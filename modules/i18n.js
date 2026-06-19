@@ -21,6 +21,8 @@ const translations = {
         playlist_err_not_found: "[Elysium Playlist] Error: Playlist file not found.",
         playlist_err_empty: "[Elysium Playlist] Error: Playlist is empty or corrupted.",
         err_no_playlist: "[Elysium] Error: Please specify a playlist name.",
+        init_config: "[Elysium Init] ⚙️ Configuration file missing. Creating default config.json...",
+        init_dir: "[Elysium Init] 📁 Creating missing system directory: ",
     },
     de: {
         welcome: "Willkommen beim Elysium Music Kommandozeilen-Interface",
@@ -43,6 +45,8 @@ const translations = {
         playlist_err_not_found: "[Elysium Playlist] Fehler: Playlist-Datei nicht gefunden.",
         playlist_err_empty: "[Elysium Playlist] Fehler: Playlist ist leer oder beschädigt.",
         err_no_playlist: "[Elysium] Fehler: Bitte gib einen Playlist-Namen an.",
+        init_config: "[Elysium Init] ⚙️ Konfigurationsdatei fehlt. Erstelle Standard-config.json...",
+        init_dir: "[Elysium Init] 📁 Erstelle fehlenden System-Ordner: ",
     },
    
 };

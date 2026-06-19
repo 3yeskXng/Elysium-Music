@@ -53,6 +53,11 @@ rl.on('line', (line) => {
             core.enqueue(args);
             break;
 
+        case 'playlist':
+            if (!args) { console.log(i18n.t('err_no_playlist')); break; }
+            core.loadPlaylist(args);
+            break;
+
         case 'queue':
             const list = core._getPlugin('queue').getTracks();
             if (list.length === 0) {

@@ -4,21 +4,48 @@ const path = require('path');
 const EventEmitter = require('events'); // Native Node.js Event Broker Architecture
 
 class ElysiumCore extends EventEmitter {
-    constructor() {
+   constructor() {
         super(); // Initialize core event emitting capabilities
-        this.config = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
-        this.plugins = {};
-        this.cacheFile = './.cache/stream_cache.json';
-        this.cache = {};
         
+        this.configFile = './config.json';
+        this.cacheFile = './.cache/stream_cache.json';
+        this.plugins = {};
+        this.cache = {};
+
+        // 1. SELF-HEALING: Auto-create missing config.json with your precise defaults
+        if (!fs.existsSync(this.configFile)) {
+            console.log("[Elysium Init] ⚙️ Configuration file missing. Creating default config.json...");
+            const defaultConfig = {
+                defaultEngine: "auto",
+                downloadDir: "./downloads",
+                cacheExpiryMs: 3600000,
+                language: "de"
+            };
+            fs.writeFileSync(this.configFile, JSON.stringify(defaultConfig, null, 2), 'utf8');
+        }
+
+        // Load config securely after ensuring it exists
+        this.config = JSON.parse(fs.readFileSync(this.configFile, 'utf8'));
+
+        // 2. SELF-HEALING: Mandate and auto-generate crucial system folders
+        const requiredDirectories = [
+            this.config.downloadDir,
+            './playlists',
+            './.cache'
+        ];
+
+        requiredDirectories.forEach(dir => {
+            if (!fs.existsSync(dir)) {
+                console.log(`[Elysium Init] 📁 Creating missing system directory: ${dir}`);
+                fs.mkdirSync(dir, { recursive: true });
+            }
+        });
+
         // Internal state machines for async queue control
         this.isProcessingQueue = false;
         this.forceSkip = false;
 
-        // IO Sanity checks for mandatory system paths
-        if (!fs.existsSync(this.config.downloadDir)) fs.mkdirSync(this.config.downloadDir, { recursive: true });
-        if (!fs.existsSync('./.cache')) fs.mkdirSync('./.cache', { recursive: true });
-
+        // Bootstrapping the subsystem bridges
         this._autoloadPlugins();
         this._loadCache();
     }
