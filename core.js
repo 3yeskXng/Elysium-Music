@@ -1,9 +1,11 @@
 // core.js
 const fs = require('fs');
+const path = require('path');
 
 // Import our custom modules
 const downloader = require('./modules/downloader.js'); 
 const library = require('./modules/library.js'); 
+const player = require('./modules/player.js'); // Our brand new player module!
 
 // Core configuration
 const DOWNLOAD_DIR = './downloads';
@@ -18,47 +20,46 @@ if (!fs.existsSync(DOWNLOAD_DIR)){
  */
 const ElysiumCore = {
     
-    /**
-     * High-level function to request a song download
-     * @param {string} trackName - Name of the song
-     */
-    requestTrack: function(trackName) {
-        console.log(`[Elysium Core] User requested: "${trackName}". Handing over to Downloader Module...`);
-        
-        downloader.downloadBySearch(trackName, DOWNLOAD_DIR, (error, result) => {
-            if (error) {
-                console.error(`[Elysium Core] Task failed: ${error.message}`);
-                return;
-            }
-            console.log(`[Elysium Core] Task successful! Message: ${result}`);
-            
-            // Print the updated library after a successful download
-            this.printLibrary();
-        });
-    },
+    // ... download logic stays here, but we focus on playing right now ...
 
     /**
-     * Fetches the local library from the storage module and prints it beautifully
+     * Plays a specific song from the local library by its index (starting at 1)
+     * @param {number} index - The song number from the library list
      */
-    printLibrary: function() {
-        console.log(`[Elysium Core] Requesting local library scan...`);
+    playLocalTrack: function(index) {
         const tracks = library.scanLibrary(DOWNLOAD_DIR);
         
-        console.log(`\n--- 🎵 ELYSIUM LOCAL LIBRARY (${tracks.length} Tracks) ---`);
         if (tracks.length === 0) {
-            console.log("   (Your library is empty. Try downloading a song!)");
-        } else {
-            tracks.forEach((track, index) => {
-                console.log(`   [${index + 1}] ${track}`);
-            });
+            console.log("[Elysium Core] Cannot play. Library is empty!");
+            return;
         }
-        console.log(`---------------------------------------------------\n`);
+
+        // Arrays start at 0, so track [1] is index 0
+        const trackName = tracks[index - 1];
+
+        if (!trackName) {
+            console.log(`[Elysium Core] Track index [${index}] not found.`);
+            return;
+        }
+
+        // Construct the full path to the file (e.g., ./downloads/song.mp3)
+        const fullPath = path.join(DOWNLOAD_DIR, trackName);
+
+        // Tell the player module to run the file
+        player.play(fullPath, (error) => {
+            if (error) {
+                console.error(`[Elysium Core] Playback error: ${error.message}`);
+                return;
+            }
+            console.log("[Elysium Core] Playback finished.");
+        });
     }
 };
 
 // --- TEST RUN ---
-// Instead of downloading a new song, we now test our new library system!
-ElysiumCore.printLibrary();
+// 1. First, show us what we have
+const tracks = library.scanLibrary(DOWNLOAD_DIR);
+console.log(`[Elysium Core] Loaded library. Found ${tracks.length} tracks.`);
 
-// If you want to download a new song, just uncomment the line below:
-// ElysiumCore.requestTrack("Matrix Clubbed to Death");
+// 2. Play the first song! (Change the number to 2 if you want to play the second song)
+ElysiumCore.playLocalTrack(1);
