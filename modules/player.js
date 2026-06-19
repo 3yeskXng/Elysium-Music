@@ -11,32 +11,38 @@ module.exports = {
         this.stop();
         console.log(`[Elysium Player] Initializing audio driver with active debug logging...`);
 
-        // Ensure the cache directory exists for the log file
         const cacheDir = './.cache';
         if (!fs.existsSync(cacheDir)) {
             fs.mkdirSync(cacheDir, { recursive: true });
         }
 
-        // Open a write stream to record everything ffplay outputs
         const logPath = path.join(cacheDir, 'player_debug.log');
-        this.logStream = fs.createWriteStream(logPath, { flags: 'w' }); // 'w' overwrites the file every run
+        this.logStream = fs.createWriteStream(logPath, { flags: 'w' });
         
         this.logStream.write(`=== ELYSIUM PLAYER DEBUG LOG - START: ${new Date().toISOString()} ===\n`);
         this.logStream.write(`Target URL/Path: ${target}\n\n`);
 
-        const args = [
-            '-nodisp',
-            '-autoexit',
-            '-user_agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            '-reconnect', '1',
-            '-reconnect_streamed', '1',
-            '-reconnect_delay_max', '5',
-            target
-        ];
+        // Check if the target is a network stream or a local file container
+        const isNetworkStream = target.startsWith('http://') || target.startsWith('https://');
+
+        // Base arguments needed for every playback type
+        let args = ['-nodisp', '-autoexit'];
+
+        if (isNetworkStream) {
+            // Apply network-only protocol options to bypass YouTube throttling mechanisms
+            args.push(
+                '-user_agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                '-reconnect', '1',
+                '-reconnect_streamed', '1',
+                '-reconnect_delay_max', '5'
+            );
+        }
+
+        // Append the target file path or streaming URL at the very end
+        args.push(target);
 
         this.currentPlayback = spawn('ffplay', args);
 
-        // Pipe the error output stream of ffplay straight into our log file
         this.currentPlayback.stderr.pipe(this.logStream);
         this.currentPlayback.stdout.pipe(this.logStream);
 

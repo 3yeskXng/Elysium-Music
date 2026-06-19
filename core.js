@@ -1,19 +1,21 @@
 // core.js
 const fs = require('fs');
 const path = require('path');
-const EventEmitter = require('events'); // Native Node.js Event Broker
+const EventEmitter = require('events'); // Native Node.js Event Broker Architecture
 
 class ElysiumCore extends EventEmitter {
     constructor() {
-        super(); // Initialize EventEmitter capabilities
+        super(); // Initialize core event emitting capabilities
         this.config = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
         this.plugins = {};
         this.cacheFile = './.cache/stream_cache.json';
         this.cache = {};
         
+        // Internal state machines for async queue control
         this.isProcessingQueue = false;
         this.forceSkip = false;
 
+        // IO Sanity checks for mandatory system paths
         if (!fs.existsSync(this.config.downloadDir)) fs.mkdirSync(this.config.downloadDir, { recursive: true });
         if (!fs.existsSync('./.cache')) fs.mkdirSync('./.cache', { recursive: true });
 
@@ -21,6 +23,10 @@ class ElysiumCore extends EventEmitter {
         this._loadCache();
     }
 
+    /**
+     * Map out the plugins directory dynamically. 
+     * Keeps core decoupled from hard dependencies.
+     */
     _autoloadPlugins() {
         const modulesDir = path.join(__dirname, 'modules');
         if (!fs.existsSync(modulesDir)) return;
@@ -44,15 +50,19 @@ class ElysiumCore extends EventEmitter {
         fs.writeFileSync(this.cacheFile, JSON.stringify(this.cache, null, 2), 'utf8');
     }
 
+    /**
+     * Lazy-loads modules into memory on-demand. Resolves memory footprints instantly.
+     */
     _getPlugin(name) {
         const plugin = this.plugins[name];
-        if (!plugin) throw new Error(`Plugin "${name}" missing.`);
+        if (!plugin) throw new Error(`Plugin "${name}" missing from infrastructure registry.`);
         if (!plugin.instance) plugin.instance = require(plugin.filePath);
         return plugin.instance;
     }
 
     /**
-     * UI-Ready Command: Enqueue a track and automatically handle the loop
+     * Controller Interface Command: Enqueue a track query and kickstart processing loop
+     * @param {string} trackQuery 
      */
     enqueue(trackQuery) {
         const queue = this._getPlugin('queue');
@@ -62,7 +72,7 @@ class ElysiumCore extends EventEmitter {
     }
 
     /**
-     * UI-Ready Command: Instantly interrupt the active song and proceed
+     * Controller Interface Command: Interrupt active audio stream instantly
      */
     skip() {
         this.forceSkip = true;
@@ -70,7 +80,7 @@ class ElysiumCore extends EventEmitter {
     }
 
     /**
-     * UI-Ready Command: Halt everything completely
+     * Controller Interface Command: Purge states and halt playback processes instantly
      */
     stopAll() {
         try {
@@ -81,7 +91,7 @@ class ElysiumCore extends EventEmitter {
     }
 
     /**
-     * Core Queue Loop - Runs entirely decoupled from the view layer
+     * Detached Core Queue Processing Engine (Runs independent from CLI / UI bindings)
      */
     async _processQueueLoop() {
         if (this.isProcessingQueue) return;
@@ -107,43 +117,93 @@ class ElysiumCore extends EventEmitter {
         this.emit('queueConcluded');
     }
 
+    /**
+     * Strategic Playback Resolution Layer (Handles Caching, Local Storage, and Hybrid Engine switching)
+     */
     async _playTrack(trackQuery) {
         const engineName = this.config.defaultEngine;
         const i18n = this._getPlugin('i18n');
 
+        // 1. Boundary Layer: Memory Stream Cache Check (Fast Return)
         if (engineName === 'streamer' && this.cache[trackQuery]) {
             const cached = this.cache[trackQuery];
             if (Date.now() - cached.timestamp < this.config.cacheExpiryMs) {
-                this.emit('statusMessage', i18n.t('track_started') + `"${trackQuery}"`);
+                this.emit('trackStarted', trackQuery);
                 return this._executePlayback(cached.url);
             }
         }
 
+        // 2. Boundary Layer: Local Storage Opus Library Check (0ms Native Local Playback)
         try {
-            const engine = this._getPlugin(engineName);
-            this.emit('statusMessage', i18n.t('engine_active') + `[${engineName}] -> "${trackQuery}"`);
+            this.emit('statusMessage', i18n.t('library_searching'));
+            const library = this._getPlugin('library');
+            const localMatch = library.findLocalTrack(trackQuery, this.config.downloadDir);
 
-            if (engineName === 'streamer') {
-                const streamUrl = await engine.getStreamUrl(trackQuery);
+            if (localMatch) {
+                this.emit('statusMessage', i18n.t('library_hit'));
+                this.emit('trackStarted', trackQuery);
+                return this._executePlayback(localMatch);
+            }
+        } catch (libraryError) {
+            // Silently fall back to network infrastructure if storage scanning faults
+        }
+
+        // 3. Boundary Layer: Network Infrastructure Request (yt-dlp core abstraction)
+        try {
+            // HYBRID AUTO MODE LOGIC
+            if (engineName === 'auto') {
+                this.emit('statusMessage', i18n.t('auto_mode_active'));
+                
+                const streamer = this._getPlugin('streamer');
+                const streamUrl = await streamer.getStreamUrl(trackQuery);
+                
                 this.cache[trackQuery] = { url: streamUrl, timestamp: Date.now() };
                 this._saveCache();
                 this.emit('trackStarted', trackQuery);
+
+                // BACKGROUND ASYNC DOWNLOAD (Lever 4 Parallelization: No await, entirely non-blocking!)
+                const downloader = this._getPlugin('downloader');
+                downloader.downloadTrack(trackQuery, this.config.downloadDir)
+                    .then(() => {
+                        this.emit('statusMessage', i18n.t('auto_mode_complete') + `"${trackQuery}"`);
+                    })
+                    .catch(() => {
+                        // Silent catch to prevent background IO glitches from freezing live playback
+                    });
+
+                // Stream audio stream right now while downloader syncs file structure in the background
                 await this._executePlayback(streamUrl);
-            } else if (engineName === 'downloader') {
-                const localPath = await engine.downloadTrack(trackQuery, this.config.downloadDir);
-                this.emit('trackStarted', trackQuery);
-                await this._executePlayback(localPath);
+
+            } else {
+                // TRADITIONAL SINGLE-ENGINE CONFIGURATION
+                const engine = this._getPlugin(engineName);
+                this.emit('statusMessage', i18n.t('engine_active') + `[${engineName}] -> "${trackQuery}"`);
+
+                if (engineName === 'streamer') {
+                    const streamUrl = await engine.getStreamUrl(trackQuery);
+                    this.cache[trackQuery] = { url: streamUrl, timestamp: Date.now() };
+                    this._saveCache();
+                    this.emit('trackStarted', trackQuery);
+                    await this._executePlayback(streamUrl);
+                } else if (engineName === 'downloader') {
+                    const localPath = await engine.downloadTrack(trackQuery, this.config.downloadDir);
+                    this.emit('trackStarted', trackQuery);
+                    await this._executePlayback(localPath);
+                }
             }
         } catch (error) {
             this.emit('error', error.message);
         }
     }
 
+    /**
+     * Low-level driver linkage execution boundary
+     */
     async _executePlayback(target) {
         const player = this._getPlugin('player');
         return new Promise((resolve) => {
             player.play(target, () => {
-                resolve();
+                resolve(); // Unlock playback loop promise chain on process exit
             });
         });
     }

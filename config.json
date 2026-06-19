@@ -1,5 +1,5 @@
 {
-  "defaultEngine": "streamer",
+  "defaultEngine": "auto",
   "downloadDir": "./downloads",
   "cacheExpiryMs": 3600000,
   "language": "de"

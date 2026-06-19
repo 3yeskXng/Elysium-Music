@@ -13,6 +13,8 @@ const translations = {
         library_hit: "[Elysium Library] 📦 Local high-quality Opus file matched! Playing from disk...",
         library_searching: "[Elysium Library] Scanning local storage directory...",
         engine_active: "[Elysium Engine] Activating module: ",
+        auto_mode_active: "[Elysium Engine] Auto-Mode: Streaming instantly while caching to disk in the background...",
+        auto_mode_complete: "[Elysium Engine] Background caching complete for: ",
     },
     de: {
         welcome: "Willkommen beim Elysium Music Kommandozeilen-Interface",
@@ -27,6 +29,8 @@ const translations = {
         engine_active: "[Elysium Engine] Aktiviere Modul: ",
         library_hit: "[Elysium Library] 📦 Lokale hochauflösende Opus-Datei gefunden! Spiele von Festplatte...",
         library_searching: "[Elysium Library] Scanne lokalen Speicherordner...",
+        auto_mode_active: "[Elysium Engine] Auto-Modus: Sofortiges Streaming, während im Hintergrund auf Festplatte zwischengespeichert wird...",
+        auto_mode_complete: "[Elysium Engine] Hintergrund-Speicherung abgeschlossen für: ",
     },
    
 };
