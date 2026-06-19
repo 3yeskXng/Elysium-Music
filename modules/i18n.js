@@ -10,7 +10,9 @@ const translations = {
         shutdown: "[Elysium] Shutting down systems. Goodbye!",
         unknown_cmd: "[Elysium] Unknown command",
         track_started: "[Elysium Engine] Now playing: ",
-        engine_active: "[Elysium Engine] Activating module: "
+        library_hit: "[Elysium Library] 📦 Local high-quality Opus file matched! Playing from disk...",
+        library_searching: "[Elysium Library] Scanning local storage directory...",
+        engine_active: "[Elysium Engine] Activating module: ",
     },
     de: {
         welcome: "Willkommen beim Elysium Music Kommandozeilen-Interface",
@@ -20,7 +22,11 @@ const translations = {
         shutdown: "[Elysium] Systeme werden heruntergefahren. Auf Wiedersehen!",
         unknown_cmd: "[Elysium] Unbekannter Befehl",
         track_started: "[Elysium Engine] Aktuelle Wiedergabe: ",
+        library_hit: "[Elysium Library] 📦 Local high-quality Opus file matched! Playing from disk...",
+        library_searching: "[Elysium Library] Scanning local storage directory...",
         engine_active: "[Elysium Engine] Aktiviere Modul: ",
+        library_hit: "[Elysium Library] 📦 Lokale hochauflösende Opus-Datei gefunden! Spiele von Festplatte...",
+        library_searching: "[Elysium Library] Scanne lokalen Speicherordner...",
     },
    
 };

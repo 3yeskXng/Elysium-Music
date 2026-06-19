@@ -2,34 +2,29 @@
 const fs = require('fs');
 const path = require('path');
 
-/**
- * Service module to manage and scan the local music library
- */
-const LibraryService = {
-    
+module.exports = {
     /**
-     * Scans the download directory and returns a list of supported audio files
-     * @param {string} dirPath - Path to the downloads directory
-     * @returns {string[]} Array of audio file names
+     * Scans the download directory for any existing .opus files that match the query
+     * @param {string} searchQuery 
+     * @param {string} downloadDir 
+     * @returns {string|null} Full path to the file, or null if no match
      */
-    scanLibrary: function(dirPath) {
-        // If the directory doesn't exist yet, return an empty library
-        if (!fs.existsSync(dirPath)) {
-            return [];
+    findLocalTrack: function(searchQuery, downloadDir) {
+        if (!fs.existsSync(downloadDir)) return null;
+
+        // Filter for native high-quality opus containers
+        const files = fs.readdirSync(downloadDir).filter(file => file.endsWith('.opus'));
+        const queryWords = searchQuery.toLowerCase().split(' ');
+
+        for (const file of files) {
+            const fileNameLower = file.toLowerCase();
+            
+            // Check if every word from the search query exists in the filename
+            const match = queryWords.every(word => fileNameLower.includes(word));
+            if (match) {
+                return path.join(downloadDir, file);
+            }
         }
-
-        // Read all files inside the directory
-        const allFiles = fs.readdirSync(dirPath);
-
-        // Filter files to only include .mp3 or .m4a formats
-        const audioFiles = allFiles.filter(file => {
-            const fileExtension = path.extname(file).toLowerCase();
-            return fileExtension === '.mp3' || fileExtension === '.m4a';
-        });
-
-        return audioFiles;
+        return null;
     }
 };
-
-// Export the module so the Core can use it
-module.exports = LibraryService;
