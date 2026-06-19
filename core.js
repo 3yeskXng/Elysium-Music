@@ -1,52 +1,65 @@
 // core.js
 const fs = require('fs');
 
-// Import our modular services
-const downloader = require('./modules/downloader.js'); 
-const library = require('./modules/library.js'); 
-const player = require('./modules/player.js'); 
-const streamer = require('./modules/streamer.js'); // Our brand new streaming module!
-
-const DOWNLOAD_DIR = './downloads';
-if (!fs.existsSync(DOWNLOAD_DIR)){
-    fs.mkdirSync(DOWNLOAD_DIR);
-}
-
 /**
- * Main Elysium Core Orchestrator
+ * Universal Elysium Core Orchestrator
+ * This core is completely independent of the underlying modules!
  */
-const ElysiumCore = {
-    
-    // ... (local library code remains untouched) ...
+class ElysiumCore {
+    /**
+     * @param {Object} config 
+     * @param {Object} config.audioService - The module used for playing/streaming
+     * @param {string} config.downloadDir - Path for downloads (if needed)
+     */
+    constructor(config) {
+        this.audioService = config.audioService;
+        this.downloadDir = config.downloadDir || './downloads';
+
+        // Ensure download directory exists
+        if (!fs.existsSync(this.downloadDir)){
+            fs.mkdirSync(this.downloadDir);
+        }
+        console.log("[Elysium Core] System initialized with custom engine.");
+    }
 
     /**
-     * Streams a song instantly from the internet without saving it to disk
-     * @param {string} trackName - Name of the song to stream
+     * Plays a track using whatever service was injected into the core
+     * @param {string} trackQuery - Song name, URL or file path
      */
-    streamTrack: function(trackName) {
-        console.log(`[Elysium Core] Instant stream requested for: "${trackName}"`);
-
-        // Step 1: Get the hidden streaming link
-        streamer.getStreamUrl(trackName, (error, streamUrl) => {
+    play(trackQuery) {
+        console.log(`\n[Elysium Core] Processing playback request for: "${trackQuery}"`);
+        
+        // The core doesn't care IF it streams or downloads. 
+        // It just tells the module: "Do your job and play this!"
+        this.audioService.handlePlayback(trackQuery, this.downloadDir, (error) => {
             if (error) {
-                console.error(`[Elysium Core] Failed to get stream URL: ${error.message}`);
+                console.error(`[Elysium Core] Playback failed: ${error.message}`);
                 return;
             }
-
-            console.log(`[Elysium Core] Stream URL obtained successfully.`);
-            
-            // Step 2: Feed the live web-URL directly into our existing player!
-            player.play(streamUrl, (playError) => {
-                if (playError) {
-                    console.error(`[Elysium Core] Streaming playback error: ${playError.message}`);
-                    return;
-                }
-                console.log("[Elysium Core] Streaming finished.");
-            });
+            console.log("[Elysium Core] Playback finished cleanly.\n");
         });
     }
-};
+}
 
-// --- TEST RUN ---
-// Let's test the instant streaming with a high-energy track!
-ElysiumCore.streamTrack("DaHool Meet Her At The Loveparade");
+// =====================================================================
+// --- CONFIGURATION & RUNTIME (Hier entscheidest DU, was passiert) ---
+// =====================================================================
+
+// 1. Load our flexible engines
+const StreamingEngine = require('./modules/streamer.js');
+const DownloadEngine  = require('./modules/downloader.js'); // Wir passen die Module gleich an!
+
+/**
+ * WÄHLE HIER DEINEN MODUS:
+ * Tausche einfach "StreamingEngine" gegen "DownloadEngine" aus!
+ */
+const activeEngine = StreamingEngine; 
+
+// 2. Start the core with the selected engine
+const elysium = new ElysiumCore({
+    audioService: activeEngine,
+    downloadDir: './downloads'
+});
+
+// 3. Fire it up!
+elysium.play("DaHool Meet Her At The Loveparade");

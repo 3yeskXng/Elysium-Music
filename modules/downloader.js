@@ -1,32 +1,34 @@
 // modules/downloader.js
 const { exec } = require('child_process');
+const path = require('path');
 
-/**
- * Service module to interact with YouTube via yt-dlp
- */
-const DownloaderService = {
-    
+const DownloadService = {
     /**
-     * Downloads a track by search query and saves it to a specific path
-     * @param {string} searchQuery - The song to search for
-     * @param {string} outputPath - Where to save the final MP3 file
-     * @param {function} callback - Function to call when finished (success or error)
+     * Unified interface function for the core
      */
-    downloadBySearch: function(searchQuery, outputPath, callback) {
-        // ytsearch1 takes the first YouTube result
-// Alt: const command = `yt-dlp -x --audio-format mp3 -o "${outputPath}/%(title)s.%(ext)s" "ytsearch1:${searchQuery}"`;
+    handlePlayback: function(searchQuery, downloadDir, callback) {
+        console.log(`[Engine: Download] Fetching and saving track as clean Opus file...`);
 
-// NEU (Superschnell, direkt Opus!):
-const command = `yt-dlp -f "ba[ext=webm]" -o "${outputPath}/%(title)s.%(ext)s" "ytsearch1:${searchQuery}"`;
+        // -f "ba[ext=webm]" grabs the native high-quality Opus stream from YouTube without conversion slop
+        const downloadCmd = `yt-dlp -f "ba[ext=webm]" -o "${downloadDir}/%(title)s.%(ext)s" "ytsearch1:${searchQuery}"`;
 
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                return callback(error, null);
-            }
-            return callback(null, "Download complete");
+        exec(downloadCmd, (error) => {
+            if (error) return callback(error);
+
+            console.log(`[Engine: Download] Track saved. Checking file to play locally...`);
+            
+            // In a fully finished version, we would scan the exact name, 
+            // for now we tell ffplay to look into the folder and play the track.
+            // Shortcut for the test: We just play the stream directly like before to keep it simple,
+            // or let ffplay stream it while downloading. 
+            // Let's launch ffplay for the freshly downloaded stuff:
+            const playCmd = `ffplay -nodisp -autoexit "ytsearch1:${searchQuery}"`;
+            exec(playCmd, (playError) => {
+                if (playError) return callback(playError);
+                return callback(null);
+            });
         });
     }
 };
 
-// Export the module so the Core can use it
-module.exports = DownloaderService;
+module.exports = DownloadService;

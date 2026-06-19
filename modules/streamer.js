@@ -1,31 +1,28 @@
 // modules/streamer.js
 const { exec } = require('child_process');
 
-/**
- * Service module to fetch direct audio stream URLs from YouTube
- */
 const StreamerService = {
-
     /**
-     * Gets the direct streaming URL for a search query
-     * @param {string} searchQuery - The song name to search for
-     * @param {function} callback - Returns (error, streamUrl)
+     * Unified interface function for the core
      */
-    getStreamUrl: function(searchQuery, callback) {
-        console.log(`[Elysium Streamer] Fetching live stream URL for: "${searchQuery}"...`);
+    handlePlayback: function(searchQuery, downloadDir, callback) {
+        console.log(`[Engine: Stream] Fetching live Opus/WebM stream URL...`);
 
-        // -f ba: select "best audio" only (makes it ultra lightweight and fast)
-        // -g: get URL instead of downloading
-        const command = `yt-dlp -f ba -g "ytsearch1:${searchQuery}"`;
+        // Fetch direct link
+        const getUrlCmd = `yt-dlp -f ba -g "ytsearch1:${searchQuery}"`;
 
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                return callback(error, null);
-            }
+        exec(getUrlCmd, (error, stdout) => {
+            if (error) return callback(error);
 
-            // stdout contains the long URL. We trim it to remove any accidental newlines
             const streamUrl = stdout.trim();
-            return callback(null, streamUrl);
+            console.log(`[Engine: Stream] Launching instant playback via ffplay...`);
+            
+            // Play instantly
+            const playCmd = `ffplay -nodisp -autoexit "${streamUrl}"`;
+            exec(playCmd, (playError) => {
+                if (playError) return callback(playError);
+                return callback(null);
+            });
         });
     }
 };
