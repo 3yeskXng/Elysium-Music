@@ -6,6 +6,7 @@ const path = require('path');
 module.exports = {
     currentPlayback: null,
     logStream: null,
+    isPaused: false, // Hält den aktuellen Pausen-Zustand fest
 
     /**
      * Probes the media target asynchronously to extract total duration in seconds
@@ -21,6 +22,7 @@ module.exports = {
 
     play: function(target, callback, onProgress) {
         this.stop();
+        this.isPaused = false; // Reset bei neuem Track
         console.log(`[Elysium Player] Initializing audio driver with active debug logging...`);
 
         const cacheDir = './.cache';
@@ -47,8 +49,8 @@ module.exports = {
 
             args.push(target);
             
-            // FIX 1: 'ignore' on stdin completely isolates ffplay from stealing your keyboard inputs!
-            this.currentPlayback = spawn('ffplay', args, { stdio: ['ignore', 'pipe', 'pipe'] });
+            // UPGRADE: 'pipe' erlaubt es uns, Steuerbefehle wie 'p' direkt an ffplay zu senden!
+            this.currentPlayback = spawn('ffplay', args, { stdio: ['pipe', 'pipe', 'pipe'] });
 
             let lastEmittedSecond = -1;
 
@@ -56,11 +58,9 @@ module.exports = {
                 if (this.logStream) this.logStream.write(data);
                 
                 const chunk = data.toString();
-                // FIX 2: Split stream updates by carriage returns for ultra-stable line parsing
                 const lines = chunk.split(/[\r\n]+/);
                 
                 for (const line of lines) {
-                    // Detects ANY valid ffplay progress state (including audio-only 'aq=' streams)
                     if (line.includes('A-V') || line.includes('M-A') || line.includes('aq=') || line.includes('fd=')) {
                         const match = line.match(/^\s*([\d.]+)/);
                         if (match && match[1]) {
@@ -85,6 +85,7 @@ module.exports = {
                     this.logStream = null;
                 }
                 this.currentPlayback = null;
+                this.isPaused = false;
                 return callback(null);
             });
 
@@ -95,9 +96,22 @@ module.exports = {
                     this.logStream = null;
                 }
                 this.currentPlayback = null;
+                this.isPaused = false;
                 return callback(err);
             });
         });
+    },
+
+    /**
+     * Schaltet plattformübergreifend zwischen Pause und Wiedergabe um
+     */
+    togglePause: function() {
+        if (this.currentPlayback && this.currentPlayback.stdin) {
+            this.currentPlayback.stdin.write('p'); // Schickt das native Pause-Signal an ffplay
+            this.isPaused = !this.isPaused;
+            return true;
+        }
+        return false;
     },
 
     stop: function() {
@@ -106,6 +120,7 @@ module.exports = {
             this.currentPlayback.kill('SIGKILL');
             this.currentPlayback = null;
         }
+        this.isPaused = false;
         if (this.logStream) {
             this.logStream.write(`\n=== PLAYBACK INTERRUPTED BY USER ===\n`);
             this.logStream.end();
