@@ -14,7 +14,10 @@ const DownloaderService = {
      */
     downloadBySearch: function(searchQuery, outputPath, callback) {
         // ytsearch1 takes the first YouTube result
-        const command = `yt-dlp -x --audio-format mp3 -o "${outputPath}/%(title)s.%(ext)s" "ytsearch1:${searchQuery}"`;
+// Alt: const command = `yt-dlp -x --audio-format mp3 -o "${outputPath}/%(title)s.%(ext)s" "ytsearch1:${searchQuery}"`;
+
+// NEU (Superschnell, direkt Opus!):
+const command = `yt-dlp -f "ba[ext=webm]" -o "${outputPath}/%(title)s.%(ext)s" "ytsearch1:${searchQuery}"`;
 
         exec(command, (error, stdout, stderr) => {
             if (error) {

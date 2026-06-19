@@ -1,16 +1,13 @@
 // core.js
 const fs = require('fs');
-const path = require('path');
 
-// Import our custom modules
+// Import our modular services
 const downloader = require('./modules/downloader.js'); 
 const library = require('./modules/library.js'); 
-const player = require('./modules/player.js'); // Our brand new player module!
+const player = require('./modules/player.js'); 
+const streamer = require('./modules/streamer.js'); // Our brand new streaming module!
 
-// Core configuration
 const DOWNLOAD_DIR = './downloads';
-
-// Ensure download directory exists
 if (!fs.existsSync(DOWNLOAD_DIR)){
     fs.mkdirSync(DOWNLOAD_DIR);
 }
@@ -20,46 +17,36 @@ if (!fs.existsSync(DOWNLOAD_DIR)){
  */
 const ElysiumCore = {
     
-    // ... download logic stays here, but we focus on playing right now ...
+    // ... (local library code remains untouched) ...
 
     /**
-     * Plays a specific song from the local library by its index (starting at 1)
-     * @param {number} index - The song number from the library list
+     * Streams a song instantly from the internet without saving it to disk
+     * @param {string} trackName - Name of the song to stream
      */
-    playLocalTrack: function(index) {
-        const tracks = library.scanLibrary(DOWNLOAD_DIR);
-        
-        if (tracks.length === 0) {
-            console.log("[Elysium Core] Cannot play. Library is empty!");
-            return;
-        }
+    streamTrack: function(trackName) {
+        console.log(`[Elysium Core] Instant stream requested for: "${trackName}"`);
 
-        // Arrays start at 0, so track [1] is index 0
-        const trackName = tracks[index - 1];
-
-        if (!trackName) {
-            console.log(`[Elysium Core] Track index [${index}] not found.`);
-            return;
-        }
-
-        // Construct the full path to the file (e.g., ./downloads/song.mp3)
-        const fullPath = path.join(DOWNLOAD_DIR, trackName);
-
-        // Tell the player module to run the file
-        player.play(fullPath, (error) => {
+        // Step 1: Get the hidden streaming link
+        streamer.getStreamUrl(trackName, (error, streamUrl) => {
             if (error) {
-                console.error(`[Elysium Core] Playback error: ${error.message}`);
+                console.error(`[Elysium Core] Failed to get stream URL: ${error.message}`);
                 return;
             }
-            console.log("[Elysium Core] Playback finished.");
+
+            console.log(`[Elysium Core] Stream URL obtained successfully.`);
+            
+            // Step 2: Feed the live web-URL directly into our existing player!
+            player.play(streamUrl, (playError) => {
+                if (playError) {
+                    console.error(`[Elysium Core] Streaming playback error: ${playError.message}`);
+                    return;
+                }
+                console.log("[Elysium Core] Streaming finished.");
+            });
         });
     }
 };
 
 // --- TEST RUN ---
-// 1. First, show us what we have
-const tracks = library.scanLibrary(DOWNLOAD_DIR);
-console.log(`[Elysium Core] Loaded library. Found ${tracks.length} tracks.`);
-
-// 2. Play the first song! (Change the number to 2 if you want to play the second song)
-ElysiumCore.playLocalTrack(1);
+// Let's test the instant streaming with a high-energy track!
+ElysiumCore.streamTrack("DaHool Meet Her At The Loveparade");
