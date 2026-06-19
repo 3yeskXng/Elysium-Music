@@ -23,6 +23,7 @@ const translations = {
         err_no_playlist: "[Elysium] Error: Please specify a playlist name.",
         init_config: "[Elysium Init] ⚙️ Configuration file missing. Creating default config.json...",
         init_dir: "[Elysium Init] 📁 Creating missing system directory: ",
+        progress_bar: "[Playback] %PERCENT%% [%BAR%] %CURRENT% / %TOTAL%",
     },
     de: {
         welcome: "Willkommen beim Elysium Music Kommandozeilen-Interface",
@@ -47,6 +48,7 @@ const translations = {
         err_no_playlist: "[Elysium] Fehler: Bitte gib einen Playlist-Namen an.",
         init_config: "[Elysium Init] ⚙️ Konfigurationsdatei fehlt. Erstelle Standard-config.json...",
         init_dir: "[Elysium Init] 📁 Erstelle fehlenden System-Ordner: ",
+        progress_bar: "[Wiedergabe] %PERCENT%% [%BAR%] %CURRENT% / %TOTAL%",
     },
    
 };

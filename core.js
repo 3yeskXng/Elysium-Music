@@ -266,14 +266,37 @@ class ElysiumCore extends EventEmitter {
     /**
      * Low-level driver linkage execution boundary
      */
+/**
+     * Low-level driver linkage execution boundary with reactive stream monitoring
+     */
     async _executePlayback(target) {
         const player = this._getPlugin('player');
         return new Promise((resolve) => {
             player.play(target, () => {
                 resolve(); // Unlock playback loop promise chain on process exit
+            }, (current, total) => {
+                // Calculate state configurations
+                const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
+                
+                // Pure helper for track duration string mapping
+                const formatTime = (secs) => {
+                    if (!secs || isNaN(secs) || secs < 0) return "00:00";
+                    const m = Math.floor(secs / 60).toString().padStart(2, '0');
+                    const s = Math.floor(secs % 60).toString().padStart(2, '0');
+                    return `${m}:${s}`;
+                };
+
+                // Broadcast live playback payload (Ready for Terminal CLI or Frontend GUI Sliders)
+                this.emit('playbackProgress', {
+                    current: current,
+                    total: total,
+                    currentFormatted: formatTime(current),
+                    totalFormatted: formatTime(total),
+                    percentage: Math.min(percentage, 100)
+                });
             });
         });
     }
 }
 
-module.exports = new ElysiumCore();
+module.exports = ElysiumCore;
