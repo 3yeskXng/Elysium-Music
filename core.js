@@ -1,65 +1,47 @@
 // core.js
 const fs = require('fs');
+const path = require('path');
+
+// 1. Read the configuration file dynamically
+const config = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
+
+// 2. Dynamically load the active engine based on config
+const Engine = require(`./modules/${config.activeEngine}.js`);
 
 /**
- * Universal Elysium Core Orchestrator
- * This core is completely independent of the underlying modules!
+ * Universal Elysium Core
  */
-class ElysiumCore {
+const ElysiumCore = {
     /**
-     * @param {Object} config 
-     * @param {Object} config.audioService - The module used for playing/streaming
-     * @param {string} config.downloadDir - Path for downloads (if needed)
+     * Executes playback using the configured dynamic engine
+     * @param {string} trackQuery - The song name or search term
      */
-    constructor(config) {
-        this.audioService = config.audioService;
-        this.downloadDir = config.downloadDir || './downloads';
-
-        // Ensure download directory exists
-        if (!fs.existsSync(this.downloadDir)){
-            fs.mkdirSync(this.downloadDir);
+    play: function(trackQuery) {
+        if (!trackQuery) {
+            console.error("[Elysium Core] Error: No song title provided!");
+            return;
         }
-        console.log("[Elysium Core] System initialized with custom engine.");
-    }
 
-    /**
-     * Plays a track using whatever service was injected into the core
-     * @param {string} trackQuery - Song name, URL or file path
-     */
-    play(trackQuery) {
-        console.log(`\n[Elysium Core] Processing playback request for: "${trackQuery}"`);
+        console.log(`[Elysium Core] Starting engine [${config.activeEngine}] for: "${trackQuery}"`);
         
-        // The core doesn't care IF it streams or downloads. 
-        // It just tells the module: "Do your job and play this!"
-        this.audioService.handlePlayback(trackQuery, this.downloadDir, (error) => {
+        Engine.handlePlayback(trackQuery, config.downloadDir, (error) => {
             if (error) {
                 console.error(`[Elysium Core] Playback failed: ${error.message}`);
                 return;
             }
-            console.log("[Elysium Core] Playback finished cleanly.\n");
+            console.log("[Elysium Core] Execution finished.\n");
         });
     }
+};
+
+// 3. Export the core so you can control it from anywhere
+module.exports = ElysiumCore;
+
+// --- DYNAMIC RUNTIME LINK ---
+// We read the song title directly from the command line argument now!
+const userTrack = process.argv.slice(2).join(' ');
+if (userTrack) {
+    ElysiumCore.play(userTrack);
+} else {
+    console.log("[Elysium] Ready. Usage: node core.js <Songname>");
 }
-
-// =====================================================================
-// --- CONFIGURATION & RUNTIME (Hier entscheidest DU, was passiert) ---
-// =====================================================================
-
-// 1. Load our flexible engines
-const StreamingEngine = require('./modules/streamer.js');
-const DownloadEngine  = require('./modules/downloader.js'); // Wir passen die Module gleich an!
-
-/**
- * WÄHLE HIER DEINEN MODUS:
- * Tausche einfach "StreamingEngine" gegen "DownloadEngine" aus!
- */
-const activeEngine = StreamingEngine; 
-
-// 2. Start the core with the selected engine
-const elysium = new ElysiumCore({
-    audioService: activeEngine,
-    downloadDir: './downloads'
-});
-
-// 3. Fire it up!
-elysium.play("DaHool Meet Her At The Loveparade");
