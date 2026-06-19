@@ -2,7 +2,6 @@
 const readline = require('readline');
 const core = require('./core.js');
 
-// Create the terminal interface input stream
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -11,81 +10,97 @@ const rl = readline.createInterface({
 
 console.log("==================================================");
 console.log("🎵 Welcome to Elysium Music Command Line Interface");
-console.log("Type 'play <song name>' to listen to music.");
-console.log("Type 'stop' to halt playback.");
-console.log("Type 'exit' to close the application.");
+console.log("Commands: play <name> | add <name> | queue | stop | exit");
 console.log("==================================================\n");
 
-// Open the prompt loop
 rl.prompt();
+
+// Helper flag to prevent overlapping playback loops
+let isProcessingQueue = false;
+
+async function checkQueueLoop() {
+    if (isProcessingQueue) return;
+    isProcessingQueue = true;
+
+    const queue = core._getPlugin('queue');
+    let nextTrack = queue.dequeue();
+
+    while (nextTrack !== null) {
+        // Await the playback to completely finish before moving to the next loop iteration
+        await core.play(nextTrack);
+        nextTrack = queue.dequeue();
+    }
+
+    isProcessingQueue = false;
+}
 
 rl.on('line', async (line) => {
     const input = line.trim();
-    
-    // Split input into command and arguments (e.g., "play linkin park" -> cmd: "play", args: "linkin park")
     const spaceIndex = input.indexOf(' ');
     const command = spaceIndex !== -1 ? input.substring(0, spaceIndex).toLowerCase() : input.toLowerCase();
     const args = spaceIndex !== -1 ? input.substring(spaceIndex + 1) : '';
 
+    const queue = core._getPlugin('queue');
+    const player = core._getPlugin('player');
+
     switch (command) {
         case 'exit':
             console.log("[Elysium] Shutting down systems. Goodbye!");
-            
-            // Access the lazy-loaded player through the core architecture to clean up processes
-            try {
-                const player = core._getPlugin('player');
-                player.stop();
-            } catch (e) { /* Player wasn't loaded yet, safe to ignore */ }
-            
+            try { player.stop(); } catch (e) {}
             process.exit(0);
             break;
 
         case 'stop':
             console.log("[Elysium] Requesting playback stop...");
             try {
-                const player = core._getPlugin('player');
+                queue.clear(); // Empty queue on explicit stop request
                 player.stop();
-                console.log("[Elysium] Playback halted successfully.");
-            } catch (e) {
-                console.log("[Elysium] No active player module running in memory.");
-            }
+            } catch (e) {}
             break;
 
         case 'play':
             if (!args) {
-                console.log("[Elysium] Error: Please specify a song name. Example: play Linkin Park");
+                console.log("[Elysium] Error: Please specify a song name.");
                 break;
             }
-            
-            // Fire and forget: We do NOT await here! 
-            // This is Lever 4 (Parallelization) in action. The UI prompt returns immediately 
-            // while the core fetches and plays the audio in the background!
-            core.play(args).then(() => {
-                // Re-prompt when the song finishes naturally
-                rl.prompt();
-            });
+            try { player.stop(); } catch (e) {} // Interrupt current song
+            queue.clear();
+            queue.enqueue(args);
+            checkQueueLoop(); // Fire and forget into background thread execution boundary
+            break;
+
+        case 'add':
+            if (!args) {
+                console.log("[Elysium] Error: Please specify a song name to add.");
+                break;
+            }
+            queue.enqueue(args);
+            checkQueueLoop(); // Triggers the loop if it's not already running
+            break;
+
+        case 'queue':
+            const list = queue.getTracks();
+            if (list.length === 0) {
+                console.log("[Elysium] The queue is currently empty.");
+            } else {
+                console.log("\n--- Current Queue Lineup ---");
+                list.forEach((track, index) => {
+                    console.log(`${index + 1}. ${track}`);
+                });
+                console.log("----------------------------\n");
+            }
             break;
 
         default:
-            console.log(`[Elysium] Unknown command: "${command}". Available commands: play <name>, stop, exit`);
+            console.log(`[Elysium] Unknown command: "${command}"`);
             break;
     }
 
-    // Instantly bring back the prompt so the user can type while the song is loading/playing!
     rl.prompt();
-}).on('close', () => {
-    console.log('\n[Elysium] Session closed.');
-    process.exit(0);
 });
 
-// app.js (Add this at the very bottom of the file)
-
-// Capture Ctrl+C (SIGINT) and clean up zombie audio processes before exiting
 process.on('SIGINT', () => {
-    console.log('\n[Elysium] Forced shutdown detected. Cleaning up audio processes...');
-    try {
-        const player = core._getPlugin('player');
-        player.stop();
-    } catch (e) {}
+    console.log('\n[Elysium] Forced shutdown detected. Cleaning up...');
+    try { core._getPlugin('player').stop(); } catch (e) {}
     process.exit(0);
 });

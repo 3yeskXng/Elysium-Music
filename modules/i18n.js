@@ -8,7 +8,9 @@ const translations = {
         help_stop: "Type 'stop' to halt playback.",
         help_exit: "Type 'exit' to close the application.",
         shutdown: "[Elysium] Shutting down systems. Goodbye!",
-        unknown_cmd: "[Elysium] Unknown command"
+        unknown_cmd: "[Elysium] Unknown command",
+        track_started: "[Elysium Engine] Now playing: ",
+        engine_active: "[Elysium Engine] Activating module: "
     },
     de: {
         welcome: "Willkommen beim Elysium Music Kommandozeilen-Interface",
@@ -16,8 +18,11 @@ const translations = {
         help_stop: "Tippe 'stop', um die Wiedergabe anzuhalten.",
         help_exit: "Tippe 'exit', um die Anwendung zu schließen.",
         shutdown: "[Elysium] Systeme werden heruntergefahren. Auf Wiedersehen!",
-        unknown_cmd: "[Elysium] Unbekannter Befehl"
-    }
+        unknown_cmd: "[Elysium] Unbekannter Befehl",
+        track_started: "[Elysium Engine] Aktuelle Wiedergabe: ",
+        engine_active: "[Elysium Engine] Aktiviere Modul: ",
+    },
+   
 };
 
 module.exports = {
