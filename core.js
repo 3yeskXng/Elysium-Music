@@ -1,29 +1,34 @@
-// Import the native Node.js module to execute command-line tools
+// Import native Node.js modules
 const { exec } = require('child_process');
+const fs = require('fs');
+
+// Ensure the downloads directory exists right at the start
+const downloadDir = './downloads';
+if (!fs.existsSync(downloadDir)){
+    fs.mkdirSync(downloadDir);
+}
 
 /**
- * Downloads the audio from a YouTube URL and converts it to MP3
- * @param {string} url - The YouTube video URL
+ * Searches YouTube for a track and downloads the best audio match
+ * @param {string} searchQuery - The song name or keywords to search for
  */
-function downloadAudio(url) {
-    console.log("[Elysium Core] Initializing download process...");
+function downloadBySearch(searchQuery) {
+    console.log(`[Elysium Core] Searching and downloading: "${searchQuery}"...`);
 
-    // Command for yt-dlp: extract audio (-x), convert to mp3, template for file name
-    // We wrap the URL in double quotes to prevent errors with special characters
-    const command = `yt-dlp -x --audio-format mp3 -o "%(title)s.%(ext)s" "${url}"`;
+    // ytsearch1: tells yt-dlp to take the very first result from YouTube search
+    // We save the file directly into our clean /downloads folder
+    const command = `yt-dlp -x --audio-format mp3 -o "${downloadDir}/%(title)s.%(ext)s" "ytsearch1:${searchQuery}"`;
 
-    // Execute the command in the background
     exec(command, (error, stdout, stderr) => {
         if (error) {
-            console.error(`[Elysium Core] Error during download: ${error.message}`);
+            console.error(`[Elysium Core] Error during search/download: ${error.message}`);
             return;
         }
         
-        console.log("[Elysium Core] Success! Track downloaded and converted.");
+        console.log(`[Elysium Core] Ready! "${searchQuery}" is now safe in your downloads folder.`);
     });
 }
 
 // --- TEST RUN ---
-// We test the core functionality with a classic internet anthem
-const testUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"; 
-downloadAudio(testUrl);
+// Now we test it with a real song name instead of a cryptic URL!
+downloadBySearch("Linkin Park Numb");
