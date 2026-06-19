@@ -91,6 +91,46 @@ class ElysiumCore extends EventEmitter {
     }
 
     /**
+     * UI-Ready Command: Load a local playlist and feed all tracks into the processing queue
+     * @param {string} playlistName 
+     */
+    loadPlaylist(playlistName) {
+        const i18n = this._getPlugin('i18n');
+        const playlistModule = this._getPlugin('playlist');
+        
+        this.emit('statusMessage', i18n.t('playlist_loading') + `"${playlistName}"`);
+        
+        const tracks = playlistModule.readPlaylist(playlistName);
+        
+        if (tracks === null) {
+            this.emit('error', i18n.t('playlist_err_not_found'));
+            return;
+        }
+        
+        if (tracks.length === 0) {
+            this.emit('error', i18n.t('playlist_err_empty'));
+            return;
+        }
+
+        // Push each track into the existing queue infrastructure
+        tracks.forEach(track => {
+            const queue = this._getPlugin('queue');
+            queue.enqueue(track);
+        });
+
+        // Broadcast the structural change to listeners (CLI/UI)
+        this.emit('queueChanged', this._getPlugin('queue').getTracks());
+        
+        const successMessage = i18n.t('playlist_loaded')
+            .replace('X', tracks.length) + `"${playlistName}"`;
+            
+        this.emit('statusMessage', successMessage);
+
+        // Trigger the loop chain engine
+        this._processQueueLoop();
+    }
+
+    /**
      * Detached Core Queue Processing Engine (Runs independent from CLI / UI bindings)
      */
     async _processQueueLoop() {

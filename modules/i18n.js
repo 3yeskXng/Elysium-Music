@@ -15,6 +15,12 @@ const translations = {
         engine_active: "[Elysium Engine] Activating module: ",
         auto_mode_active: "[Elysium Engine] Auto-Mode: Streaming instantly while caching to disk in the background...",
         auto_mode_complete: "[Elysium Engine] Background caching complete for: ",
+        welcome: "==================================================\n🎵 Welcome to Elysium Music Command Line Interface\nCommands: play <name> | add <name> | playlist <name> | next | queue | stop | exit\n==================================================\n",
+        playlist_loading: "[Elysium Playlist] Loading playlist: ",
+        playlist_loaded: "[Elysium Playlist] Loaded X tracks from playlist: ",
+        playlist_err_not_found: "[Elysium Playlist] Error: Playlist file not found.",
+        playlist_err_empty: "[Elysium Playlist] Error: Playlist is empty or corrupted.",
+        err_no_playlist: "[Elysium] Error: Please specify a playlist name.",
     },
     de: {
         welcome: "Willkommen beim Elysium Music Kommandozeilen-Interface",
@@ -31,6 +37,12 @@ const translations = {
         library_searching: "[Elysium Library] Scanne lokalen Speicherordner...",
         auto_mode_active: "[Elysium Engine] Auto-Modus: Sofortiges Streaming, während im Hintergrund auf Festplatte zwischengespeichert wird...",
         auto_mode_complete: "[Elysium Engine] Hintergrund-Speicherung abgeschlossen für: ",
+        welcome: "==================================================\n🎵 Willkommen beim Elysium Music Kommandozeilen-Interface\nBefehle: play <Name> | add <Name> | playlist <Name> | next | queue | stop | exit\n==================================================\n",
+        playlist_loading: "[Elysium Playlist] Lade Playlist: ",
+        playlist_loaded: "[Elysium Playlist] X Titel aus Playlist geladen: ",
+        playlist_err_not_found: "[Elysium Playlist] Fehler: Playlist-Datei nicht gefunden.",
+        playlist_err_empty: "[Elysium Playlist] Fehler: Playlist ist leer oder beschädigt.",
+        err_no_playlist: "[Elysium] Fehler: Bitte gib einen Playlist-Namen an.",
     },
    
 };
