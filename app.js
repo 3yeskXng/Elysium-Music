@@ -9,17 +9,68 @@ const rl = readline.createInterface({
     prompt: 'ELYSIUM> '
 });
 
+let hasActiveProgressLine = false;
+
 console.log(i18n.t('welcome'));
 rl.prompt();
 
+function printSystemLog(msg) {
+    if (hasActiveProgressLine) {
+        readline.moveCursor(process.stdout, 0, -1);
+        readline.clearLine(process.stdout, 0);
+        hasActiveProgressLine = false;
+    }
+    readline.clearLine(process.stdout, 0);
+    readline.cursorTo(process.stdout, 0);
+    console.log(msg);
+    rl.prompt(true);
+}
+
 // --- ATTACHING UI EVENT LISTENERS TO THE CORE ---
-core.on('statusMessage', (msg) => { console.log(msg); rl.prompt(); });
-core.on('trackStarted', (track) => { console.log(i18n.t('track_started') + `"${track}"`); rl.prompt(); });
-core.on('trackSkipped', () => { console.log(i18n.t('skip_action')); rl.prompt(); });
-core.on('queueConcluded', () => { console.log(i18n.t('queue_finished')); rl.prompt(); });
-core.on('error', (err) => { console.error(`[Error] ${err}`); rl.prompt(); });
+core.on('statusMessage', (msg) => { printSystemLog(msg); });
+core.on('trackStarted', (track) => { printSystemLog(i18n.t('track_started') + `"${track}"`); });
+core.on('trackSkipped', () => { printSystemLog(i18n.t('skip_action')); });
+core.on('queueConcluded', () => { 
+    if (hasActiveProgressLine) {
+        readline.moveCursor(process.stdout, 0, -1);
+        readline.clearLine(process.stdout, 0);
+        hasActiveProgressLine = false;
+    }
+    printSystemLog(i18n.t('queue_finished')); 
+});
+core.on('error', (err) => { printSystemLog(`[Error] ${err}`); });
+
+core.on('playbackProgress', (data) => {
+    const barWidth = 20;
+    const filledWidth = Math.round((data.percentage / 100) * barWidth);
+    const emptyWidth = Math.max(0, barWidth - filledWidth);
+    const barStr = '█'.repeat(filledWidth) + '░'.repeat(emptyWidth);
+
+    let progressMsg = i18n.t('progress_bar')
+        .replace('%PERCENT%', data.percentage)
+        .replace('%BAR%', barStr)
+        .replace('%CURRENT%', data.currentFormatted)
+        .replace('%TOTAL%', data.totalFormatted);
+
+    if (hasActiveProgressLine) {
+        readline.moveCursor(process.stdout, 0, -1);
+        readline.clearLine(process.stdout, 0);
+    }
+
+    readline.clearLine(process.stdout, 0);
+    readline.cursorTo(process.stdout, 0);
+    
+    process.stdout.write(progressMsg + '\n');
+    
+    readline.clearLine(process.stdout, 0);
+    rl.prompt(true);
+    hasActiveProgressLine = true;
+});
 
 rl.on('line', (line) => {
+    // FIX: Just decouple the flag on enter, let native shell layout process the execution line
+    hasActiveProgressLine = false;
+
     const input = line.trim();
     const spaceIndex = input.indexOf(' ');
     const command = spaceIndex !== -1 ? input.substring(0, spaceIndex).toLowerCase() : input.toLowerCase();
@@ -70,7 +121,9 @@ rl.on('line', (line) => {
             break;
 
         default:
-            console.log(`${i18n.t('unknown_cmd')}"${command}"`);
+            if (command !== '') {
+                console.log(`${i18n.t('unknown_cmd')}"${command}"`);
+            }
             break;
     }
     rl.prompt();

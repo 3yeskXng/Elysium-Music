@@ -4,7 +4,7 @@ const path = require('path');
 const EventEmitter = require('events'); // Native Node.js Event Broker Architecture
 
 class ElysiumCore extends EventEmitter {
-   constructor() {
+    constructor() {
         super(); // Initialize core event emitting capabilities
         
         this.configFile = './config.json';
@@ -12,7 +12,7 @@ class ElysiumCore extends EventEmitter {
         this.plugins = {};
         this.cache = {};
 
-        // 1. SELF-HEALING: Auto-create missing config.json with your precise defaults
+        // 1. SELF-HEALING: Auto-create missing config.json with precise defaults
         if (!fs.existsSync(this.configFile)) {
             console.log("[Elysium Init] ⚙️ Configuration file missing. Creating default config.json...");
             const defaultConfig = {
@@ -264,9 +264,6 @@ class ElysiumCore extends EventEmitter {
     }
 
     /**
-     * Low-level driver linkage execution boundary
-     */
-/**
      * Low-level driver linkage execution boundary with reactive stream monitoring
      */
     async _executePlayback(target) {
@@ -299,4 +296,4 @@ class ElysiumCore extends EventEmitter {
     }
 }
 
-module.exports = ElysiumCore;
+module.exports = new ElysiumCore();

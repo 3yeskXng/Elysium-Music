@@ -11,11 +11,11 @@ module.exports = {
      * Probes the media target asynchronously to extract total duration in seconds
      */
     getDuration: function(target, callback) {
-        const cmd = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${target}"`;
+        const cmd = `ffprobe -v error -fflags +nobuffer -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${target}"`;
         exec(cmd, (err, stdout) => {
-            if (err) return callback(0);
+            if (err) return callback(180); 
             const duration = parseFloat(stdout.trim());
-            callback(isNaN(duration) ? 0 : duration);
+            callback(isNaN(duration) || duration <= 0 ? 180 : duration);
         });
     },
 
@@ -32,10 +32,9 @@ module.exports = {
         this.logStream.write(`=== ELYSIUM PLAYER DEBUG LOG - START: ${new Date().toISOString()} ===\n`);
         this.logStream.write(`Target URL/Path: ${target}\n\n`);
 
-        // Extract duration first, then spawn the stream
         this.getDuration(target, (totalDuration) => {
             const isNetworkStream = target.startsWith('http://') || target.startsWith('https://');
-            let args = ['-nodisp', '-autoexit'];
+            let args = ['-nodisp', '-autoexit', '-stats'];
 
             if (isNetworkStream) {
                 args.push(
@@ -47,25 +46,32 @@ module.exports = {
             }
 
             args.push(target);
-            this.currentPlayback = spawn('ffplay', args);
+            
+            // FIX 1: 'ignore' on stdin completely isolates ffplay from stealing your keyboard inputs!
+            this.currentPlayback = spawn('ffplay', args, { stdio: ['ignore', 'pipe', 'pipe'] });
 
             let lastEmittedSecond = -1;
 
-            // Parse live playback output from ffplay's stderr
             this.currentPlayback.stderr.on('data', (data) => {
                 if (this.logStream) this.logStream.write(data);
                 
                 const chunk = data.toString();
-                // Regex traps ffplay timestamp rendering format (e.g. "  4.21 A-V:")
-                const match = chunk.match(/([\d.]+)\s+(?:A-V|M-A)/i);
+                // FIX 2: Split stream updates by carriage returns for ultra-stable line parsing
+                const lines = chunk.split(/[\r\n]+/);
                 
-                if (match && match[1]) {
-                    const currentTime = parseFloat(match[1]);
-                    const currentSecond = Math.floor(currentTime);
-                    
-                    if (currentSecond !== lastEmittedSecond) {
-                        lastEmittedSecond = currentSecond;
-                        if (onProgress) onProgress(currentSecond, Math.round(totalDuration));
+                for (const line of lines) {
+                    // Detects ANY valid ffplay progress state (including audio-only 'aq=' streams)
+                    if (line.includes('A-V') || line.includes('M-A') || line.includes('aq=') || line.includes('fd=')) {
+                        const match = line.match(/^\s*([\d.]+)/);
+                        if (match && match[1]) {
+                            const currentTime = parseFloat(match[1]);
+                            const currentSecond = Math.floor(currentTime);
+                            
+                            if (currentSecond !== lastEmittedSecond) {
+                                lastEmittedSecond = currentSecond;
+                                if (onProgress) onProgress(currentSecond, Math.round(totalDuration));
+                            }
+                        }
                     }
                 }
             });
