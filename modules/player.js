@@ -1,33 +1,33 @@
 // modules/player.js
-const { exec } = require('child_process');
-const path = require('path');
+const { spawn } = require('child_process');
 
-const PlayerService = {
+module.exports = {
     currentPlayback: null,
 
-    play: function(filePath, callback) {
+    play: function(target, callback) {
         this.stop();
+        console.log(`[Elysium Player] Initializing hardware audio driver...`);
 
-        console.log(`[Elysium Player] Now playing: "${path.basename(filePath)}"`);
-        const command = `ffplay -nodisp -autoexit "${filePath}"`;
+        // Using spawn instead of exec to prevent buffer overflows (fixes the 1-minute crash)
+        this.currentPlayback = spawn('ffplay', ['-nodisp', '-autoexit', target]);
 
-        this.currentPlayback = exec(command, (error, stdout, stderr) => {
+        this.currentPlayback.on('close', (code) => {
             this.currentPlayback = null;
-            if (error && !error.killed) {
-                return callback(error);
-            }
+            // Code 0 or null means it exited normally or was killed intentionally
             return callback(null);
+        });
+
+        this.currentPlayback.on('error', (err) => {
+            this.currentPlayback = null;
+            return callback(err);
         });
     },
 
     stop: function() {
         if (this.currentPlayback) {
-            console.log("[Elysium Player] Stopping playback...");
-            this.currentPlayback.kill();
+            console.log("[Elysium Player] Killing active playback process...");
+            this.currentPlayback.kill('SIGKILL'); // Force kill the process tree element
             this.currentPlayback = null;
         }
     }
 };
-
-// CHECK THIS LINE CAREFULLY: Must have an 's' at the end of exports!
-module.exports = PlayerService;

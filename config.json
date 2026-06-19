@@ -1,4 +1,6 @@
 {
-  "activeEngine": "streamer",
-  "downloadDir": "./downloads"
+  "defaultEngine": "streamer",
+  "downloadDir": "./downloads",
+  "cacheExpiryMs": 3600000,
+  "language": "de"
 }

@@ -1,5 +1,6 @@
 # Dependency directories (where external libraries live)
 node_modules/
+.cache/
 
 # Log files
 *.log

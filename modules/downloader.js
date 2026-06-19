@@ -1,34 +1,31 @@
 // modules/downloader.js
 const { exec } = require('child_process');
 const path = require('path');
+const fs = require('fs');
 
-const DownloadService = {
-    /**
-     * Unified interface function for the core
-     */
-    handlePlayback: function(searchQuery, downloadDir, callback) {
-        console.log(`[Engine: Download] Fetching and saving track as clean Opus file...`);
-
-        // -f "ba[ext=webm]" grabs the native high-quality Opus stream from YouTube without conversion slop
-        const downloadCmd = `yt-dlp -f "ba[ext=webm]" -o "${downloadDir}/%(title)s.%(ext)s" "ytsearch1:${searchQuery}"`;
-
-        exec(downloadCmd, (error) => {
-            if (error) return callback(error);
-
-            console.log(`[Engine: Download] Track saved. Checking file to play locally...`);
+module.exports = {
+    downloadTrack: function(searchQuery, downloadDir) {
+        return new Promise((resolve, reject) => {
+            console.log(`[Engine: Downloader] Pulling native high-quality Opus audio track container...`);
             
-            // In a fully finished version, we would scan the exact name, 
-            // for now we tell ffplay to look into the folder and play the track.
-            // Shortcut for the test: We just play the stream directly like before to keep it simple,
-            // or let ffplay stream it while downloading. 
-            // Let's launch ffplay for the freshly downloaded stuff:
-            const playCmd = `ffplay -nodisp -autoexit "ytsearch1:${searchQuery}"`;
-            exec(playCmd, (playError) => {
-                if (playError) return callback(playError);
-                return callback(null);
+            const command = `yt-dlp -x --audio-format opus -o "${downloadDir}/%(title)s.%(ext)s" "ytsearch1:${searchQuery}"`;
+
+            exec(command, (error) => {
+                if (error) return reject(error);
+                
+                // Let's find the freshly downloaded file to pass the exact path back to the core
+                const files = fs.readdirSync(downloadDir);
+                // Sort by newest file to catch the current download
+                const newestFile = files
+                    .map(file => ({ name: file, time: fs.statSync(path.join(downloadDir, file)).mtime.getTime() }))
+                    .sort((a, b) => b.time - a.time)[0];
+
+                if (newestFile) {
+                    resolve(path.join(downloadDir, newestFile.name));
+                } else {
+                    reject(new Error("Downloaded file not found on disk."));
+                }
             });
         });
     }
 };
-
-module.exports = DownloadService;

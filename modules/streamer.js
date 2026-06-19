@@ -1,30 +1,16 @@
 // modules/streamer.js
 const { exec } = require('child_process');
 
-const StreamerService = {
-    /**
-     * Unified interface function for the core
-     */
-    handlePlayback: function(searchQuery, downloadDir, callback) {
-        console.log(`[Engine: Stream] Fetching live Opus/WebM stream URL...`);
+module.exports = {
+    getStreamUrl: function(searchQuery) {
+        return new Promise((resolve, reject) => {
+            console.log(`[Engine: Streamer] Resolving live streaming payload URL via yt-dlp...`);
+            const command = `yt-dlp -f ba -g "ytsearch1:${searchQuery}"`;
 
-        // Fetch direct link
-        const getUrlCmd = `yt-dlp -f ba -g "ytsearch1:${searchQuery}"`;
-
-        exec(getUrlCmd, (error, stdout) => {
-            if (error) return callback(error);
-
-            const streamUrl = stdout.trim();
-            console.log(`[Engine: Stream] Launching instant playback via ffplay...`);
-            
-            // Play instantly
-            const playCmd = `ffplay -nodisp -autoexit "${streamUrl}"`;
-            exec(playCmd, (playError) => {
-                if (playError) return callback(playError);
-                return callback(null);
+            exec(command, (error, stdout) => {
+                if (error) return reject(error);
+                resolve(stdout.trim());
             });
         });
     }
 };
-
-module.exports = StreamerService;
