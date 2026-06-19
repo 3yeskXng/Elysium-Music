@@ -1,34 +1,39 @@
-// Import native Node.js modules
-const { exec } = require('child_process');
+// core.js
 const fs = require('fs');
 
-// Ensure the downloads directory exists right at the start
-const downloadDir = './downloads';
-if (!fs.existsSync(downloadDir)){
-    fs.mkdirSync(downloadDir);
+// FIXED: Corrected the path to our custom downloader module
+const downloader = require('./modules/downloader.js'); 
+
+// Core configuration
+const DOWNLOAD_DIR = './downloads';
+
+// Ensure download directory exists
+if (!fs.existsSync(DOWNLOAD_DIR)){
+    fs.mkdirSync(DOWNLOAD_DIR);
 }
 
 /**
- * Searches YouTube for a track and downloads the best audio match
- * @param {string} searchQuery - The song name or keywords to search for
+ * Main Elysium Core Orchestrator
  */
-function downloadBySearch(searchQuery) {
-    console.log(`[Elysium Core] Searching and downloading: "${searchQuery}"...`);
-
-    // ytsearch1: tells yt-dlp to take the very first result from YouTube search
-    // We save the file directly into our clean /downloads folder
-    const command = `yt-dlp -x --audio-format mp3 -o "${downloadDir}/%(title)s.%(ext)s" "ytsearch1:${searchQuery}"`;
-
-    exec(command, (error, stdout, stderr) => {
-        if (error) {
-            console.error(`[Elysium Core] Error during search/download: ${error.message}`);
-            return;
-        }
+const ElysiumCore = {
+    
+    /**
+     * High-level function to request a song download
+     * @param {string} trackName - Name of the song
+     */
+    requestTrack: function(trackName) {
+        console.log(`[Elysium Core] User requested: "${trackName}". Handing over to Downloader Module...`);
         
-        console.log(`[Elysium Core] Ready! "${searchQuery}" is now safe in your downloads folder.`);
-    });
-}
+        downloader.downloadBySearch(trackName, DOWNLOAD_DIR, (error, result) => {
+            if (error) {
+                console.error(`[Elysium Core] Task failed: ${error.message}`);
+                return;
+            }
+            console.log(`[Elysium Core] Task successful! Message: ${result}`);
+        });
+    }
+};
 
 // --- TEST RUN ---
-// Now we test it with a real song name instead of a cryptic URL!
-downloadBySearch("Linkin Park Numb");
+// Let's test our modular system with a classic track!
+ElysiumCore.requestTrack("Abba Dancing Queen");
