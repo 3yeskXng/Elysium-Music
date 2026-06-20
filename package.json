@@ -1,9 +1,11 @@
 {
   "name": "elysium-music",
+  "type": "module",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Elysium Music Engine Core",
+  "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -13,9 +15,12 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/3yeskXng/Elysium-Music/issues"
   },
-  "homepage": "https://github.com/3yeskXng/Elysium-Music#readme"
+  "homepage": "https://github.com/3yeskXng/Elysium-Music#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0"
+  }
 }

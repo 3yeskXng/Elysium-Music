@@ -1,4 +1,4 @@
-const BACKEND_URL = 'http://localhost:3000/api';
+const BACKEND_URL = 'http://127.0.0.1:3000/api';
 
 export async function fetchFromCore(endpoint, method = 'GET', body = null) {
     try {

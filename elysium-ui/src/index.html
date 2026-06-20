@@ -10,12 +10,18 @@
 
     <div class="app-container">
         <header class="player-header">
-            <div id="brand-text" class="brand"></div>
+            <div id="brand-text" class="brand">ELYSIUM CORE</div>
             <div class="track-info">
-                <h2 id="trackTitle">---</h2>
-                <span id="engineStatus" class="badge standby">---</span>
+                <h2 id="trackTitle">Warte auf Verbindung...</h2>
+                <span id="engineStatus" class="badge standby">OFFLINE</span>
             </div>
         </header>
+
+        <section class="search-section" style="margin: 20px 0; display: flex; gap: 10px;">
+            <input type="text" id="songInput" placeholder="Songname, YouTube-Link oder ID eingeben..." 
+                   style="flex: 1; padding: 10px; background: #111; border: 1px solid #00f0ff; color: #fff; border-radius: 5px;">
+            <button id="btn-load-song" class="btn btn-primary" style="padding: 10px 20px;">Laden</button>
+        </section>
 
         <section class="progress-section">
             <div class="time-label" id="timeCurrent">00:00</div>
@@ -26,9 +32,9 @@
         </section>
 
         <footer class="player-controls">
-            <button class="btn btn-secondary" id="btn-skip">---</button>
-            <button class="btn btn-primary" id="playPauseBtn">---</button>
-            <button class="btn btn-secondary" id="btn-settings">---</button>
+            <button class="btn btn-secondary" id="btn-skip">SKIP</button>
+            <button class="btn btn-primary" id="playPauseBtn">PLAY</button>
+            <button class="btn btn-secondary" id="btn-settings">SETTING</button>
         </footer>
     </div>
 

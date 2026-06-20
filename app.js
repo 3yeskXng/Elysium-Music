@@ -1,164 +1,99 @@
-const readline = require('readline');
-const express = require('express');
-const path = require('path');
+import express from 'express';
+import cors from 'cors';
 
-// Autodetect: Lädt dein Core- oder Player-Modul, egal wie es benannt ist
-let core;
-try {
-    core = require('./core');
-} catch (e) {
-    try {
-        core = require('./modules/player');
-    } catch (err) {
-        console.error("❌ Kritischer Fehler: Weder './core.js' noch './modules/player.js' gefunden!");
-        process.exit(1);
-    }
-}
+// ==========================================
+// ARCHITEKTUR-HINWEIS FÜR DIE ZUKUNFT:
+// Hier werden später deine echten Module geladen, z.B.:
+// import { corePlayer } from './modules/player.js';
+// import { pluginManager } from './modules/plugins.js';
+// ==========================================
 
 const app = express();
-const API_PORT = 3000;
+const PORT = 3000;
 
+// CORS aktivieren, damit die Tauri-Desktop-Hülle sichere Anfragen senden darf
+app.use(cors());
 app.use(express.json());
-// Erlaubt optional das Laden statischer Web-Dateien aus dem "public" Ordner
-app.use(express.static(path.join(__dirname, 'public')));
 
-// =========================================================================
-// 1. THE BRIDGE: HTTP REST API (Für Tauri, Kotlin & Web-UIs)
-// =========================================================================
+// Das globale "Gehirn" des Cores (Zustands-Management)
+// Bereit für moderne Audio-Formate wie Opus
+let playerState = {
+    currentTrack: "Elysium Overture (Opus-Stream).opus", 
+    duration: 240,            // Gesamtlänge in Sekunden (4 Minuten)
+    currentSeconds: 0,        // Aktuelle Abspielposition
+    isPaused: true            // Standardmäßig im Standby
+};
 
-// UI fragt den aktuellen Live-Status ab
+// Modularer Ticker: Simuliert das Abspielen im Hintergrund
+setInterval(() => {
+    if (!playerState.isPaused && playerState.currentSeconds < playerState.duration) {
+        playerState.currentSeconds++;
+    }
+}, 1000);
+
+// ==========================================
+// REST-API ENDPOINTS (Schnittstelle zur UI)
+// ==========================================
+
+/**
+ * 1. STATUS-SYNC
+ * Die UI fragt diesen Endpoint jede Sekunde ab, um synchron zu bleiben.
+ */
 app.get('/api/status', (req, res) => {
-    res.json({
-        isPlaying: !!(core.audioProcess || core.isPlaying || core.playing),
-        isPaused: !!core.isPaused,
-        currentSeconds: core.currentSeconds || 0,
-        duration: core.duration || 0,
-        currentTrack: core.currentTrack || null
-    });
+    res.json(playerState);
 });
 
-// UI fügt einen Song hinzu oder spielt ihn ab
-app.post('/api/play', (req, res) => {
-    const { track } = req.body;
-    if (!track) return res.status(400).json({ error: 'Kein Track angegeben' });
-
-    try {
-        if (typeof core.enqueue === 'function') {
-            core.enqueue(track);
-        } else if (typeof core.play === 'function') {
-            core.play(track);
-        }
-        res.json({ success: true, message: `Track geladen: ${track}` });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// UI schaltet Pause/Fortsetzen um
+/**
+ * 2. WIEDERGABE / PAUSE
+ * Steuert den aktuellen Abspielmodus.
+ */
 app.post('/api/pause', (req, res) => {
-    try {
-        if (typeof core.togglePause === 'function') {
-            core.togglePause();
-        } else if (typeof core.pause === 'function' && core.isPaused) {
-            if (typeof core.resume === 'function') core.resume();
-        } else if (typeof core.pause === 'function') {
-            core.pause();
-        }
-        res.json({ success: true, isPaused: !!core.isPaused });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+    playerState.isPaused = !playerState.isPaused;
+    
+    // Log für die Konsole, damit du siehst, dass die UI gefunkt hat
+    console.log(`[Core] Status geändert: ${playerState.isPaused ? '⏸ PAUSE' : '▶ WIEDERGABE'}`);
+    res.json(playerState);
 });
 
-// UI überspringt den aktuellen Song
+/**
+ * 3. TRACK ÜBERSPRINGEN (SKIP)
+ * Hier klinkt sich später die modulare Queue ein, um den nächsten Song zu laden.
+ */
 app.post('/api/skip', (req, res) => {
-    try {
-        if (typeof core.skip === 'function') {
-            core.skip();
-        } else if (typeof core.stop === 'function') {
-            core.stop();
-        }
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// API-Server im Hintergrund starten
-app.listen(API_PORT, () => {
-    console.log(`\n🌐 [Elysium Link] API aktiv auf http://localhost:${API_PORT} (Bereit für Tauri/Kotlin)`);
+    console.log("[Core] ⏭ Skip-Signal empfangen. Rufe Plugin-Schnittstelle auf...");
+    
+    // Mock-Daten für den nächsten Song
+    playerState.currentSeconds = 0;
+    playerState.currentTrack = "Modular-Plugin-Track.opus";
+    playerState.duration = 180;
+    playerState.isPaused = false; // Direkt weiterspielen
+    
+    res.json(playerState);
 });
 
 
-// =========================================================================
-// 2. THE COMMAND LINE: Vollständige CLI-Steuerung im Terminal
-// =========================================================================
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
+/**
+ * 4. WUNSCH-SONG LADEN (Aus dem UI Eingabefeld)
+ * Hier kommt später die Nuclear-Logik rein (z.B. YouTube-Suche starten)
+ */
+app.post('/api/play-track', (req, res) => {
+    const { track } = req.body;
+    console.log(`[Core] UI fordert Song an: "${track}"`);
+    
+    // Wir simulieren, dass das System den Song sofort lädt
+    playerState.currentTrack = track; 
+    playerState.duration = 180;        // Standardmäßig 3 Minuten
+    playerState.currentSeconds = 0;    // Song startet von vorn
+    playerState.isPaused = false;      // Direkt abspielen!
+    
+    res.json(playerState);
 });
-
-function handleCliCommand(line) {
-    const args = line.trim().split(' ');
-    const cmd = args[0].toLowerCase();
-    const param = args.slice(1).join(' ');
-
-    switch (cmd) {
-        case 'play':
-            if (!param) {
-                console.log('❌ Fehler: Bitte gib einen Dateipfad an! (z.B. play song.opus)');
-            } else {
-                try {
-                    if (typeof core.enqueue === 'function') core.enqueue(param);
-                    else if (typeof core.play === 'function') core.play(param);
-                    console.log(`🎵 Spiele: ${param}`);
-                } catch (e) {
-                    console.log(`❌ Fehler beim Abspielen: ${e.message}`);
-                }
-            }
-            break;
-
-        case 'pause':
-            try {
-                if (typeof core.togglePause === 'function') core.togglePause();
-                console.log(core.isPaused ? '⏸️  Wiedergabe pausiert' : '▶️  Wiedergabe fortgesetzt');
-            } catch (e) {
-                console.log(`❌ Fehler bei Pause: ${e.message}`);
-            }
-            break;
-
-        case 'skip':
-        case 'stop':
-            try {
-                if (typeof core.skip === 'function') core.skip();
-                else if (typeof core.stop === 'function') core.stop();
-                console.log('⏭️  Track geändert/gestoppt.');
-            } catch (e) {
-                console.log(`❌ Fehler bei Skip: ${e.message}`);
-            }
-            break;
-
-        case 'exit':
-            console.log('👋 Schließe Elysium Audio Engine...');
-            if (typeof core.stop === 'function') core.stop();
-            process.exit(0);
-            break;
-
-        case '':
-            break;
-
-        default:
-            console.log(`❌ Unbekannter Befehl: "${cmd}". Erlaubt: play, pause, skip, exit`);
-            break;
-    }
-    rl.prompt();
-}
-
-// CLI-Interface initialisieren
-console.log(`⌨️  [Elysium CLI] Aktiv. Befehle: play <pfad>, pause, skip, exit`);
-rl.setPrompt('ELYSIUM> ');
-rl.prompt();
-
-rl.on('line', (line) => {
-    handleCliCommand(line);
+// Server starten
+// Ändere die Zeile so ab:
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`\n🤖 ===================================================`);
+    console.log(`   ELYSIUM MUSIC ENGINE // CORE SUCCESSFULLY STARTED`);
+    console.log(`   -> API Endpoint: http://127.0.0.1:${PORT}`);
+    console.log(`   -> Status: Waiting for Tauri UI connection...`);
+    console.log(`   ===================================================\n`);
 });
