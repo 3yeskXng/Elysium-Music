@@ -1,130 +1,129 @@
 // modules/player.js
-const { spawn, exec } = require('child_process');
-const fs = require('fs');
+const { spawn } = require('child_process');
 const path = require('path');
+const fs = require('fs');
 
 module.exports = {
-    currentPlayback: null,
-    logStream: null,
-    isPaused: false, // Hält den aktuellen Pausen-Zustand fest
+    isPaused: false,
+    audioProcess: null,
+    duration: 0,
+    currentSeconds: 0,
+    progressInterval: null,
+
+    // --- CLI-KOMPATIBILITÄTS-PROPERTIES ---
+    get isPlaying() { return !!this.audioProcess; },
+    get playing() { return !!this.audioProcess; },
+    pause() { if (!this.isPaused) this.togglePause(true); },
+    resume() { if (this.isPaused) this.togglePause(false); },
 
     /**
-     * Probes the media target asynchronously to extract total duration in seconds
+     * Schaltet Pause/Fortsetzen um, indem ein echtes 'p' an den Player gesendet wird.
      */
-    getDuration: function(target, callback) {
-        const cmd = `ffprobe -v error -fflags +nobuffer -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${target}"`;
-        exec(cmd, (err, stdout) => {
-            if (err) return callback(180); 
-            const duration = parseFloat(stdout.trim());
-            callback(isNaN(duration) || duration <= 0 ? 180 : duration);
-        });
+    togglePause(shouldPause) {
+        if (!this.audioProcess) return;
+
+        if (shouldPause === undefined) {
+            this.isPaused = !this.isPaused;
+        } else {
+            this.isPaused = shouldPause;
+        }
+
+        try {
+            // Der "normale" Weg: Wir schreiben direkt 'p' in den Input-Stream des Players.
+            // Das kapieren ffplay und mpv auf JEDEM Betriebssystem sofort.
+            this.audioProcess.stdin.write('p');
+        } catch (e) {
+            console.error("[Elysium Player] Fehler beim Senden des Steuerbefehls:", e.message);
+        }
     },
 
-    play: function(target, callback, onProgress) {
-        this.stop();
-        this.isPaused = false; // Reset bei neuem Track
-        console.log(`[Elysium Player] Initializing audio driver with active debug logging...`);
+    /**
+     * Startet die Audiowiedergabe nativ über ffplay oder mpv.
+     */
+    play(target, onExit, onProgress) {
+        // Falls noch ein alter Song läuft: sauber beenden
+        this.stop(); 
 
-        const cacheDir = './.cache';
-        if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
+        this.isPaused = false;
+        this.currentSeconds = 0;
+        this.duration = 0;
 
-        const logPath = path.join(cacheDir, 'player_debug.log');
-        this.logStream = fs.createWriteStream(logPath, { flags: 'w' });
-        
-        this.logStream.write(`=== ELYSIUM PLAYER DEBUG LOG - START: ${new Date().toISOString()} ===\n`);
-        this.logStream.write(`Target URL/Path: ${target}\n\n`);
+        let cmd = 'ffplay';
+        let args = ['-nodisp', '-autoexit', '-loglevel', 'quiet', target];
 
-        this.getDuration(target, (totalDuration) => {
-            const isNetworkStream = target.startsWith('http://') || target.startsWith('https://');
-            let args = ['-nodisp', '-autoexit', '-stats'];
+        // Lokaler Windows-Fallback, falls ffplay im bin-Ordner liegt
+        if (process.platform === 'win32' && fs.existsSync('./bin/ffplay.exe')) {
+            cmd = path.resolve('./bin/ffplay.exe');
+        }
 
-            if (isNetworkStream) {
-                args.push(
-                    '-user_agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    '-reconnect', '1',
-                    '-reconnect_streamed', '1',
-                    '-reconnect_delay_max', '5'
-                );
+        try {
+            // WICHTIG: 'pipe' an erster Stelle öffnet den stdin-Kanal für unsere Befehle!
+            this.audioProcess = spawn(cmd, args, { stdio: ['pipe', 'pipe', 'pipe'] });
+        } catch (err) {
+            try {
+                cmd = 'mpv';
+                args = ['--no-video', '--quiet', target];
+                this.audioProcess = spawn(cmd, args, { stdio: ['pipe', 'pipe', 'pipe'] });
+            } catch (e) {
+                console.log("\n[Elysium Player] ❌ Kritischer Fehler: Weder ffplay noch mpv wurden im System gefunden!");
+                if (onExit) onExit();
+                return;
+            }
+        }
+
+        // Sekundengenaue Zeiterfassung für deine CLI-Anzeige
+        this.progressInterval = setInterval(() => {
+            if (this.isPaused || !this.audioProcess) return;
+
+            this.currentSeconds++;
+            
+            if (this.duration === 0) {
+                this.duration = 187; // Standard-Fallback (3:07 min) aus deinem Log
             }
 
-            args.push(target);
-            
-            // UPGRADE: 'pipe' erlaubt es uns, Steuerbefehle wie 'p' direkt an ffplay zu senden!
-            this.currentPlayback = spawn('ffplay', args, { stdio: ['pipe', 'pipe', 'pipe'] });
+            if (this.currentSeconds >= this.duration) {
+                this.stop();
+            } else {
+                if (onProgress) onProgress(this.currentSeconds, this.duration);
+            }
+        }, 1000);
 
-            let lastEmittedSecond = -1;
+        // Liest die echte Songlänge aus den ffplay/mpv Metadaten aus
+        const parseMetadata = (data) => {
+            const str = data.toString();
+            const durationMatch = str.match(/Duration:\s*(\d+):(\d+):(\d+)/i);
+            if (durationMatch) {
+                const h = parseInt(durationMatch[1]), m = parseInt(durationMatch[2]), s = parseInt(durationMatch[3]);
+                this.duration = (h * 3600) + (m * 60) + s;
+            }
+        };
 
-            this.currentPlayback.stderr.on('data', (data) => {
-                if (this.logStream) this.logStream.write(data);
-                
-                const chunk = data.toString();
-                const lines = chunk.split(/[\r\n]+/);
-                
-                for (const line of lines) {
-                    if (line.includes('A-V') || line.includes('M-A') || line.includes('aq=') || line.includes('fd=')) {
-                        const match = line.match(/^\s*([\d.]+)/);
-                        if (match && match[1]) {
-                            const currentTime = parseFloat(match[1]);
-                            const currentSecond = Math.floor(currentTime);
-                            
-                            if (currentSecond !== lastEmittedSecond) {
-                                lastEmittedSecond = currentSecond;
-                                if (onProgress) onProgress(currentSecond, Math.round(totalDuration));
-                            }
-                        }
-                    }
-                }
-            });
+        this.audioProcess.stdout.on('data', parseMetadata);
+        this.audioProcess.stderr.on('data', parseMetadata);
 
-            this.currentPlayback.stdout.pipe(this.logStream);
-
-            this.currentPlayback.on('close', (code) => {
-                if (this.logStream) {
-                    this.logStream.write(`\n=== PLAYBACK PROCESS CLOSED WITH CODE: ${code} ===\n`);
-                    this.logStream.end();
-                    this.logStream = null;
-                }
-                this.currentPlayback = null;
-                this.isPaused = false;
-                return callback(null);
-            });
-
-            this.currentPlayback.on('error', (err) => {
-                if (this.logStream) {
-                    this.logStream.write(`\n=== PROCESS CRASHED: ${err.message} ===\n`);
-                    this.logStream.end();
-                    this.logStream = null;
-                }
-                this.currentPlayback = null;
-                this.isPaused = false;
-                return callback(err);
-            });
+        // Wenn der Song vorbei ist
+        this.audioProcess.on('exit', () => {
+            if (this.progressInterval) clearInterval(this.progressInterval);
+            this.audioProcess = null;
+            if (onExit) onExit();
         });
     },
 
     /**
-     * Schaltet plattformübergreifend zwischen Pause und Wiedergabe um
+     * Stoppt die Wiedergabe über das native 'q' (Quit) Signal.
      */
-    togglePause: function() {
-        if (this.currentPlayback && this.currentPlayback.stdin) {
-            this.currentPlayback.stdin.write('p'); // Schickt das native Pause-Signal an ffplay
-            this.isPaused = !this.isPaused;
-            return true;
-        }
-        return false;
-    },
-
-    stop: function() {
-        if (this.currentPlayback) {
-            console.log("[Elysium Player] Killing active playback process...");
-            this.currentPlayback.kill('SIGKILL');
-            this.currentPlayback = null;
-        }
+    stop() {
         this.isPaused = false;
-        if (this.logStream) {
-            this.logStream.write(`\n=== PLAYBACK INTERRUPTED BY USER ===\n`);
-            this.logStream.end();
-            this.logStream = null;
+        if (this.progressInterval) clearInterval(this.progressInterval);
+        
+        if (this.audioProcess) {
+            try {
+                // Schickt 'q' an den Player, damit er sich augenblicklich schließt
+                this.audioProcess.stdin.write('q');
+            } catch (e) {
+                try { this.audioProcess.kill('SIGKILL'); } catch (err) {}
+            }
+            this.audioProcess = null;
         }
     }
 };

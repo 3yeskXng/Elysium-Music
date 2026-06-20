@@ -11,6 +11,7 @@ class ElysiumCore extends EventEmitter {
         this.cacheFile = './.cache/stream_cache.json';
         this.plugins = {};
         this.cache = {};
+        this.isPaused = false;
 
         // 1. SELF-HEALING: Auto-create missing config.json with precise defaults
         if (!fs.existsSync(this.configFile)) {
@@ -50,9 +51,26 @@ class ElysiumCore extends EventEmitter {
         this._loadCache();
     }
 
+    // --- ULTRA-KOMPATIBILITÄTS-LAYER FÜR DEINE CLI ---
+    get isPlaying() {
+        try { return !!this._getPlugin('player').audioProcess; } catch(e) { return false; }
+    }
+    get playing() {
+        return this.isPlaying;
+    }
+    get audioProcess() {
+        try { return this._getPlugin('player').audioProcess; } catch(e) { return null; }
+    }
+    pause() {
+        return this.togglePause(true);
+    }
+    resume() {
+        return this.togglePause(false);
+    }
+    // -------------------------------------------------
+
     /**
      * Map out the plugins directory dynamically. 
-     * Keeps core decoupled from hard dependencies.
      */
     _autoloadPlugins() {
         const modulesDir = path.join(__dirname, 'modules');
@@ -77,9 +95,6 @@ class ElysiumCore extends EventEmitter {
         fs.writeFileSync(this.cacheFile, JSON.stringify(this.cache, null, 2), 'utf8');
     }
 
-    /**
-     * Lazy-loads modules into memory on-demand. Resolves memory footprints instantly.
-     */
     _getPlugin(name) {
         const plugin = this.plugins[name];
         if (!plugin) throw new Error(`Plugin "${name}" missing from infrastructure registry.`);
@@ -88,9 +103,33 @@ class ElysiumCore extends EventEmitter {
     }
 
     /**
-     * Controller Interface Command: Enqueue a track query and kickstart processing loop
-     * @param {string} trackQuery 
+     * Zentralisierte Steuerung für Pause und Fortsetzen.
      */
+    togglePause(shouldPause) {
+        try {
+            const player = this._getPlugin('player');
+            
+            if (shouldPause === undefined) {
+                this.isPaused = !this.isPaused;
+            } else {
+                this.isPaused = shouldPause;
+            }
+            
+            player.isPaused = this.isPaused;
+
+            if (typeof player.togglePause === 'function') {
+                player.togglePause(this.isPaused);
+            } else if (this.isPaused && typeof player.pause === 'function') {
+                player.pause();
+            } else if (!this.isPaused && typeof player.resume === 'function') {
+                player.resume();
+            }
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
     enqueue(trackQuery) {
         const queue = this._getPlugin('queue');
         queue.enqueue(trackQuery);
@@ -98,18 +137,14 @@ class ElysiumCore extends EventEmitter {
         this._processQueueLoop();
     }
 
-    /**
-     * Controller Interface Command: Interrupt active audio stream instantly
-     */
     skip() {
         this.forceSkip = true;
+        this.isPaused = false;
         try { this._getPlugin('player').stop(); } catch (e) {}
     }
 
-    /**
-     * Controller Interface Command: Purge states and halt playback processes instantly
-     */
     stopAll() {
+        this.isPaused = false;
         try {
             this._getPlugin('queue').clear();
             this._getPlugin('player').stop();
@@ -117,10 +152,6 @@ class ElysiumCore extends EventEmitter {
         } catch (e) {}
     }
 
-    /**
-     * UI-Ready Command: Load a local playlist and feed all tracks into the processing queue
-     * @param {string} playlistName 
-     */
     loadPlaylist(playlistName) {
         const i18n = this._getPlugin('i18n');
         const playlistModule = this._getPlugin('playlist');
@@ -139,27 +170,20 @@ class ElysiumCore extends EventEmitter {
             return;
         }
 
-        // Push each track into the existing queue infrastructure
         tracks.forEach(track => {
             const queue = this._getPlugin('queue');
             queue.enqueue(track);
         });
 
-        // Broadcast the structural change to listeners (CLI/UI)
         this.emit('queueChanged', this._getPlugin('queue').getTracks());
         
         const successMessage = i18n.t('playlist_loaded')
             .replace('X', tracks.length) + `"${playlistName}"`;
             
         this.emit('statusMessage', successMessage);
-
-        // Trigger the loop chain engine
         this._processQueueLoop();
     }
 
-    /**
-     * Detached Core Queue Processing Engine (Runs independent from CLI / UI bindings)
-     */
     async _processQueueLoop() {
         if (this.isProcessingQueue) return;
         this.isProcessingQueue = true;
@@ -169,6 +193,7 @@ class ElysiumCore extends EventEmitter {
 
         while (nextTrack !== null) {
             this.forceSkip = false;
+            this.isPaused = false;
             this.emit('queueChanged', queue.getTracks());
             
             await this._playTrack(nextTrack);
@@ -184,14 +209,10 @@ class ElysiumCore extends EventEmitter {
         this.emit('queueConcluded');
     }
 
-    /**
-     * Strategic Playback Resolution Layer (Handles Caching, Local Storage, and Hybrid Engine switching)
-     */
     async _playTrack(trackQuery) {
         const engineName = this.config.defaultEngine;
         const i18n = this._getPlugin('i18n');
 
-        // 1. Boundary Layer: Memory Stream Cache Check (Fast Return)
         if (engineName === 'streamer' && this.cache[trackQuery]) {
             const cached = this.cache[trackQuery];
             if (Date.now() - cached.timestamp < this.config.cacheExpiryMs) {
@@ -200,7 +221,6 @@ class ElysiumCore extends EventEmitter {
             }
         }
 
-        // 2. Boundary Layer: Local Storage Opus Library Check (0ms Native Local Playback)
         try {
             this.emit('statusMessage', i18n.t('library_searching'));
             const library = this._getPlugin('library');
@@ -211,13 +231,9 @@ class ElysiumCore extends EventEmitter {
                 this.emit('trackStarted', trackQuery);
                 return this._executePlayback(localMatch);
             }
-        } catch (libraryError) {
-            // Silently fall back to network infrastructure if storage scanning faults
-        }
+        } catch (libraryError) {}
 
-        // 3. Boundary Layer: Network Infrastructure Request (yt-dlp core abstraction)
         try {
-            // HYBRID AUTO MODE LOGIC
             if (engineName === 'auto') {
                 this.emit('statusMessage', i18n.t('auto_mode_active'));
                 
@@ -228,21 +244,16 @@ class ElysiumCore extends EventEmitter {
                 this._saveCache();
                 this.emit('trackStarted', trackQuery);
 
-                // BACKGROUND ASYNC DOWNLOAD (Lever 4 Parallelization: No await, entirely non-blocking!)
                 const downloader = this._getPlugin('downloader');
                 downloader.downloadTrack(trackQuery, this.config.downloadDir)
                     .then(() => {
                         this.emit('statusMessage', i18n.t('auto_mode_complete') + `"${trackQuery}"`);
                     })
-                    .catch(() => {
-                        // Silent catch to prevent background IO glitches from freezing live playback
-                    });
+                    .catch(() => {});
 
-                // Stream audio stream right now while downloader syncs file structure in the background
                 await this._executePlayback(streamUrl);
 
             } else {
-                // TRADITIONAL SINGLE-ENGINE CONFIGURATION
                 const engine = this._getPlugin(engineName);
                 this.emit('statusMessage', i18n.t('engine_active') + `[${engineName}] -> "${trackQuery}"`);
 
@@ -263,19 +274,17 @@ class ElysiumCore extends EventEmitter {
         }
     }
 
-    /**
-     * Low-level driver linkage execution boundary with reactive stream monitoring
-     */
     async _executePlayback(target) {
         const player = this._getPlugin('player');
+        this.isPaused = false;
+        player.isPaused = false;
+
         return new Promise((resolve) => {
             player.play(target, () => {
-                resolve(); // Unlock playback loop promise chain on process exit
+                resolve(); 
             }, (current, total) => {
-                // Calculate state configurations
                 const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
                 
-                // Pure helper for track duration string mapping
                 const formatTime = (secs) => {
                     if (!secs || isNaN(secs) || secs < 0) return "00:00";
                     const m = Math.floor(secs / 60).toString().padStart(2, '0');
@@ -283,7 +292,6 @@ class ElysiumCore extends EventEmitter {
                     return `${m}:${s}`;
                 };
 
-                // Broadcast live playback payload (Ready for Terminal CLI or Frontend GUI Sliders)
                 this.emit('playbackProgress', {
                     current: current,
                     total: total,
