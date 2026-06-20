@@ -36,7 +36,7 @@ async function loadRequestedSong() {
         
         // TEST-SOUND: Da dein Backend noch keine echten Opus-Dateien streamt,
         // füttern wir die Audio-Engine mit einem kurzen Sound, damit Windows die Medientasten freischaltet!
-        audioEngine.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; 
+        audioEngine.src = `http://127.0.0.1:3000/api/audio?track=${encodeURIComponent(data.currentTrack)}`;
         audioEngine.play();
         
         // Windows-Systemsteuerung updaten (wird im Windows-Overlay angezeigt!)

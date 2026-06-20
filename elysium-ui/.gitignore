@@ -1,6 +1,6 @@
 # Node-Abhängigkeiten der UI
 node_modules/
-
+music/
 # Temporärer Rust-Build-Müll von Tauri (wird gigantisch groß!)
 src-tauri/target/
 

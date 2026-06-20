@@ -10,6 +10,8 @@ import cors from 'cors';
 
 const app = express();
 const PORT = 3000;
+const path = require('path');
+const fs = require('fs');
 
 // CORS aktivieren, damit die Tauri-Desktop-Hülle sichere Anfragen senden darf
 app.use(cors());
@@ -87,6 +89,31 @@ app.post('/api/play-track', (req, res) => {
     playerState.isPaused = false;      // Direkt abspielen!
     
     res.json(playerState);
+});
+
+/**
+ * 5. ECHTEN AUDIO-STREAM BEREITSTELLEN
+ * Dieser Endpoint sucht im Ordner /music nach dem passenden Song (.opus oder .mp3)
+ */
+app.get('/api/audio', (req, res) => {
+    const trackName = req.query.track;
+    if (!trackName) return res.status(400).send('Kein Track angegeben.');
+
+    const musicFolder = path.join(__dirname, 'music');
+    
+    // Wir prüfen erst, ob eine bevorzugte .opus Datei existiert, sonst Fallback auf .mp3
+    let filePath = path.join(musicFolder, `${trackName}.opus`);
+    if (!fs.existsSync(filePath)) {
+        filePath = path.join(musicFolder, `${trackName}.mp3`);
+    }
+
+    // Wenn die Datei existiert, streamen wir sie an die UI
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        console.log(`[Core] Datei nicht gefunden: ${trackName} (.opus/.mp3) im Ordner /music`);
+        res.status(404).send('Song nicht im /music Ordner gefunden.');
+    }
 });
 // Server starten
 // Ändere die Zeile so ab:
