@@ -1,0 +1,19 @@
+# Node-Abhängigkeiten der UI
+node_modules/
+
+# Temporärer Rust-Build-Müll von Tauri (wird gigantisch groß!)
+src-tauri/target/
+
+# Von Tauri generierte Dateien
+src-tauri/gen/
+
+# Lokale Log-Dateien von npm-Fehlern
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Betriebssystem-Dateien (z.B. Mac/Windows Thumbnails)
+.DS_Store
+Thumbs.db
+
