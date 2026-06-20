@@ -8,7 +8,7 @@ Current status (Since I'm making rapid progress right now, Elysium may look diff
 Here you can see what it should look like
 ## How it works
 
-Go to the Elysium-ui folder, type npm install and then npm run dev and you ... should see... a window. It has a core, which gets the song from YouTube and the UI then shows the details and is the interaction with the core.,
+Just start the file start.bat *or* go to the Elysium-ui folder, type npm install and then npm run dev and you ... should see... a window. It has a core, which gets the song from YouTube and the UI then shows the details and is the interaction with the core.,
 
 ## ⚠️ Legal Disclaimer
 

@@ -5,5 +5,6 @@ if not exist node_modules (
     npm install
 )
 echo [Elysium Launcher] Booting core engine...
-node app.js
+cd elysium_ui
+npm run dev
 pause
