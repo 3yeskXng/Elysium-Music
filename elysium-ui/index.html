@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elysium Premium Audio Engine</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <header class="player-header">
+            <div class="brand">ELYSIUM // CORE</div>
+            <div class="track-info">
+                <h2 id="trackTitle">Kein Track geladen</h2>
+                <span id="engineStatus" class="badge">STANDBY</span>
+            </div>
+        </header>
+
+        <section class="progress-section">
+            <div class="time-label" id="timeCurrent">00:00</div>
+            <div class="progress-track" onclick="seek(event)">
+                <div id="progressBar" class="progress-fill"></div>
+            </div>
+            <div class="time-label" id="timeTotal">00:00</div>
+        </section>
+
+        <footer class="player-controls">
+            <button class="btn btn-secondary" onclick="sendControl('skip')">SKIP</button>
+            <button class="btn btn-primary" id="playPauseBtn" onclick="togglePlayPause()">PLAY</button>
+            <button class="btn btn-secondary" onclick="openSettings()">SETTINGS</button>
+        </footer>
+    </div>
+
+    <script src="frontend.js"></script>
+</body>
+</html>
