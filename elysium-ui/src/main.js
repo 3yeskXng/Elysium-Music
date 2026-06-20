@@ -1,21 +1,26 @@
 import { state, updateDOM } from './state.js';
 import { fetchFromCore } from './api.js';
-import { t } from './i18n.js';
 
-// Event-Listeners binden
-document.getElementById('playPauseBtn').addEventListener('click', togglePlay);
-document.getElementById('btn-skip').addEventListener('click', () => fetchFromCore('/skip', 'POST'));
-document.getElementById('btn-load-song').addEventListener('click', loadRequestedSong);
+// Event-Listeners absolut sicher binden
+document.addEventListener('DOMContentLoaded', () => {
+    const playBtn = document.getElementById('playPauseBtn');
+    const skipBtn = document.getElementById('btn-skip');
+    const loadBtn = document.getElementById('btn-load-song');
+
+    if (playBtn) playBtn.addEventListener('click', togglePlay);
+    if (skipBtn) skipBtn.addEventListener('click', () => fetchFromCore('/skip', 'POST'));
+    if (loadBtn) loadBtn.addEventListener('click', loadRequestedSong);
+});
 
 // Funktion um Wunsch-Song an den Core zu senden
 async function loadRequestedSong() {
     const inputField = document.getElementById('songInput');
-    const songName = inputField.value.trim();
+    if (!inputField) return;
     
+    const songName = inputField.value.trim();
     if (!songName) return;
     
     console.log("Sende Musik-Wunsch an Core:", songName);
-    // Wir funken den neuen Endpoint an, den wir gleich im Backend bauen
     const data = await fetchFromCore('/play-track', 'POST', { track: songName });
     
     if (data) {
@@ -28,7 +33,6 @@ async function togglePlay() {
     if (data) {
         state.isPlaying = !data.isPaused;
         state.status = data.isPaused ? 'paused' : 'playing';
-        updateDOM();
     }
 }
 
@@ -36,36 +40,49 @@ async function togglePlay() {
 setInterval(async () => {
     const data = await fetchFromCore('/status');
     
+    // HTML Elemente holen
+    const trackTitleEl = document.getElementById('trackTitle');
+    const statusBadgeEl = document.getElementById('engineStatus');
+    const progressBarEl = document.getElementById('progressBar');
+    const timeCurrentEl = document.getElementById('timeCurrent');
+    const timeTotalEl = document.getElementById('timeTotal');
+    const playPauseBtnEl = document.getElementById('playPauseBtn');
+
     if (data) {
         // Zustand in den globalen State schreiben
-        state.currentTrack = data.currentTrack || "Kein Track";
+        state.currentTrack = data.currentTrack || "Kein Track geladen";
         state.duration = data.duration || 0;
         state.currentSeconds = data.currentSeconds || 0;
         state.status = data.isPaused ? 'paused' : 'playing';
 
-        // Sicherheits-Fix: Direktes Schreiben ins HTML, damit die Striche verschwinden!
-        document.getElementById('trackTitle').innerText = state.currentTrack;
+        // Direktes Schreiben ins HTML
+        if (trackTitleEl) trackTitleEl.innerText = state.currentTrack;
         
-        const statusBadge = document.getElementById('engineStatus');
-        statusBadge.innerText = data.isPaused ? 'PAUSIERT' : 'SPIELT';
-        statusBadge.className = `badge ${data.isPaused ? 'paused' : 'playing'}`;
+        if (statusBadgeEl) {
+            statusBadgeEl.innerText = data.isPaused ? 'PAUSIERT' : 'SPIELT';
+            statusBadgeEl.className = `badge ${data.isPaused ? 'paused' : 'playing'}`;
+        }
+
+        if (playPauseBtnEl) {
+            playPauseBtnEl.innerText = data.isPaused ? 'PLAY' : 'PAUSE';
+        }
 
         // Fortschrittsbalken berechnen
-        if (state.duration > 0) {
+        if (progressBarEl && state.duration > 0) {
             const percent = (state.currentSeconds / state.duration) * 100;
-            document.getElementById('progressBar').style.width = `${percent}%`;
+            progressBarEl.style.width = `${percent}%`;
         }
         
-        document.getElementById('timeCurrent').innerText = formatTime(state.currentSeconds);
-        document.getElementById('timeTotal').innerText = formatTime(state.duration);
+        if (timeCurrentEl) timeCurrentEl.innerText = formatTime(state.currentSeconds);
+        if (timeTotalEl) timeTotalEl.innerText = formatTime(state.duration);
     } else {
         // Wenn das Backend nicht erreichbar ist
-        document.getElementById('trackTitle').innerText = "Core Offline 🤖";
-        document.getElementById('engineStatus').innerText = "OFFLINE";
-        document.getElementById('engineStatus').className = "badge standby";
+        if (trackTitleEl) trackTitleEl.innerText = "Core Offline 🤖";
+        if (statusBadgeEl) {
+            statusBadgeEl.innerText = "OFFLINE";
+            statusBadgeEl.className = "badge standby";
+        }
     }
-    
-    if (typeof updateDOM === 'function') updateDOM();
 }, 1000);
 
 function formatTime(seconds) {
@@ -74,5 +91,3 @@ function formatTime(seconds) {
     const s = (seconds % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
 }
-
-if (typeof updateDOM === 'function') updateDOM();

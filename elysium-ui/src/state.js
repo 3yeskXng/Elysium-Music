@@ -1,23 +1,13 @@
-import { t } from './i18n.js';
-
 export const state = {
-    isPlaying: false,
-    currentTrack: t('noTrack'),
+    currentTrack: "Kein Track geladen",
     duration: 0,
     currentSeconds: 0,
-    status: 'standby' // standby, playing, paused, offline
+    status: "standby",
+    isPlaying: false
 };
 
-// Aktualisiert die UI-Elemente basierend auf dem aktuellen Zustand
+// Wir exportieren eine leere Funktion, damit main.js beim Aufruf nicht abstürzt
 export function updateDOM() {
-    document.getElementById('brand-text').innerText = t('brand');
-    document.getElementById('trackTitle').innerText = state.currentTrack;
-    
-    const statusBadge = document.getElementById('engineStatus');
-    statusBadge.innerText = t(state.status);
-    statusBadge.className = `badge ${state.status}`;
-
-    document.getElementById('playPauseBtn').innerText = state.isPlaying ? t('paused') : "PLAY";
-    document.getElementById('btn-skip').innerText = t('btnSkip');
-    document.getElementById('btn-settings').innerText = t('btnSettings');
+    // Wird von main.js aufgerufen, macht aber nichts, 
+    // da main.js das HTML jetzt direkt selbst steuert.
 }
