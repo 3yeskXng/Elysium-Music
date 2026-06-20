@@ -19,3 +19,13 @@ me.txt
 Thumbs.db
 
 # Please change later! NO PACKAGE.JSON HERE!!!
+
+# Tauri / Rust build artifacts
+src-tauri/target/
+
+# Tauri third-party dependencies
+src-tauri/gen/
+
+# Node modules for the frontend
+node_modules/
+.DS_Store
