@@ -3,7 +3,12 @@
 An experimental, music player and management core built with Node.js, ui is being built with Tauri..
 
 ![alt text](image.png)
-![alt text](image-1.png)
+Current status (Since I'm making rapid progress right now, Elysium may look different again.)
+![alt text](image-2.png)
+Here you can see what it should look like
+## How it works
+
+Go to the Elysium-ui folder, type npm install and then npm run dev and you ... should see... a window. It has a core, which gets the song from YouTube and the UI then shows the details and is the interaction with the core.,
 
 ## ⚠️ Legal Disclaimer
 
@@ -28,3 +33,7 @@ I'm sorry, I used AI to build this project. Since I have relatively little codin
 
 I am currently in the process of designing the program so that it works and I can create an early alpha in a timely manner. Then you will be able to load music, listen to it, and pause. 
 Of course, new features will be coming all the time! It won't just be music.
+
+## Supported Languages
+
+It supports via i18n.js German and English. More coming soon!
