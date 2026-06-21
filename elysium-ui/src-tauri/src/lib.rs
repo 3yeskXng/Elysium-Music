@@ -1,5 +1,6 @@
 use tauri::Manager;
-use std::process::Command;
+use std::process::{Command, Stdio};
+use std::fs::File;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -12,32 +13,82 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![greet])
-        // HIER IST DER KUGELSICHERE START
-        .setup(|app| {
-            // 1. Sicheres Auflösen des Ressourcen-Pfads ohne .expect()
-            let resource_path = match app.path().resource_dir() {
-                Ok(path) => path.join("backend"),
+.setup(|app| {
+            use tauri::path::BaseDirectory;
+            use std::io::Write;
+
+            // 1. Log-Ordner im AppData-Verzeichnis bestimmen
+            let log_dir = match app.path().app_local_data_dir() {
+                Ok(path) => {
+                    let _ = std::fs::create_dir_all(&path);
+                    path
+                },
+                Err(_) => std::env::temp_dir(),
+            };
+            let log_file_path = log_dir.join("backend_debug.log");
+            
+            // Log-Datei öffnen
+            let mut log_file = File::create(&log_file_path).expect("Logdatei Fehler");
+
+            let _ = writeln!(log_file, "[Elysium Log] --- App-Setup wurde gestartet ---");
+
+            // 2. Pfade über die offizielle Tauri v2 Resolve-API auflösen
+            let backend_entry = match app.path().resolve("../backend/app.js", BaseDirectory::Resource) {
+                Ok(path) => path,
                 Err(e) => {
-                    eprintln!("[Elysium Rust] Fehler: Ressourcen-Verzeichnis nicht gefunden: {:?}", e);
-                    return Ok(()); // Beendet das Setup sauber, App stürzt nicht ab
+                    let _ = writeln!(log_file, "[Elysium Log] Fehler beim Auflösen von app.js: {:?}", e);
+                    return Ok(());
                 }
             };
 
-            let backend_entry = resource_path.join("app.js");
+            let resource_path = match app.path().resolve("../backend", BaseDirectory::Resource) {
+                Ok(path) => path,
+                Err(e) => {
+                    let _ = writeln!(log_file, "[Elysium Log] Fehler beim Auflösen des Ordners: {:?}", e);
+                    return Ok(());
+                }
+            };
 
-            // 2. Prüfen, ob die Datei dort wirklich existiert
+            // 🌟 NEU: Pfad zur MITEINGEBETTETEN node.exe auflösen
+            let node_executable = resource_path.join("node.exe");
+
+            let _ = writeln!(log_file, "[Elysium Log] Gesuchter Pfad zu app.js: {:?}", backend_entry);
+            let _ = writeln!(log_file, "[Elysium Log] Gesuchter Pfad zu node.exe: {:?}", node_executable);
+            let _ = writeln!(log_file, "[Elysium Log] Existiert node.exe? {}", node_executable.exists());
+
             if !backend_entry.exists() {
-                eprintln!("[Elysium Rust] Fehler: app.js existiert nicht unter: {:?}", backend_entry);
-                return Ok(()); // App bleibt offen, Core bleibt halt offline
+                let _ = writeln!(log_file, "[Elysium Log] ABBRUCH: app.js existiert nicht.");
+                return Ok(());
             }
 
-            // 3. Node starten ohne abzustürzen (match statt .expect)
-            match Command::new("node").arg(&backend_entry).spawn() {
+            let _ = writeln!(log_file, "[Elysium Log] Starte Node-Prozess jetzt über integrierte node.exe...");
+
+            // Klonen der Datei-Handles für stdout und stderr
+            let stdout_file = match log_file.try_clone() {
+                Ok(f) => f,
+                Err(_) => return Ok(()),
+            };
+            let stderr_file = match log_file.try_clone() {
+                Ok(f) => f,
+                Err(_) => return Ok(()),
+            };
+
+            // 3. Node-Prozess vorbereiten – WIR STARTEN DIREKT DIE node_executable Pfad-Datei!
+            let mut command = Command::new(&node_executable);
+            command.arg(&backend_entry)
+                   .current_dir(&resource_path)
+                   .stdout(Stdio::from(stdout_file))
+                   .stderr(Stdio::from(stderr_file));
+
+            // 4. Node starten
+            match command.spawn() {
                 Ok(_) => {
-                    println!("[Elysium Rust] Node-Backend wurde im Hintergrund gestartet.");
+                    let _ = writeln!(log_file, "[Elysium Log] Prozess erfolgreich gestartet! Ab hier übernimmt Node.");
                 }
                 Err(e) => {
-                    eprintln!("[Elysium Rust] Kritisch: 'node' konnte nicht ausgeführt werden. Fehler: {:?}", e);
+                    if let Ok(mut panic_file) = File::create(log_dir.join("backend_spawn_error.txt")) {
+                        let _ = writeln!(panic_file, "Kritischer Fehler: Integrierte node.exe konnte nicht ausgeführt werden.\nDetails: {:?}", e);
+                    }
                 }
             }
 
@@ -45,4 +96,12 @@ pub fn run() {
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+// Kleine Hilfsfunktion für den absoluten Notfall-Log
+fn json_utils_or_write_failed(f: &mut File, e: std::io::Error) -> std::io::Result<()> {
+    use std::io::Write;
+    writeln!(f, "Kritischer Fehler: Windows konnte den 'node' Befehl nicht ausführen.")?;
+    writeln!(f, "Möglicher Grund: Node.js ist im System-PATH nicht verfügbar.")?;
+    writeln!(f, "Details: {:?}", e)
 }
