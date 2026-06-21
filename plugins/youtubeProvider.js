@@ -8,44 +8,59 @@ export const YoutubeProvider = {
     async getStream(trackName, writeToLogFile) {
         writeToLogFile('YT_HYBRID', 'Starte Hybrid-Engine', `Suchbegriff: ${trackName}`);
         
-        // ==========================================
-        // 1. BLITZSCHNELLE SUCHE VIA PLAY-DL
-        // ==========================================
-        let searchResults;
-        try {
-            searchResults = await play.search(trackName, { limit: 1 });
-        } catch (searchError) {
-            writeToLogFile('YT_SEARCH_CRASH', 'Fehler bei der play-dl Suche', searchError.message);
-            throw searchError;
-        }
-
-        const video = searchResults?.[0];
-        if (!video) {
-            writeToLogFile('YT_SEARCH_EMPTY', 'Keine YouTube-Treffer für diesen Begriff', { trackName });
-            return null;
-        }
-
-        writeToLogFile('YT_SEARCH_SUCCESS', 'Video erfolgreich über play-dl gefunden', {
-            titel: video.title,
-            url: video.url
-        });
-
-        // ==========================================
-        // 2. KUGELSICHERE ENTSCHLÜSSELUNG VIA YT-DLP
-        // ==========================================
-        writeToLogFile('YT_YTDLP_START', 'Rufe decodierte Streaming-URLs ab via yt-dlp...');
-        
         let videoInfo;
+        let finalTitle = trackName;
+        let finalDuration = 180;
+
+        // ==========================================
+        // 1. & 2. KUGELSICHERE HYBRID-SUCHE & ENTSCHLÜSSELUNG
+        // ==========================================
         try {
+            writeToLogFile('YT_SEARCH_START', 'Versuche blitzschnelle Suche via play-dl...');
+            const searchResults = await play.search(trackName, { limit: 1 });
+            const video = searchResults?.[0];
+            
+            if (!video) {
+                writeToLogFile('YT_SEARCH_EMPTY', 'Keine YouTube-Treffer via play-dl', { trackName });
+                return null;
+            }
+
+            finalTitle = video.title;
+            finalDuration = video.durationInSec || 180;
+            writeToLogFile('YT_SEARCH_SUCCESS', 'Video über play-dl gefunden, starte yt-dlp Entschlüsselung...', { url: video.url });
+
+            // Normaler Ablauf mit der gefundenen URL
             videoInfo = await youtubedl(video.url, {
                 dumpSingleJson: true,
                 noCheckCertificates: true,
                 noWarnings: true,
                 preferFreeFormats: true
             });
-        } catch (ytdlpError) {
-            writeToLogFile('YT_YTDLP_CRASH', 'yt-dlp Entschlüsselung fehlgeschlagen', ytdlpError.message);
-            throw ytdlpError;
+
+        } catch (error) {
+            // HIER WIRD DEIN CRASH GEFANGEN! (Der browseId-Fehler von play-dl)
+            writeToLogFile('YT_PATCH_ACTIVATED', 'play-dl wegen YouTube-Layout abgestürzt. Aktiviere yt-dlp-Fallback-Suche...', error.message);
+            
+            try {
+                // yt-dlp sucht UND entschlüsselt direkt in einem Schritt via "ytsearch1:"
+                const rawSearchInfo = await youtubedl(`ytsearch1:${trackName}`, {
+                    dumpSingleJson: true,
+                    noCheckCertificates: true,
+                    noWarnings: true,
+                    preferFreeFormats: true
+                });
+
+                // Bei ytsearch1 liefert yt-dlp ein Objekt mit einem 'entries'-Array zurück
+                if (rawSearchInfo && rawSearchInfo.entries && rawSearchInfo.entries[0]) {
+                    videoInfo = rawSearchInfo.entries[0];
+                    finalTitle = videoInfo.title;
+                    finalDuration = videoInfo.duration || 180;
+                    writeToLogFile('YT_FALLBACK_SUCCESS', 'Song erfolgreich über yt-dlp Fallback gefunden!', { titel: finalTitle });
+                }
+            } catch (fallbackError) {
+                writeToLogFile('YT_TOTAL_CRASH', 'Auch der yt-dlp Fallback ist fehlgeschlagen', fallbackError.message);
+                throw fallbackError;
+            }
         }
 
         if (!videoInfo || !videoInfo.formats) {
@@ -57,7 +72,6 @@ export const YoutubeProvider = {
         // ==========================================
         // 3. SELEKTION DES OPTIMALEN OPUS-AUDIOSTREAMS
         // ==========================================
-        // vcodec === 'none' garantiert reine Audio-Streams ohne hungrige Videodaten
         const audioFormats = videoInfo.formats.filter(f => f.vcodec === 'none' && f.url);
         
         if (audioFormats.length === 0) {
@@ -105,8 +119,8 @@ export const YoutubeProvider = {
             type: 'network_stream',
             stream: rawHttpsStream,
             contentType: bestAudio.ext === 'webm' ? 'audio/webm' : 'audio/mp4',
-            title: video.title,
-            duration: video.durationInSec || videoInfo.duration || 180
+            title: finalTitle,
+            duration: finalDuration
         };
     }
 };
