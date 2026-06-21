@@ -1,21 +1,25 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import * as esbuild from 'esbuild'; 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const srcDir = path.join(__dirname, '..'); 
 const stageDir = path.join(__dirname, 'backend'); 
 
-// 1. Alten Ordner sauber löschen und neu erstellen
+console.log('⚡ [Elysium] Starting ultimate backend staging process...');
+
+// 1. Clean and recreate the destination directory
 if (fs.existsSync(stageDir)) {
     fs.rmSync(stageDir, { recursive: true, force: true });
 }
 fs.mkdirSync(stageDir, { recursive: true });
 
-const filesToCopy = ['app.js', 'config.json', 'core.js', 'frontend.js', 'package.json', 'package-lock.json', 'node.exe'];
+// Added 'i18n.js' to the copy list to ensure localization files are shipped
+const filesToCopy = ['config.json', 'core.js', 'frontend.js', 'i18n.js', 'package.json', 'package-lock.json', 'node.exe'];
 const foldersToCopy = ['core', '.cache', 'modules', 'plugins'];
 
-// 2. Dateien kopieren
+// 2. Copy individual configuration and binary files
 filesToCopy.forEach(file => {
     const from = path.join(srcDir, file);
     if (fs.existsSync(from)) {
@@ -23,7 +27,7 @@ filesToCopy.forEach(file => {
     }
 });
 
-// 3. Ordner kopieren
+// 3. Copy required dependency directories
 foldersToCopy.forEach(folder => {
     const from = path.join(srcDir, folder);
     if (fs.existsSync(from)) {
@@ -31,4 +35,38 @@ foldersToCopy.forEach(folder => {
     }
 });
 
-console.log('⚡ [Elysium] Backend staging area successfully prepared!');
+// Locate and migrate YouTube-DL/YT-DLP binaries into the installer scope
+const ytdlBinSrc = path.join(srcDir, 'node_modules', 'youtube-dl-exec', 'bin');
+const ytdlBinDest = path.join(stageDir, 'bin');
+if (fs.existsSync(ytdlBinSrc)) {
+    console.log('📦 Moving YouTube-DL binaries into staging area...');
+    fs.cpSync(ytdlBinSrc, ytdlBinDest, { recursive: true, force: true });
+}
+
+// 4. Compile backend and resolve all module scope discrepancies
+console.log('🚀 Bundling backend codebase and resolving dependency scopes...');
+try {
+    esbuild.buildSync({
+        entryPoints: [path.join(srcDir, 'app.js')],
+        bundle: true,
+        platform: 'node',
+        target: 'node26', 
+        format: 'esm',    
+        outfile: path.join(stageDir, 'app.js'), 
+        minify: false,    
+        sourcemap: false,
+        external: ['play-opus', 'opusscript'], 
+        // Solves 'Identifier already been declared' by namespacing the internal lookups
+        banner: {
+            js: `import { createRequire as __esbuild_localCreateRequire } from 'module';
+const require = __esbuild_localCreateRequire(import.meta.url);
+const __filename = require('url').fileURLToPath(import.meta.url);
+const __dirname = require('path').dirname(__filename);
+process.env.YOUTUBE_DL_DIR = require('path').join(__dirname, 'bin');`,
+        },
+    });
+    console.log('✅ [Elysium] Staging and bundling successfully completed with zero conflicts!');
+} catch (err) {
+    console.error('❌ Critical error encountered during esbuild compilation:', err);
+    process.exit(1);
+}

@@ -49,15 +49,19 @@ pub fn run() {
                 }
             };
 
-            // 🌟 NEU: Pfad zur MITEINGEBETTETEN node.exe auflösen
             let node_executable = resource_path.join("node.exe");
 
-            let _ = writeln!(log_file, "[Elysium Log] Gesuchter Pfad zu app.js: {:?}", backend_entry);
-            let _ = writeln!(log_file, "[Elysium Log] Gesuchter Pfad zu node.exe: {:?}", node_executable);
+            // 🌟 NEU: Das Windows UNC-Präfix "\\?\" entfernen, weil Node.js sonst abstürzt!
+            let clean_backend_entry = backend_entry.to_string_lossy().replace(r#"\\?\"#, "");
+            let clean_resource_path = resource_path.to_string_lossy().replace(r#"\\?\"#, "");
+            let clean_node_executable = node_executable.to_string_lossy().replace(r#"\\?\"#, "");
+
+            let _ = writeln!(log_file, "[Elysium Log] Gesuchter Pfad zu app.js: {:?}", clean_backend_entry);
+            let _ = writeln!(log_file, "[Elysium Log] Gesuchter Pfad zu node.exe: {:?}", clean_node_executable);
             let _ = writeln!(log_file, "[Elysium Log] Existiert node.exe? {}", node_executable.exists());
 
-            if !backend_entry.exists() {
-                let _ = writeln!(log_file, "[Elysium Log] ABBRUCH: app.js existiert nicht.");
+            if !node_executable.exists() {
+                let _ = writeln!(log_file, "[Elysium Log] ABBRUCH: node.exe existiert nicht.");
                 return Ok(());
             }
 
@@ -73,10 +77,10 @@ pub fn run() {
                 Err(_) => return Ok(()),
             };
 
-            // 3. Node-Prozess vorbereiten – WIR STARTEN DIREKT DIE node_executable Pfad-Datei!
-            let mut command = Command::new(&node_executable);
-            command.arg(&backend_entry)
-                   .current_dir(&resource_path)
+            // 3. Node-Prozess vorbereiten – Jetzt mit den BEREINIGTEN Pfaden!
+            let mut command = Command::new(&clean_node_executable);
+            command.arg(&clean_backend_entry)
+                   .current_dir(&clean_resource_path)
                    .stdout(Stdio::from(stdout_file))
                    .stderr(Stdio::from(stderr_file));
 
