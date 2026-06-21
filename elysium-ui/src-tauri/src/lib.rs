@@ -2,6 +2,10 @@ use tauri::Manager;
 use std::process::{Command, Stdio};
 use std::fs::File;
 
+// Import the Windows-specific extension trait for processes
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
+
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -13,7 +17,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![greet])
-.setup(|app| {
+        .setup(|app| {
             use tauri::path::BaseDirectory;
             use std::io::Write;
 
@@ -79,6 +83,11 @@ pub fn run() {
 
             // 3. Node-Prozess vorbereiten – Jetzt mit den BEREINIGTEN Pfaden!
             let mut command = Command::new(&clean_node_executable);
+            
+            // Injects the Win32 windowless creation flag if compiling target is Windows
+            #[cfg(windows)]
+            command.creation_flags(0x08000000);
+
             command.arg(&clean_backend_entry)
                    .current_dir(&clean_resource_path)
                    .stdout(Stdio::from(stdout_file))

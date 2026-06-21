@@ -56,12 +56,12 @@ try {
         minify: false,    
         sourcemap: false,
         external: ['play-opus', 'opusscript'], 
-        // Solves 'Identifier already been declared' by namespacing the internal lookups
+        // Changed from 'const' to 'var' to allow harmless re-declarations down the line inside the flattened bundle file
         banner: {
             js: `import { createRequire as __esbuild_localCreateRequire } from 'module';
-const require = __esbuild_localCreateRequire(import.meta.url);
-const __filename = require('url').fileURLToPath(import.meta.url);
-const __dirname = require('path').dirname(__filename);
+var require = __esbuild_localCreateRequire(import.meta.url);
+var __filename = require('url').fileURLToPath(import.meta.url);
+var __dirname = require('path').dirname(__filename);
 process.env.YOUTUBE_DL_DIR = require('path').join(__dirname, 'bin');`,
         },
     });
