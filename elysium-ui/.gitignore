@@ -22,3 +22,4 @@ Thumbs.db
 
 # Nur diese speziellen Cache-Dateien ignorieren, die mit Zahlen beginnen
 [0-9]*-player-script.js
+backend/

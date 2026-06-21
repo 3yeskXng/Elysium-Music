@@ -3,10 +3,11 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "scripts": {
-    "dev": "concurrently \"node ../app.js\" \"tauri dev\"",
-    "tauri": "tauri"
-  },
+"scripts": {
+  "tauri": "tauri",
+  "build": "node build-stage.js && tauri build",
+  "dev": "node build-stage.js && tauri dev"
+},
   "devDependencies": {
     "@tauri-apps/cli": "^2",
     "concurrently": "^10.0.3"
