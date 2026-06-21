@@ -1,0 +1,41 @@
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Pfade auflösen (Funktioniert super in modernen Node-Projekten)
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const sourceDir = path.resolve(__dirname, '..');           // Der Oberordner (Elysium-Music)
+const targetDir = path.resolve(__dirname, 'backend');      // Der temporäre Staging-Ordner
+
+console.log('⚡ [Elysium] Starte Backend Staging-Prozess...');
+
+try {
+    // 1. Alten temporären Ordner restlos löschen, um Datenmüll zu vermeiden
+    if (fs.existsSync(targetDir)) {
+        fs.rmSync(targetDir, { recursive: true, force: true });
+    }
+    fs.mkdirSync(targetDir, { recursive: true });
+
+    // 2. ALLES rekursiv kopieren (Dateien, Ordner, Exen, einfach alles!)
+    fs.cpSync(sourceDir, targetDir, {
+        recursive: true,
+        filter: (src) => {
+            const relativePath = path.relative(sourceDir, src);
+            
+            // 🔥 KRITISCH: Ignoriere den UI-Ordner selbst, um Endlosschleifen zu verhindern!
+            if (relativePath.startsWith('elysium-ui')) {
+                return false;
+            }
+            // Ignoriere Git-Ordner
+            if (relativePath.startsWith('.git')) {
+                return false;
+            }
+            return true; // Erlaubt node.exe, .js, .json und alle Sub-Ordner
+        }
+    });
+
+    console.log('✅ [Elysium] Staging area erfolgreich vorbereitet (Inklusive node.exe)!');
+} catch (err) {
+    console.error('❌ Kritischer Fehler im Staging-Skript:', err);
+    process.exit(1);
+}

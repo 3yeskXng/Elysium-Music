@@ -12,7 +12,7 @@ if (fs.existsSync(stageDir)) {
 }
 fs.mkdirSync(stageDir, { recursive: true });
 
-const filesToCopy = ['app.js', 'config.json', 'core.js', 'frontend.js', 'package.json', 'package-lock.json'];
+const filesToCopy = ['app.js', 'config.json', 'core.js', 'frontend.js', 'package.json', 'package-lock.json', 'node.exe'];
 const foldersToCopy = ['core', '.cache', 'modules', 'plugins'];
 
 // 2. Dateien kopieren
