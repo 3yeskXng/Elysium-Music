@@ -1,0 +1,41 @@
+name: "Publish Linux AppImage Release"
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggers the workflow when you push a version tag like v0.0.4
+
+jobs:
+  publish-tauri:
+    permissions:
+      contents: write
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+
+      - name: install frontend dependencies
+        run: npm install
+
+      - name: Build and Publish Tauri Linux AppImage
+        uses: tauri-apps/tauri-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "Elysium Linux ${{ github.ref_name }}"
+          releaseBody: "Automated Linux AppImage and DEB bundle deployment."
+          releaseDraft: true
+          prerelease: false

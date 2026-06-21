@@ -19,14 +19,11 @@
       "csp": null
     }
   },
-"bundle": {
-  "active": true,
-  "targets": "all",
-  "icon": [
-    "../Elysium.ico"
-  ],
-  "resources": [
-    "../backend/**/*"
-  ]
-}
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "../Elysium.ico"
+    ]
+  }
 }
