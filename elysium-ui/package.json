@@ -6,7 +6,7 @@
 "scripts": {
   "tauri": "tauri",
   "build": "node build-stage.js && tauri build",
-  "dev": "node build-stage.js && tauri dev"
+  "dev": "node dev.js"
 },
   "devDependencies": {
     "@tauri-apps/cli": "^2",
