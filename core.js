@@ -51,7 +51,7 @@ class ElysiumCore extends EventEmitter {
         this._loadCache();
     }
 
-    // --- ULTRA-KOMPATIBILITÄTS-LAYER FÜR DEINE CLI ---
+    // --- ULTRA COMPATIBILITY LAYER FOR YOUR CLI ---
     get isPlaying() {
         try { return !!this._getPlugin('player').audioProcess; } catch(e) { return false; }
     }
@@ -103,7 +103,7 @@ class ElysiumCore extends EventEmitter {
     }
 
     /**
-     * Zentralisierte Steuerung für Pause und Fortsetzen.
+     * Centralized control for pausing and resuming playback.
      */
     togglePause(shouldPause) {
         try {
@@ -137,19 +137,38 @@ class ElysiumCore extends EventEmitter {
         this._processQueueLoop();
     }
 
+    /**
+     * Forcefully skip the current track and kill the audio stream instantly.
+     */
     skip() {
         this.forceSkip = true;
         this.isPaused = false;
-        try { this._getPlugin('player').stop(); } catch (e) {}
+        try {
+            const player = this._getPlugin('player');
+            if (player && typeof player.stop === 'function') {
+                player.stop(); // Forcefully kill the active audio process/stream
+            }
+        } catch (e) {
+            console.error("[Elysium Core] Error executing player.stop() during skip:", e);
+        }
     }
 
+    /**
+     * Clear the queue and terminate all playback mechanics.
+     */
     stopAll() {
         this.isPaused = false;
+        this.forceSkip = false;
         try {
             this._getPlugin('queue').clear();
-            this._getPlugin('player').stop();
+            const player = this._getPlugin('player');
+            if (player && typeof player.stop === 'function') {
+                player.stop();
+            }
             this.emit('queueChanged', []);
-        } catch (e) {}
+        } catch (e) {
+            console.error("[Elysium Core] Error executing stopAll:", e);
+        }
     }
 
     loadPlaylist(playlistName) {
@@ -184,6 +203,9 @@ class ElysiumCore extends EventEmitter {
         this._processQueueLoop();
     }
 
+    /**
+     * Asynchronous orchestration loop managing the playback queue timeline.
+     */
     async _processQueueLoop() {
         if (this.isProcessingQueue) return;
         this.isProcessingQueue = true;
@@ -196,6 +218,7 @@ class ElysiumCore extends EventEmitter {
             this.isPaused = false;
             this.emit('queueChanged', queue.getTracks());
             
+            // Execute playback and block execution synchronously until the song finishes or gets aborted
             await this._playTrack(nextTrack);
             
             if (this.forceSkip) {
@@ -281,7 +304,7 @@ class ElysiumCore extends EventEmitter {
 
         return new Promise((resolve) => {
             player.play(target, () => {
-                resolve(); 
+                resolve(); // Resolves the blocking promise when the stream ends or is forced to stop
             }, (current, total) => {
                 const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
                 
