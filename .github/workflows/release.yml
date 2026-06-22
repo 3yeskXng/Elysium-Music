@@ -18,8 +18,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
-          cache-dependency-path: 'elysium-ui/package-lock.json' # High Optimization: Explicit lockfile targeting for nested structures
 
       - name: Install Rust Stable Toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -60,17 +58,24 @@ jobs:
             exit 1
           fi
 
-      - name: Install Frontend Dependencies
+      # 🌟 NEU & CRITICAL: Installiert Express, Cors, play-dl etc. im Hauptverzeichnis
+      - name: Install Backend Dependencies (Root Scope)
         run: |
-          echo "[Elysium CI] Restoring project dependency tree inside subfolder..."
+          echo "[Elysium CI] Resolving backend node_modules in repository root..."
           npm install
-        working-directory: elysium-ui # Targets the directory containing your package.json
+
+      # Installiert Tauri, esbuild etc. im UI-Unterordner
+      - name: Install Frontend & Build Dependencies (UI Scope)
+        run: |
+          echo "[Elysium CI] Resolving frontend and bundler node_modules inside elysium-ui..."
+          npm install
+        working-directory: elysium-ui
 
       - name: Bundle Frontend and Backend Assets (Modular Compiling)
         run: |
           echo "[Elysium CI] Triggering explicit asset transformation script..."
           node build-stage.js
-        working-directory: elysium-ui # Executes your staging script directly where it belongs
+        working-directory: elysium-ui
 
       - name: Pre-Flight Integrity Diagnostics
         run: |
