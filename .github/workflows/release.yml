@@ -33,7 +33,7 @@ jobs:
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
           echo "[Elysium CI] Core system dependencies successfully mounted."
 
-      # SELF-HEALING: Dynamically downloads the exact Linux binary mapping target to satisfy runtime sidecar constraints
+      # SELF-HEALING: Dynamically downloads and injects the Node.js binary into all structural sidecar vectors
       - name: Fetch Linux Node Binary (Sidecar Self-Healing Subsystem)
         run: |
           echo "[Elysium CI] --- Initiating Dynamic Sidecar Allocation Sequence ---"
@@ -43,20 +43,21 @@ jobs:
           echo "[Elysium CI] Unpacking payload stream..."
           tar -xf node.tar.xz
           
-          echo "[Elysium CI] Injecting bare 'node' execution binary into repository root..."
+          echo "[Elysium CI] Creating Tauri explicit binary directory structure..."
+          mkdir -p elysium-ui/src-tauri/binaries
+          
+          echo "[Elysium CI] Injecting operational node binaries across system scopes..."
           cp node-v22.12.0-linux-x64/bin/node ./node
+          cp node-v22.12.0-linux-x64/bin/node ./elysium-ui/node
+          cp node-v22.12.0-linux-x64/bin/node ./elysium-ui/src-tauri/binaries/node-x86_64-unknown-linux-gnu
+          
           chmod +x ./node
+          chmod +x ./elysium-ui/node
+          chmod +x ./elysium-ui/src-tauri/binaries/node-x86_64-unknown-linux-gnu
           
           echo "[Elysium CI] Purging temporary archive overhead..."
           rm -rf node.tar.xz node-v22.12.0-linux-x64
-          
-          echo "[Elysium CI] Verifying operational state of self-healed sidecar..."
-          if [ -f "./node" ]; then
-            echo "[Elysium CI] SUCCESS: Linux node sidecar is armed and verified in root directory."
-          else
-            echo "[Elysium CI] CRITICAL EXCEPTION: Sidecar extraction routine collapsed."
-            exit 1
-          fi
+          echo "[Elysium CI] SUCCESS: Sidecar targets armed and verified."
 
       - name: Install Backend Dependencies (Root Scope)
         run: |
@@ -74,6 +75,8 @@ jobs:
           echo "[Elysium CI] Triggering explicit asset transformation script..."
           node build-stage.js
         working-directory: elysium-ui
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096" # Allocation safeguard for recursive folder staging operations
 
       - name: Pre-Flight Integrity Diagnostics
         run: |
@@ -94,7 +97,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPIMAGE_EXTRACT_AND_RUN: 1 # Anti-Crash: Forces appimagetool to extract instead of using FUSE (blocked on GitHub runners)
-          CARGO_BUILD_JOBS: 2 # Memory-Protection: Limits concurrent compiler threads to prevent Exit Code 134 / OOM crashes
+          CARGO_BUILD_JOBS: 2 # Memory-Protection: Limits concurrent compiler threads to prevent OOM
+          NODE_OPTIONS: "--max-old-space-size=4096" # Memory-Protection: Prevents Node environment from collapsing during heavy bundling
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "Elysium Linux ${{ github.ref_name }}"
