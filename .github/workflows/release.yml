@@ -18,13 +18,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm' # High Optimization: Caches npm dependency tree to eliminate repetitive fetching overhead
+          cache: 'npm'
+          cache-dependency-path: 'elysium-ui/package-lock.json' # High Optimization: Explicit lockfile targeting for nested structures
 
       - name: Install Rust Stable Toolchain
         uses: dtolnay/rust-toolchain@stable
 
       - name: Initialize Rust Compiler Cache
-        uses: swatinem/rust-cache@v2 # Enterprise Optimization: Prevents full recompilation of heavy Linux crates (gtk, webkit) on sequential runs
+        uses: swatinem/rust-cache@v2
 
       - name: Install Linux Build Dependencies
         run: |
@@ -61,29 +62,32 @@ jobs:
 
       - name: Install Frontend Dependencies
         run: |
-          echo "[Elysium CI] Restoring project dependency tree..."
+          echo "[Elysium CI] Restoring project dependency tree inside subfolder..."
           npm install
+        working-directory: elysium-ui # Targets the directory containing your package.json
 
       - name: Bundle Frontend and Backend Assets (Modular Compiling)
         run: |
-          echo "[Elysium CI] Triggering esbuild asset transformation and staging engine..."
-          npm run build 
+          echo "[Elysium CI] Triggering explicit asset transformation script..."
+          node build-stage.js
+        working-directory: elysium-ui # Executes your staging script directly where it belongs
 
       - name: Pre-Flight Integrity Diagnostics
         run: |
           echo "[Elysium CI] --- Commencing Comprehensive Pre-Flight Workspace Inspection ---"
-          echo "[Elysium CI] Active file layout map:"
+          echo "[Elysium CI] Current directory map contents:"
           ls -la
-          echo "[Elysium CI] Validating targeted sidecar resource paths..."
-          ls -la elysium-ui/backend || echo "WARNING: Subdirectory elysium-ui/backend not accessible!"
-          if [ -f "elysium-ui/backend/app.js" ]; then
-            echo "[Elysium CI] VERIFIED: Target resource 'app.js' is locked and loaded."
+          echo "[Elysium CI] Checking generated backend assets..."
+          ls -la backend || echo "WARNING: backend folder not found!"
+          if [ -f "backend/app.js" ]; then
+            echo "[Elysium CI] VERIFIED: Target resource 'app.js' is locked and loaded for Tauri packaging."
           else
-            echo "[Elysium CI] FAULT DETECTED: 'app.js' missing from staging environment. Build likely to fail."
+            echo "[Elysium CI] FAULT DETECTED: 'app.js' missing from staging environment."
           fi
+        working-directory: elysium-ui
 
       - name: Build and Publish Tauri Linux AppImage
-        uses: tauri-apps/tauri-action@v0 # Scaled back to stable @v0 to prevent configuration and staging path truncation
+        uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -92,4 +96,4 @@ jobs:
           releaseBody: "Automated Linux production bundle compilation featuring structural self-healing sidecar assets."
           releaseDraft: true
           prerelease: false
-          projectPath: "elysium-ui" # CRITICAL CORRECTION: Informs the builder that the Tauri scope is nested inside the subdirectory
+          projectPath: "elysium-ui"
