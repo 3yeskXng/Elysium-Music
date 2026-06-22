@@ -17,55 +17,70 @@ jobs:
       - name: Setup Node.js Environment
         uses: actions/setup-node@v4
         with:
-          node-version: 22 # Using modern LTS for enhanced ecosystem stability
+          node-version: 22
+          cache: 'npm' # High Optimization: Caches npm dependency tree to eliminate repetitive fetching overhead
 
       - name: Install Rust Stable Toolchain
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Initialize Rust Compiler Cache
+        uses: swatinem/rust-cache@v2 # Enterprise Optimization: Prevents full recompilation of heavy Linux crates (gtk, webkit) on sequential runs
+
       - name: Install Linux Build Dependencies
         run: |
-          echo "[Elysium CI] Updating system package repositories..."
+          echo "[Elysium CI] Synchronizing system package definitions..."
           sudo apt-get update
-          echo "[Elysium CI] Installing required webkit and system libraries for Tauri v2..."
+          echo "[Elysium CI] Provisioning Linux system dependencies for Tauri v2 pipeline..."
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
-          echo "[Elysium CI] System core components successfully provisioned."
+          echo "[Elysium CI] Core system dependencies successfully mounted."
 
-      # SELF-HEALING: Dynamically download the Linux Node binary into root so it doesn't need to be tracked in Git
-      - name: Fetch Linux Node Binary (Sidecar Self-Healing)
+      # SELF-HEALING: Dynamically downloads the exact Linux binary mapping target to satisfy runtime sidecar constraints
+      - name: Fetch Linux Node Binary (Sidecar Self-Healing Subsystem)
         run: |
-          echo "[Elysium CI] --- Starting Node Sidecar Self-Healing Sequence ---"
-          echo "[Elysium CI] Downloading official Linux x64 Node binary archive..."
+          echo "[Elysium CI] --- Initiating Dynamic Sidecar Allocation Sequence ---"
+          echo "[Elysium CI] Downloading official Linux x64 Node.js runtime core..."
           curl -L https://nodejs.org/dist/v22.12.0/node-v22.12.0-linux-x64.tar.xz -o node.tar.xz
           
-          echo "[Elysium CI] Extracting binary stream package..."
+          echo "[Elysium CI] Unpacking payload stream..."
           tar -xf node.tar.xz
           
-          echo "[Elysium CI] Injecting naked 'node' binary into source root directory..."
+          echo "[Elysium CI] Injecting bare 'node' execution binary into repository root..."
           cp node-v22.12.0-linux-x64/bin/node ./node
           chmod +x ./node
           
-          echo "[Elysium CI] Flushing temporary build artifacts..."
+          echo "[Elysium CI] Purging temporary archive overhead..."
           rm -rf node.tar.xz node-v22.12.0-linux-x64
           
-          echo "[Elysium CI] Validating staging source state..."
+          echo "[Elysium CI] Verifying operational state of self-healed sidecar..."
           if [ -f "./node" ]; then
-            echo "[Elysium CI] SUCCESS: Linux node sidecar payload is armed and ready in root."
+            echo "[Elysium CI] SUCCESS: Linux node sidecar is armed and verified in root directory."
           else
-            echo "[Elysium CI] CRITICAL ERROR: Sidecar extraction routine collapsed."
+            echo "[Elysium CI] CRITICAL EXCEPTION: Sidecar extraction routine collapsed."
             exit 1
           fi
 
       - name: Install Frontend Dependencies
         run: |
-          echo "[Elysium CI] Resolving node_modules tree..."
+          echo "[Elysium CI] Restoring project dependency tree..."
           npm install
 
-      # Diagnostic logging step to visually inspect workspace layout before compile mapping begins
-      - name: Pre-Flight Diagnostics
+      - name: Bundle Frontend and Backend Assets (Modular Compiling)
         run: |
-          echo "[Elysium CI] --- Running Pre-Flight Environment Inspection ---"
-          echo "[Elysium CI] Active workspace directory structure:"
+          echo "[Elysium CI] Triggering esbuild asset transformation and staging engine..."
+          npm run build 
+
+      - name: Pre-Flight Integrity Diagnostics
+        run: |
+          echo "[Elysium CI] --- Commencing Comprehensive Pre-Flight Workspace Inspection ---"
+          echo "[Elysium CI] Active file layout map:"
           ls -la
+          echo "[Elysium CI] Validating targeted sidecar resource paths..."
+          ls -la elysium-ui/backend || echo "WARNING: Subdirectory elysium-ui/backend not accessible!"
+          if [ -f "elysium-ui/backend/app.js" ]; then
+            echo "[Elysium CI] VERIFIED: Target resource 'app.js' is locked and loaded."
+          else
+            echo "[Elysium CI] FAULT DETECTED: 'app.js' missing from staging environment. Build likely to fail."
+          fi
 
       - name: Build and Publish Tauri Linux AppImage
         uses: tauri-apps/tauri-action@v0 # Scaled back to stable @v0 to prevent configuration and staging path truncation
@@ -74,6 +89,7 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "Elysium Linux ${{ github.ref_name }}"
-          releaseBody: "Automated Linux AppImage and DEB bundle deployment with integrated self-healing Node.js sidecar environment."
+          releaseBody: "Automated Linux production bundle compilation featuring structural self-healing sidecar assets."
           releaseDraft: true
           prerelease: false
+          projectPath: "elysium-ui" # CRITICAL CORRECTION: Informs the builder that the Tauri scope is nested inside the subdirectory
