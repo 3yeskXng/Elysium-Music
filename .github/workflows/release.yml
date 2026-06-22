@@ -58,13 +58,11 @@ jobs:
             exit 1
           fi
 
-      # 🌟 NEU & CRITICAL: Installiert Express, Cors, play-dl etc. im Hauptverzeichnis
       - name: Install Backend Dependencies (Root Scope)
         run: |
           echo "[Elysium CI] Resolving backend node_modules in repository root..."
           npm install
 
-      # Installiert Tauri, esbuild etc. im UI-Unterordner
       - name: Install Frontend & Build Dependencies (UI Scope)
         run: |
           echo "[Elysium CI] Resolving frontend and bundler node_modules inside elysium-ui..."
@@ -95,6 +93,8 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPIMAGE_EXTRACT_AND_RUN: 1 # Anti-Crash: Forces appimagetool to extract instead of using FUSE (blocked on GitHub runners)
+          CARGO_BUILD_JOBS: 2 # Memory-Protection: Limits concurrent compiler threads to prevent Exit Code 134 / OOM crashes
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "Elysium Linux ${{ github.ref_name }}"
