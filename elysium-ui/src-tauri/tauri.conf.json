@@ -23,7 +23,8 @@
     "active": true,
     "targets": "all",
     "icon": [
-      "../Elysium.ico"
+      "../Elysium.ico",
+      "../Elysium.png"
     ]
   }
 }
