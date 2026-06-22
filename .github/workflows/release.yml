@@ -11,31 +11,69 @@ jobs:
       contents: write
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: setup node
+      - name: Setup Node.js Environment
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22 # Using modern LTS for enhanced ecosystem stability
 
-      - name: install Rust stable
+      - name: Install Rust Stable Toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: install Linux build dependencies
+      - name: Install Linux Build Dependencies
         run: |
+          echo "[Elysium CI] Updating system package repositories..."
           sudo apt-get update
+          echo "[Elysium CI] Installing required webkit and system libraries for Tauri v2..."
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+          echo "[Elysium CI] System core components successfully provisioned."
 
-      - name: install frontend dependencies
-        run: npm install
+      # SELF-HEALING: Dynamically download the Linux Node binary into root so it doesn't need to be tracked in Git
+      - name: Fetch Linux Node Binary (Sidecar Self-Healing)
+        run: |
+          echo "[Elysium CI] --- Starting Node Sidecar Self-Healing Sequence ---"
+          echo "[Elysium CI] Downloading official Linux x64 Node binary archive..."
+          curl -L https://nodejs.org/dist/v22.12.0/node-v22.12.0-linux-x64.tar.xz -o node.tar.xz
+          
+          echo "[Elysium CI] Extracting binary stream package..."
+          tar -xf node.tar.xz
+          
+          echo "[Elysium CI] Injecting naked 'node' binary into source root directory..."
+          cp node-v22.12.0-linux-x64/bin/node ./node
+          chmod +x ./node
+          
+          echo "[Elysium CI] Flushing temporary build artifacts..."
+          rm -rf node.tar.xz node-v22.12.0-linux-x64
+          
+          echo "[Elysium CI] Validating staging source state..."
+          if [ -f "./node" ]; then
+            echo "[Elysium CI] SUCCESS: Linux node sidecar payload is armed and ready in root."
+          else
+            echo "[Elysium CI] CRITICAL ERROR: Sidecar extraction routine collapsed."
+            exit 1
+          fi
+
+      - name: Install Frontend Dependencies
+        run: |
+          echo "[Elysium CI] Resolving node_modules tree..."
+          npm install
+
+      # Diagnostic logging step to visually inspect workspace layout before compile mapping begins
+      - name: Pre-Flight Diagnostics
+        run: |
+          echo "[Elysium CI] --- Running Pre-Flight Environment Inspection ---"
+          echo "[Elysium CI] Active workspace directory structure:"
+          ls -la
 
       - name: Build and Publish Tauri Linux AppImage
-        uses: tauri-apps/tauri-action@v2
+        uses: tauri-apps/tauri-action@v0 # Scaled back to stable @v0 to prevent configuration and staging path truncation
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "Elysium Linux ${{ github.ref_name }}"
-          releaseBody: "Automated Linux AppImage and DEB bundle deployment."
+          releaseBody: "Automated Linux AppImage and DEB bundle deployment with integrated self-healing Node.js sidecar environment."
           releaseDraft: true
           prerelease: false

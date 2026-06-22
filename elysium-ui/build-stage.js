@@ -15,8 +15,12 @@ if (fs.existsSync(stageDir)) {
 }
 fs.mkdirSync(stageDir, { recursive: true });
 
+// 🔥 DYNAMISCHER plattformspezifischer Node-Check
+const nodeBinary = process.platform === 'win32' ? 'node.exe' : 'node';
+
 // Added 'i18n.js' to the copy list to ensure localization files are shipped
-const filesToCopy = ['config.json', 'core.js', 'frontend.js', 'i18n.js', 'package.json', 'package-lock.json', 'node.exe'];
+// 'nodeBinary' ersetzt jetzt das hartcodierte 'node.exe'
+const filesToCopy = ['config.json', 'core.js', 'frontend.js', 'i18n.js', 'package.json', 'package-lock.json', nodeBinary];
 const foldersToCopy = ['core', '.cache', 'modules', 'plugins'];
 
 // 2. Copy individual configuration and binary files
@@ -26,6 +30,8 @@ filesToCopy.forEach(file => {
         fs.copyFileSync(from, path.join(stageDir, file));
     }
 });
+
+// [Der Rest deines Skripts für Ordner, YouTube-DL und esbuild bleibt exakt gleich...]
 
 // 3. Copy required dependency directories
 foldersToCopy.forEach(folder => {
