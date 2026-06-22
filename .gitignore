@@ -30,4 +30,3 @@ src-tauri/gen/
 node_modules/
 .DS_Store
 node.exe
-node
