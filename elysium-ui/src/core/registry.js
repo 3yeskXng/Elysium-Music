@@ -1,66 +1,66 @@
 // elysium-ui/src/core/registry.js
-import { eventBus } from './eventBus.js';
+// High-End Architecture Component: The Dynamic Plugin View Registry
 
-/**
- * Core Architecture Registry. Manages slots, views, and plugin injection lifecycles.
- */
 class PluginRegistry {
     constructor() {
         this.plugins = new Map();
-        this.slots = {
-            sidebarNavigation: [],
-            sidebarFooter: [],
-            mainViews: new Map(),
-            playerMeta: null,
-            playerControls: null,
-            playerUtilities: null
-        };
-        this.activeView = null;
+        this.currentActiveId = null;
+        this.onViewChangeCallback = null;
     }
 
     /**
-     * Registers and activates a plugin safely inside the core execution layer
-     * @param {Object} plugin The plugin manifest and execution lifecycle
+     * Registers a new modular component into the application matrix
      */
     register(plugin) {
-        // Self-healing check: Enforce structural minimum guidelines
-        if (!plugin || !plugin.id || typeof plugin.init !== 'function') {
-            console.error(`[Registry Error] Refused corrupted plugin architecture. Management reference ignored.`);
+        if (!plugin.id || !plugin.label || !plugin.icon || typeof plugin.render !== 'function') {
+            console.error('Core rejected invalid module structure:', plugin);
             return;
         }
-
-        try {
-            console.log(`[Elysium Engine] Activating module: ${plugin.name || plugin.id}`);
-            this.plugins.set(plugin.id, plugin);
-            plugin.init(this);
-            eventBus.emit('plugin:activated', plugin.id);
-        } catch (fault) {
-            console.error(`[Registry Self-Healing] Active quarantine triggered for crashing plugin "${plugin.id}":`, fault);
-        }
+        this.plugins.set(plugin.id, plugin);
     }
 
     /**
-     * Mounts a plugin view into a core UI navigation slot
+     * Connects the layout engine to catch view switching events
      */
-    registerView(viewId, sidebarLabelKey, renderFunction, position = 'navigation') {
-        this.slots.mainViews.set(viewId, renderFunction);
-        
-        const targetSlot = position === 'footer' ? this.slots.sidebarFooter : this.slots.sidebarNavigation;
-        targetSlot.push({ id: viewId, labelKey: sidebarLabelKey });
-        
-        eventBus.emit('registry:viewAdded', { viewId, position });
+    onViewChange(callback) {
+        this.onViewChangeCallback = callback;
     }
 
     /**
-     * Switches the active view in the MainContent container
+     * Executes a clean state switch between modules
      */
-    switchView(viewId) {
-        if (!this.slots.mainViews.has(viewId)) {
-            console.warn(`[Registry] View target "${viewId}" not found. Navigation fallback triggered.`);
-            return;
+    switchTo(id) {
+        if (!this.plugins.has(id)) return;
+        this.currentActiveId = id;
+        
+        if (this.onViewChangeCallback) {
+            this.onViewChangeCallback(this.plugins.get(id));
         }
-        this.activeView = viewId;
-        eventBus.emit('registry:viewSwitched', viewId);
+        this.renderSidebar();
+    }
+
+    /**
+     * Compiles and draws the registered sidebar navigation points dynamically
+     */
+    renderSidebar() {
+        const navContainer = document.getElementById('sidebar-navigation-slots');
+        if (!navContainer) return;
+
+        navContainer.innerHTML = '';
+
+        this.plugins.forEach((plugin) => {
+            const btn = document.createElement('button');
+            // Clean dynamic active state class handling
+            btn.className = `nav-btn ${this.currentActiveId === plugin.id ? 'active' : ''}`;
+            
+            btn.innerHTML = `
+                <span class="nav-icon">${plugin.icon}</span>
+                <span class="nav-label">${plugin.label}</span>
+            `;
+
+            btn.addEventListener('click', () => this.switchTo(plugin.id));
+            navContainer.appendChild(btn);
+        });
     }
 }
 
