@@ -1,151 +1,119 @@
+/* elysium-ui/src/style.css */
+
 :root {
-    --bg-main: #060709;
-    --bg-card: #0d0f14;
-    --accent: #00ffcc;
-    --accent-glow: rgba(0, 255, 204, 0.2);
-    --text-main: #f8fafc;
-    --text-muted: #475569;
-    --border: #1e293b;
-    
-    --status-standby: #64748b;
-    --status-playing: #00ffcc;
-    --status-paused: #ffb703;
-    --status-offline: #ef4444;
+    --bg-main: #ffffff;
+    --bg-sidebar: #fcfbfa;
+    --border-color: #000000;
+    --accent-color: #00a2ff; /* Your blue marker color from paint sketch */
+    --text-main: #000000;
+    --sidebar-width: 240px;
+    --player-height: 90px;
 }
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-main);
     -webkit-user-select: none;
 }
 
-body {
-    background-color: var(--bg-main);
-    color: var(--text-main);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
-}
-
-.app-container {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    width: 420px;
-    padding: 40px;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
-}
-
-.player-header {
-    text-align: center;
-    margin-bottom: 40px;
-}
-
-.brand {
-    font-size: 10px;
-    letter-spacing: 4px;
-    color: var(--text-muted);
-    font-weight: 800;
-    margin-bottom: 16px;
-}
-
-.track-info h2 {
-    font-size: 22px;
-    font-weight: 400;
-    letter-spacing: -0.5px;
-    margin-bottom: 12px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.badge {
-    display: inline-block;
-    font-size: 9px;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 6px;
-    letter-spacing: 1.5px;
-    background: rgba(30, 41, 59, 0.5);
-    transition: all 0.3s ease;
-}
-
-.badge.standby { color: var(--status-standby); }
-.badge.playing { color: var(--status-playing); border: 1px solid rgba(0,255,204,0.2); }
-.badge.paused { color: var(--status-paused); }
-.badge.offline { color: var(--status-offline); }
-
-.progress-section {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 40px;
-}
-
-.time-label {
-    font-family: monospace;
-    font-size: 11px;
-    color: var(--text-muted);
-}
-
-.progress-track {
-    flex: 1;
-    height: 4px;
-    background: var(--border);
-    border-radius: 2px;
-    position: relative;
-}
-
-.progress-fill {
+body, html {
+    width: 100%;
     height: 100%;
-    width: 0%;
-    background: var(--accent);
-    border-radius: 2px;
-    box-shadow: 0 0 10px var(--accent-glow);
+    overflow: hidden;
+    background-color: var(--bg-main);
 }
 
-.player-controls {
+/* Master Grid Structure mapping your Paint template */
+#app-shell {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr;
+    grid-template-rows: 1fr var(--player-height);
+    width: 100vw;
+    height: 100vh;
+}
+
+/* Sidebar Layout constraints */
+#shell-sidebar {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    background-color: var(--bg-sidebar);
+    border-right: 2px solid var(--border-color);
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
+    flex-direction: column;
+    padding: 20px;
 }
 
-.btn {
-    border: none;
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: 700;
+.brand-zone {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+}
+
+.logo-box {
+    border: 2px solid var(--border-color);
+    padding: 2px 6px;
+    font-size: 0.8rem;
+}
+
+#sidebar-navigation-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex-grow: 1;
+}
+
+#sidebar-footer-slots {
+    margin-bottom: calc(var(--player-height) + 10px);
+}
+
+/* Structural buttons mapped directly to your handdrawn UI elements */
+.nav-btn {
+    width: 100%;
+    padding: 12px;
+    text-align: left;
+    background: transparent;
+    border: 2px solid var(--border-color);
+    font-size: 1rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
-    letter-spacing: 1px;
 }
 
-.btn-primary {
-    background: var(--accent);
-    color: var(--bg-main);
-    flex: 2;
-    padding: 16px;
-    box-shadow: 0 8px 20px var(--accent-glow);
+.nav-btn:hover, .nav-btn.active {
+    background-color: var(--border-color);
+    color: white;
 }
 
-.btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 12px 24px var(--accent-glow);
+/* Content Area routing grid container */
+#shell-main-content {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 30px;
+    overflow-y: auto;
 }
 
-.btn-secondary {
-    background: transparent;
-    color: var(--text-main);
-    border: 1px solid var(--border);
-    flex: 1;
-    padding: 16px;
+/* Structural Bottom Player constraints */
+#shell-player-bar {
+    grid-column: 2;
+    grid-row: 2;
+    border-top: 2px solid var(--border-color);
+    background: var(--bg-main);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 100;
 }
 
-.btn-secondary:hover {
-    background: var(--border);
+.error-boundary {
+    border: 2px dashed red;
+    padding: 20px;
+    color: red;
+    font-weight: bold;
 }

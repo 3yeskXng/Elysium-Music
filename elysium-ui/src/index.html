@@ -1,40 +1,30 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elysium Engine</title>
+    <title>Elysium Premium</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <div class="app-container">
-        <header class="player-header">
-            <div id="brand-text" class="brand">ELYSIUM CORE</div>
-            <div class="track-info">
-                <h2 id="trackTitle">Warte auf Verbindung...</h2>
-                <span id="engineStatus" class="badge standby">OFFLINE</span>
+    <div id="app-shell">
+        <aside id="shell-sidebar">
+            <div class="brand-zone">
+                <div class="logo-box">Logo</div>
+                <span class="app-title">Elysium</span>
             </div>
-        </header>
+            <nav id="sidebar-navigation-slots"></nav>
+            <div id="sidebar-footer-slots"></div>
+        </aside>
 
-        <section class="search-section" style="margin: 20px 0; display: flex; gap: 10px;">
-            <input type="text" id="songInput" placeholder="Songname, YouTube-Link oder ID eingeben..." 
-                   style="flex: 1; padding: 10px; background: #111; border: 1px solid #00f0ff; color: #fff; border-radius: 5px;">
-            <button id="btn-load-song" class="btn btn-primary" style="padding: 10px 20px;">Laden</button>
-        </section>
+        <main id="shell-main-content">
+            <div id="content-mount-point"></div>
+        </main>
 
-        <section class="progress-section">
-            <div class="time-label" id="timeCurrent">00:00</div>
-            <div class="progress-track">
-                <div id="progressBar" class="progress-fill"></div>
-            </div>
-            <div class="time-label" id="timeTotal">00:00</div>
-        </section>
-
-        <footer class="player-controls">
-            <button class="btn btn-secondary" id="btn-skip">SKIP</button>
-            <button class="btn btn-primary" id="playPauseBtn">PLAY</button>
-            <button class="btn btn-secondary" id="btn-settings">SETTING</button>
+        <footer id="shell-player-bar">
+            <div id="player-meta-slot"></div>
+            <div id="player-controls-slot"></div>
+            <div id="player-utilities-slot"></div>
         </footer>
     </div>
 
