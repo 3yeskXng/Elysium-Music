@@ -3,6 +3,7 @@ import { moduleRegistry } from './core/moduleRegistry.js';
 import { downloadModule } from './modules/downloadModule.js';
 import { listenModule } from './modules/listenModule.js';
 import { audioEngine } from './core/audioEngine.js';
+import { debugModule } from './modules/debugModule.js';
 
 // --- UI ICONS (SVG) ---
 const ICON_PLAY = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><polygon points="6 2 22 12 6 22 6 2"></polygon></svg>`;
@@ -193,8 +194,11 @@ document.addEventListener('DOMContentLoaded', () => {
     moduleRegistry.registerCoreModule(downloadModule);
     moduleRegistry.registerCoreModule(listenModule);
     moduleRegistry.registerCoreModule(settingsModule);
-    moduleRegistry.renderSidebarNavigation();
+    moduleRegistry.registerCoreModule(debugModule);   // <-- 2. REGISTRIERUNG HIER EINFÜGEN
     
+    moduleRegistry.renderSidebarNavigation();
+    // ... restlicher Code ...
+
     // Dynamically patch sidebar translation capabilities right after generation
     const navSlots = document.getElementById('sidebar-navigation-slots');
     if (navSlots) {
