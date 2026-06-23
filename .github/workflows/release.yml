@@ -3,7 +3,7 @@ name: "Publish Linux AppImage Release"
 on:
   push:
     tags:
-      - 'v*' # Triggers the workflow when you push a version tag like v0.0.4
+      - 'v*' # Triggers the workflow when you push a version tag like v0.1.1
 
 jobs:
   publish-tauri:
@@ -76,7 +76,7 @@ jobs:
           node build-stage.js
         working-directory: elysium-ui
         env:
-          NODE_OPTIONS: "--max-old-space-size=4096" # Allocation safeguard for recursive folder staging operations
+          NODE_OPTIONS: "--max-old-space-size=4096"
 
       - name: Pre-Flight Integrity Diagnostics
         run: |
@@ -96,9 +96,9 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          APPIMAGE_EXTRACT_AND_RUN: 1 # Anti-Crash: Forces appimagetool to extract instead of using FUSE (blocked on GitHub runners)
-          CARGO_BUILD_JOBS: 2 # Memory-Protection: Limits concurrent compiler threads to prevent OOM
-          NODE_OPTIONS: "--max-old-space-size=4096" # Memory-Protection: Prevents Node environment from collapsing during heavy bundling
+          APPIMAGE_EXTRACT_AND_RUN: 1 
+          CARGO_BUILD_JOBS: 2 
+          NODE_OPTIONS: "--max-old-space-size=4096" 
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "Elysium Linux ${{ github.ref_name }}"
