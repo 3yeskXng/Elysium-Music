@@ -9,19 +9,26 @@ export const listenModule = {
     label: 'Hören',
     icon: ICON_HEADPHONES,
     
+    // Module Runtime State Tracker
+    tracks: [],
+    currentTrackIndex: -1,
+    viewportElement: null,
+
     render() {
         const viewport = document.createElement('div');
         viewport.className = 'view-container animate-fade-in';
+        this.viewportElement = viewport;
         
         viewport.innerHTML = `
-            <h2 class="view-title">Deine Musikbibliothek</h2>
-            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px;">Exklusive High-Fidelity Opus Audiospur-Übersicht.</p>
+            <h2 class="view-title" data-i18n="lib_title">Deine Musikbibliothek</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px;" data-i18n="lib_sub">Exklusive High-Fidelity Opus Audiospur-Übersicht.</p>
             <div id="library-tracks-container" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 90px;">
-                <span style="color: var(--accent-premium);">Lese lokalen Musik-Pool aus...</span>
+                <span style="color: var(--accent-premium);" data-i18n="lib_loading">Lese lokalen Musik-Pool aus...</span>
             </div>
         `;
         
         this.loadLocalTracks(viewport);
+        this.initSkipEngine();
         return viewport;
     },
 
@@ -30,21 +37,25 @@ export const listenModule = {
         if (!container) return;
 
         try {
-            const tracks = await invokeBackend('get_local_library');
+            // Fetch clean array payload from backend system
+            this.tracks = await invokeBackend('get_local_library');
+            const currentLang = localStorage.getItem('elysium_language') || 'de';
 
-            if (tracks.length === 0) {
+            if (this.tracks.length === 0) {
                 container.innerHTML = `
-                    <div style="color: var(--text-muted); padding: 20px; border: 1px dashed var(--border-subtle); border-radius: 8px; text-align: center;">
-                        Keine .opus Dateien im Ordner "music/" gefunden.
+                    <div style="color: var(--text-muted); padding: 20px; border: 1px dashed var(--border-subtle); border-radius: 8px; text-align: center;" data-i18n="lib_empty">
+                        ${currentLang === 'de' ? 'Keine .opus Dateien im Ordner "music/" gefunden.' : 'No .opus files found inside "music/" folder.'}
                     </div>`;
                 return;
             }
 
             container.innerHTML = '';
             
-            tracks.forEach(track => {
+            // Build real interactive track node rows
+            this.tracks.forEach((track, index) => {
                 const trackRow = document.createElement('div');
                 trackRow.className = 'track-row-item';
+                trackRow.setAttribute('data-track-index', index);
                 trackRow.style = `
                     display: flex; justify-content: space-between; align-items: center;
                     padding: 14px 18px; background: var(--bg-sidebar);
@@ -55,30 +66,67 @@ export const listenModule = {
                 trackRow.innerHTML = `
                     <div>
                         <div style="font-weight: 600; font-size: 0.95rem; color:var(--text-main);">${track.title}</div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted);">${track.artist}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">${track.artist || 'Unknown Artist'}</div>
                     </div>
-                    <div style="font-size: 0.9rem; color: var(--text-muted); font-family: monospace;">${track.duration}</div>
+                    <div style="font-size: 0.9rem; color: var(--text-muted); font-family: monospace;">${track.duration || '--:--'}</div>
                 `;
 
                 trackRow.addEventListener('click', () => {
-                    // Setze alle anderen Zeilen optisch zurück
-                    viewport.querySelectorAll('.track-row-item').forEach(row => {
-                        row.style.borderLeftColor = 'transparent';
-                        row.style.background = 'var(--bg-sidebar)';
-                    });
-
-                    // Aktiv-Design für die angeklickte Zeile (Dezent und edel)
-                    trackRow.style.borderLeftColor = 'var(--accent-premium)';
-                    trackRow.style.background = 'rgba(138, 92, 246, 0.05)';
-                    
-                    audioEngine.playTrack(track);
+                    this.playTrackAt(index);
                 });
 
                 container.appendChild(trackRow);
             });
 
+            // Keep visual styling intact if a track is already spinning in the background
+            if (this.currentTrackIndex !== -1) {
+                this.highlightTrackRow(this.currentTrackIndex);
+            }
+
         } catch (error) {
-            container.innerHTML = `<span style="color: #ef4444;">Fehler beim Laden der Bibliothek: ${error}</span>`;
+            container.innerHTML = `<span style="color: #ef4444;">Fehler: ${error.message || error}</span>`;
         }
+    },
+
+    // Execution Core for advancing tracks
+    playTrackAt(index) {
+        if (index < 0 || index >= this.tracks.length) return;
+        
+        this.currentTrackIndex = index;
+        const track = this.tracks[index];
+
+        this.highlightTrackRow(index);
+        audioEngine.playTrack(track);
+        console.log(`[Listen Module] Queue processing track index: ${index} -> ${track.title}`);
+    },
+
+    // Handles visual DOM state transformations cleanly
+    highlightTrackRow(index) {
+        if (!this.viewportElement) return;
+        
+        this.viewportElement.querySelectorAll('.track-row-item').forEach(row => {
+            row.style.borderLeftColor = 'transparent';
+            row.style.background = 'var(--bg-sidebar)';
+        });
+
+        const activeRow = this.viewportElement.querySelector(`.track-row-item[data-track-index="${index}"]`);
+        if (activeRow) {
+            activeRow.style.borderLeftColor = 'var(--accent-premium)';
+            activeRow.style.background = 'rgba(138, 92, 246, 0.05)';
+        }
+    },
+
+    // Dynamic global listener attachment setup
+    initSkipEngine() {
+        // Prevent duplicate listener attachments on hot view swaps
+        window.removeEventListener('elysium-skip-next', this.handleGlobalSkip);
+        this.handleGlobalSkip = () => {
+            if (this.tracks.length === 0) return;
+            
+            // Increment index, roll back to 0 if bounds exceeded (circular queue)
+            const nextIndex = (this.currentTrackIndex + 1) % this.tracks.length;
+            this.playTrackAt(nextIndex);
+        };
+        window.addEventListener('elysium-skip-next', this.handleGlobalSkip);
     }
 };
