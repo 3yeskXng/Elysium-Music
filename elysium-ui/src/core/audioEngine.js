@@ -1,6 +1,4 @@
 // elysium-ui/src/core/audioEngine.js
-// High-End Autonomous Web Audio Interface Layer
-
 import { invokeBackend } from '../api.js';
 
 class AudioEngine {
@@ -10,33 +8,39 @@ class AudioEngine {
         this.onTrackChangeCallback = null;
         this.onStatusChangeCallback = null;
 
-        // Sync native HTML5 media pipeline back into our ecosystem
+        // Synchronisiere native HTML5 Event-Trigger
         this.audio.addEventListener('timeupdate', () => {
             if (this.onStatusChangeCallback) this.onStatusChangeCallback('timeupdate');
         });
         
+        this.audio.addEventListener('play', () => {
+            this.updateMediaSession('playing');
+            if (this.onStatusChangeCallback) this.onStatusChangeCallback('playing');
+        });
+
+        this.audio.addEventListener('pause', () => {
+            this.updateMediaSession('paused');
+            if (this.onStatusChangeCallback) this.onStatusChangeCallback('paused');
+        });
+
         this.audio.addEventListener('ended', () => {
             if (this.onStatusChangeCallback) this.onStatusChangeCallback('ended');
         });
+
+        // Key-Binding: Registriere globale Medientasten des Keyboards
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('play', () => this.togglePause());
+            navigator.mediaSession.setActionHandler('pause', () => this.togglePause());
+        }
     }
 
-    /**
-     * Streams an isolated local track container by turning raw bytes into an active audio node
-     */
     async playTrack(track) {
         try {
-            console.log(`[Audio Engine] Initializing memory stream for: ${track.title}`);
             this.currentTrack = track;
-            
             if (this.onTrackChangeCallback) this.onTrackChangeCallback(track, 'loading');
 
-            // Pull raw binary buffer from the Rust filesystem matrix
             const bytes = await invokeBackend('get_track_bytes', { filePath: track.file_path });
-            
-            // Build an in-memory blob locked explicitly to premium opus decoding
             const blob = new Blob([new Uint8Array(bytes)], { type: 'audio/opus' });
-            
-            // Generate a secure local streaming URL bound to the browser runtime context
             const streamUrl = URL.createObjectURL(blob);
 
             this.audio.src = streamUrl;
@@ -44,7 +48,7 @@ class AudioEngine {
             
             if (this.onTrackChangeCallback) this.onTrackChangeCallback(track, 'playing');
         } catch (fault) {
-            console.error('[Audio Engine Critical Fault] Pipeline crashed:', fault);
+            console.error('[Audio Engine Fault]', fault);
             if (this.onTrackChangeCallback) this.onTrackChangeCallback(track, 'error');
         }
     }
@@ -60,6 +64,12 @@ class AudioEngine {
         }
     }
 
+    seek(seconds) {
+        if (this.audio.duration) {
+            this.audio.currentTime = seconds;
+        }
+    }
+
     getProgress() {
         if (!this.audio.duration) return { current: 0, total: 0, percent: 0 };
         return {
@@ -67,6 +77,16 @@ class AudioEngine {
             total: this.audio.duration,
             percent: (this.audio.currentTime / this.audio.duration) * 100
         };
+    }
+
+    updateMediaSession(state) {
+        if ('mediaSession' in navigator && this.currentTrack) {
+            navigator.mediaSession.playbackState = state;
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: this.currentTrack.title,
+                artist: this.currentTrack.artist || "Elysium Premium"
+            });
+        }
     }
 
     onTrackChange(callback) { this.onTrackChangeCallback = callback; }

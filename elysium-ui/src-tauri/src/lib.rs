@@ -1,7 +1,8 @@
 // src-tauri/src/lib.rs
-use tauri::{AppHandle, Manager};
+use tauri::AppHandle;
 use serde::{Serialize, Deserialize};
 use std::fs;
+use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct TrackPayload {
@@ -16,12 +17,10 @@ fn elysium_log(module: &str, message: &str) {
     println!("[Elysium Engine] ⚙️ [{}] {}", module, message);
 }
 
-#[tauri::command]
-async fn get_local_library(_app: AppHandle) -> Result<Vec<TrackPayload>, String> {
-    elysium_log("Library", "Scanning local storage directory for high-quality Opus tracks...");
-
+/// Resolves and ensures existence of the root music repository execution context
+fn get_music_dir() -> Result<PathBuf, String> {
     let mut music_dir = std::env::current_dir()
-        .map_err(|e| format!("Failed to get current dir: {}", e))?;
+        .map_err(|e| format!("Failed to resolve runtime workspace: {}", e))?;
     
     if music_dir.ends_with("src-tauri") {
         music_dir.pop();
@@ -31,13 +30,18 @@ async fn get_local_library(_app: AppHandle) -> Result<Vec<TrackPayload>, String>
     }
     
     music_dir.push("music");
-    elysium_log("Library", &format!("Target scanning path resolved to: {:?}", music_dir));
-
+    
     if !music_dir.exists() {
-        fs::create_dir_all(&music_dir).map_err(|e| format!("Failed to initialize music path: {}", e))?;
-        elysium_log("Init", "Creating missing system directory: music/");
+        fs::create_dir_all(&music_dir).map_err(|e| format!("Failed to auto-create music directory matrix: {}", e))?;
+        elysium_log("Init", "Successfully generated missing music/ storage matrix folder.");
     }
+    Ok(music_dir)
+}
 
+#[tauri::command]
+async fn get_local_library() -> Result<Vec<TrackPayload>, String> {
+    elysium_log("Library", "Scanning local storage directory for high-quality Opus tracks...");
+    let music_dir = get_music_dir()?;
     let mut tracks = Vec::new();
 
     if let Ok(entries) = fs::read_dir(music_dir) {
@@ -61,28 +65,29 @@ async fn get_local_library(_app: AppHandle) -> Result<Vec<TrackPayload>, String>
     Ok(tracks)
 }
 
-/// New Command: Reads raw file binary stream buffers directly from disk
 #[tauri::command]
 async fn get_track_bytes(file_path: String) -> Result<Vec<u8>, String> {
-    elysium_log("AudioEngine", &format!("Reading binary stream data from: {}", file_path));
     fs::read(&file_path).map_err(|e| format!("Failed to access local audio track resource: {}", e))
 }
 
+/// Global dynamic write interface: saves raw byte arrays safely as an isolated audio file
 #[tauri::command]
-async fn process_download_request(query: String) -> Result<TrackPayload, String> {
-    if query.trim().is_empty() {
-        return Err("Execution payload command rejected: Query parameter cannot be empty.".to_string());
-    }
-    elysium_log("Engine", &format!("Activating module sequence for target: {}", query));
-    tokio::time::sleep(tokio::time::Duration::from_millis(1500)).await;
-    elysium_log("Engine", &format!("Background caching complete for: {}", query));
+async fn save_track(title: String, bytes: Vec<u8>) -> Result<TrackPayload, String> {
+    let mut music_dir = get_music_dir()?;
+    
+    // Normalize string naming patterns to prevent operating system path crashes
+    let safe_title = title.replace(|c: char| !c.is_alphanumeric() && c != ' ' && c != '-' && c != '_', "");
+    music_dir.push(format!("{}.opus", safe_title));
+    
+    fs::write(&music_dir, bytes).map_err(|e| format!("Failed to write track to storage matrix: {}", e))?;
+    elysium_log("Downloader", &format!("Successfully saved high-fidelity asset to disk: {:?}", music_dir));
 
     Ok(TrackPayload {
         id: uuid::Uuid::new_v4().to_string(),
-        title: query,
-        artist: "Elysium Stream Optimizer".to_string(),
-        duration: "03:45".to_string(),
-        file_path: format!("../music/{}.opus", ".."),
+        title: safe_title,
+        artist: "Elysium Audio Pipeline".to_string(),
+        duration: "03:15".to_string(),
+        file_path: music_dir.to_string_lossy().into_owned(),
     })
 }
 
@@ -92,8 +97,8 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
             get_local_library,
-            process_download_request,
-            get_track_bytes // Registered core command intercept
+            get_track_bytes,
+            save_track
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
