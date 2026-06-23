@@ -3,7 +3,7 @@ name: "Publish Linux AppImage Release"
 on:
   push:
     tags:
-      - 'v*' # Triggers the workflow when you push a version tag like v0.1.1
+      - 'v*'
 
 jobs:
   publish-tauri:
@@ -27,70 +27,34 @@ jobs:
 
       - name: Install Linux Build Dependencies
         run: |
-          echo "[Elysium CI] Synchronizing system package definitions..."
           sudo apt-get update
-          echo "[Elysium CI] Provisioning Linux system dependencies for Tauri v2 pipeline..."
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
-          echo "[Elysium CI] Core system dependencies successfully mounted."
 
-      # SELF-HEALING: Dynamically downloads and injects the Node.js binary into all structural sidecar vectors
       - name: Fetch Linux Node Binary (Sidecar Self-Healing Subsystem)
         run: |
-          echo "[Elysium CI] --- Initiating Dynamic Sidecar Allocation Sequence ---"
-          echo "[Elysium CI] Downloading official Linux x64 Node.js runtime core..."
           curl -L https://nodejs.org/dist/v22.12.0/node-v22.12.0-linux-x64.tar.xz -o node.tar.xz
-          
-          echo "[Elysium CI] Unpacking payload stream..."
           tar -xf node.tar.xz
-          
-          echo "[Elysium CI] Creating Tauri explicit binary directory structure..."
           mkdir -p elysium-ui/src-tauri/binaries
-          
-          echo "[Elysium CI] Injecting operational node binaries across system scopes..."
           cp node-v22.12.0-linux-x64/bin/node ./node
           cp node-v22.12.0-linux-x64/bin/node ./elysium-ui/node
           cp node-v22.12.0-linux-x64/bin/node ./elysium-ui/src-tauri/binaries/node-x86_64-unknown-linux-gnu
-          
           chmod +x ./node
           chmod +x ./elysium-ui/node
           chmod +x ./elysium-ui/src-tauri/binaries/node-x86_64-unknown-linux-gnu
-          
-          echo "[Elysium CI] Purging temporary archive overhead..."
           rm -rf node.tar.xz node-v22.12.0-linux-x64
-          echo "[Elysium CI] SUCCESS: Sidecar targets armed and verified."
 
       - name: Install Backend Dependencies (Root Scope)
-        run: |
-          echo "[Elysium CI] Resolving backend node_modules in repository root..."
-          npm install
+        run: npm install
 
       - name: Install Frontend & Build Dependencies (UI Scope)
-        run: |
-          echo "[Elysium CI] Resolving frontend and bundler node_modules inside elysium-ui..."
-          npm install
+        run: npm install
         working-directory: elysium-ui
 
       - name: Bundle Frontend and Backend Assets (Modular Compiling)
-        run: |
-          echo "[Elysium CI] Triggering explicit asset transformation script..."
-          node build-stage.js
+        run: node build-stage.cjs
         working-directory: elysium-ui
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
-
-      - name: Pre-Flight Integrity Diagnostics
-        run: |
-          echo "[Elysium CI] --- Commencing Comprehensive Pre-Flight Workspace Inspection ---"
-          echo "[Elysium CI] Current directory map contents:"
-          ls -la
-          echo "[Elysium CI] Checking generated backend assets..."
-          ls -la backend || echo "WARNING: backend folder not found!"
-          if [ -f "backend/app.js" ]; then
-            echo "[Elysium CI] VERIFIED: Target resource 'app.js' is locked and loaded for Tauri packaging."
-          else
-            echo "[Elysium CI] FAULT DETECTED: 'app.js' missing from staging environment."
-          fi
-        working-directory: elysium-ui
 
       - name: Build and Publish Tauri Linux AppImage
         uses: tauri-apps/tauri-action@v0
