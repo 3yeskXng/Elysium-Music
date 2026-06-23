@@ -1,5 +1,6 @@
 // elysium-ui/src/modules/listenModule.js
 import { invokeBackend } from '../api.js';
+import { audioEngine } from '../core/audioEngine.js'; // Statically link the audio pipeline
 
 const ICON_HEADPHONES = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>`;
 
@@ -20,9 +21,7 @@ export const listenModule = {
             </div>
         `;
         
-        // Starte den asynchronen Ladevorgang direkt nach dem Rendern
         this.loadLocalTracks(viewport);
-        
         return viewport;
     },
 
@@ -31,7 +30,6 @@ export const listenModule = {
         if (!container) return;
 
         try {
-            // Rufe den echten Rust-Scan auf!
             const tracks = await invokeBackend('get_local_library');
 
             if (tracks.length === 0) {
@@ -42,33 +40,29 @@ export const listenModule = {
                 return;
             }
 
-            container.innerHTML = ''; // Lade-Text löschen
+            container.innerHTML = '';
             
-            // Rendere jedes gefundene Lied als cleane Zeile
             tracks.forEach(track => {
                 const trackRow = document.createElement('div');
                 trackRow.style = `
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    padding: 12px 16px;
-                    background: var(--bg-sidebar);
-                    border: 1px solid var(--border-subtle);
-                    border-radius: 6px;
-                    cursor: pointer;
+                    display: flex; justify-content: space-between; align-items: center;
+                    padding: 12px 16px; background: var(--bg-sidebar);
+                    border: 1px solid var(--border-subtle); border-radius: 6px; cursor: pointer;
+                    transition: border 0.2s ease-in-out;
                 `;
                 
                 trackRow.innerHTML = `
                     <div>
-                        <div style="font-weight: 600; font-size: 0.95rem;">${track.title}</div>
+                        <div style="font-weight: 600; font-size: 0.95rem; color:var(--text-main);">${track.title}</div>
                         <div style="font-size: 0.8rem; color: var(--text-muted);">${track.artist}</div>
                     </div>
                     <div style="font-size: 0.9rem; color: var(--text-muted);">${track.duration}</div>
                 `;
 
-                // Später hängen wir hier das Klick-Event zum Abspielen an!
+                // Intercept clicks to pipe into our dedicated engine stream handler
                 trackRow.addEventListener('click', () => {
-                    console.log(`[Playback] Target localized stream uri: ${track.file_path}`);
+                    trackRow.style.borderColor = 'var(--accent-premium)';
+                    audioEngine.playTrack(track);
                 });
 
                 container.appendChild(trackRow);
