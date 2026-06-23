@@ -30,27 +30,20 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
 
-      - name: Fetch Linux Node Binary (Sidecar Self-Healing Subsystem)
-        run: |
-          curl -L https://nodejs.org/dist/v22.12.0/node-v22.12.0-linux-x64.tar.xz -o node.tar.xz
-          tar -xf node.tar.xz
-          mkdir -p elysium-ui/src-tauri/binaries
-          cp node-v22.12.0-linux-x64/bin/node ./node
-          cp node-v22.12.0-linux-x64/bin/node ./elysium-ui/node
-          cp node-v22.12.0-linux-x64/bin/node ./elysium-ui/src-tauri/binaries/node-x86_64-unknown-linux-gnu
-          chmod +x ./node
-          chmod +x ./elysium-ui/node
-          chmod +x ./elysium-ui/src-tauri/binaries/node-x86_64-unknown-linux-gnu
-          rm -rf node.tar.xz node-v22.12.0-linux-x64
-
       - name: Install Backend Dependencies (Root Scope)
         run: npm install
+        env:
+          YOUTUBE_DL_SKIP_DOWNLOAD: "true"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Frontend & Build Dependencies (UI Scope)
         run: npm install
         working-directory: elysium-ui
+        env:
+          YOUTUBE_DL_SKIP_DOWNLOAD: "true"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Bundle Frontend and Backend Assets (Modular Compiling)
+      - name: Bundle Frontend Assets
         run: node build-stage.cjs
         working-directory: elysium-ui
         env:
@@ -66,7 +59,7 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "Elysium Linux ${{ github.ref_name }}"
-          releaseBody: "Automated Linux production bundle compilation featuring structural self-healing sidecar assets."
+          releaseBody: "Automated Linux production bundle compilation. Automated live-runtime architecture configured."
           releaseDraft: true
           prerelease: false
           projectPath: "elysium-ui"
