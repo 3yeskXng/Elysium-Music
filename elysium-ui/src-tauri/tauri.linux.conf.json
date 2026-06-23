@@ -1,8 +1,0 @@
-{
-  "bundle": {
-    "resources": [
-      "../backend/app.js",
-      "../backend/node"
-    ]
-  }
-}
