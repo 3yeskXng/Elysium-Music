@@ -11,17 +11,24 @@ pub struct TrackPayload {
     title: String,
     artist: String,
     duration: String,
-    // Sicherheitsnetz: Wir liefern beides aus, um jeden Frontend-Konflikt zu imkeimen!
-    file_path: String, 
+    #[serde(rename = "durationSecs")]
+    duration_secs: u32,
+    #[serde(rename = "duration_secs")]
+    duration_secs_snake: u32,
+    file_path: String,
     #[serde(rename = "filePath")]
-    filePath: String, 
+    filePath: String,
+    album: String,
+    #[serde(rename = "coverUrl")]
+    cover_url_camel: String,
+    #[serde(rename = "cover_url")]
+    cover_url_snake: String,
 }
 
 fn elysium_log(module: &str, message: &str) {
     println!("[Elysium Engine] ⚙️ [{}] {}", module, message);
 }
 
-/// Bereinigt Strings von Zeichen, die im Windows-Dateisystem verboten sind
 fn sanitize_filename(name: &str) -> String {
     name.chars()
         .filter(|&c| !r#"<>:"/\|?*"#.contains(c))
@@ -30,7 +37,6 @@ fn sanitize_filename(name: &str) -> String {
         .to_string()
 }
 
-/// Löst den Musik-Ordner auf und erstellt ihn, falls er fehlt
 fn get_music_dir() -> Result<PathBuf, String> {
     let mut music_dir = std::env::current_dir()
         .map_err(|e| format!("Failed to resolve runtime workspace: {}", e))?;
@@ -63,7 +69,6 @@ async fn get_local_library() -> Result<Vec<TrackPayload>, String> {
             if path.is_file() {
                 if let Some(ext) = path.extension().and_then(|s| s.to_str()) {
                     let ext_lower = ext.to_lowercase();
-                    // Akzeptiert alle relevanten Formate, damit alte und neue Downloads auftauchen
                     if ext_lower == "opus" || ext_lower == "webm" || ext_lower == "mp3" || ext_lower == "m4a" {
                         let file_name = path.file_stem().and_then(|s| s.to_str()).unwrap_or("Unknown Track").to_string();
                         
@@ -81,8 +86,13 @@ async fn get_local_library() -> Result<Vec<TrackPayload>, String> {
                             title,
                             artist,
                             duration: "03:30".to_string(), 
+                            duration_secs: 210,
+                            duration_secs_snake: 210,
                             file_path: path_str.clone(),
                             filePath: path_str,
+                            album: "Elysium Archive".to_string(),
+                            cover_url_camel: "".to_string(),
+                            cover_url_snake: "".to_string(),
                         });
                     }
                 }
@@ -121,8 +131,13 @@ async fn save_track(title: String, bytes: Vec<u8>) -> Result<TrackPayload, Strin
         title: track_title,
         artist,
         duration: "03:30".to_string(),
+        duration_secs: 210,
+        duration_secs_snake: 210,
         file_path: path_str.clone(),
         filePath: path_str,
+        album: "Elysium Archive".to_string(),
+        cover_url_camel: "".to_string(),
+        cover_url_snake: "".to_string(),
     })
 }
 
@@ -132,7 +147,6 @@ async fn download_youtube(_app: AppHandle, query: String) -> Result<TrackPayload
     let music_dir = get_music_dir()?;
     let shell = _app.shell();
 
-    // SCHRITT 1: Metadaten holen für saubere YouTube-Namen
     let meta_output = shell
         .command("yt-dlp")
         .args([
@@ -150,6 +164,7 @@ async fn download_youtube(_app: AppHandle, query: String) -> Result<TrackPayload
     let mut raw_title = query.clone();
     let mut raw_artist = "YouTube Stream".to_string();
     let mut duration_str = "03:30".to_string();
+    let mut secs_u32 = 210;
 
     if meta_output.status.success() && !meta_str.trim().is_empty() {
         let parts: Vec<&str> = meta_str.trim().split("|||").collect();
@@ -157,6 +172,7 @@ async fn download_youtube(_app: AppHandle, query: String) -> Result<TrackPayload
             raw_title = parts[0].to_string();
             raw_artist = parts[1].to_string();
             if let Ok(secs) = parts[2].parse::<u32>() {
+                secs_u32 = secs;
                 duration_str = format!("{:02}:{:02}", secs / 60, secs % 60);
             }
         }
@@ -170,14 +186,14 @@ async fn download_youtube(_app: AppHandle, query: String) -> Result<TrackPayload
 
     elysium_log("Downloader", &format!("Downloading audio stream for: {}", file_base_name));
 
-    // SCHRITT 2: Direkter Download (Nutzt fehlerfrei das beste Opus-Audio-Format 251)
     let download_output = shell
         .command("yt-dlp")
         .args([
             "-f", "251/bestaudio[acodec=opus]/bestaudio",
             "--no-playlist",
             "--no-warnings",
-            "--no-check-formats", 
+            "--no-part",              // Verhindert .part-Dateien ohne ffprobe
+            "--no-check-formats",     // Ignoriert ffprobe-Checks komplett
             "--ignore-errors",
             "--output", &temp_output_template.to_string_lossy(),
             &format!("ytsearch1:{}", query),
@@ -191,7 +207,6 @@ async fn download_youtube(_app: AppHandle, query: String) -> Result<TrackPayload
         elysium_log("Downloader", &format!("🔴 yt-dlp Core Error: {}", error_log));
     }
 
-    // Pfad-Verifizierung der tatsächlich geschriebenen Datei
     let extensions = ["webm", "m4a", "opus", "ogg", "mp3"];
     let mut final_track_path = PathBuf::new();
     let mut found = false;
@@ -217,8 +232,13 @@ async fn download_youtube(_app: AppHandle, query: String) -> Result<TrackPayload
         title: clean_title,
         artist: clean_artist,
         duration: duration_str,
+        duration_secs: secs_u32,
+        duration_secs_snake: secs_u32,
         file_path: path_str.clone(),
         filePath: path_str,
+        album: "YouTube Release".to_string(),
+        cover_url_camel: "".to_string(),
+        cover_url_snake: "".to_string(),
     })
 }
 

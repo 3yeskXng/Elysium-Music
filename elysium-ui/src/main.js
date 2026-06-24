@@ -4,6 +4,7 @@ import { downloadModule } from './modules/downloadModule.js';
 import { listenModule } from './modules/listenModule.js';
 import { audioEngine } from './core/audioEngine.js';
 import { debugModule } from './modules/debugModule.js';
+import { PlayerBarModule } from "./modules/PlayerBar.js";
 
 // --- UI ICONS (SVG) ---
 const ICON_PLAY = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><polygon points="6 2 22 12 6 22 6 2"></polygon></svg>`;
@@ -321,5 +322,9 @@ function injectGlobalPlayerBar() {
         const totSec = isNaN(prog.total) ? "00" : Math.floor(prog.total % 60).toString().padStart(2, '0');
         
         timeText.textContent = `${curMin}:${curSec} / ${totMin}:${totSec}`;
+
+
+        // Initialisiere das Modul einmalig beim Start
+const playerBar = new PlayerBarModule();
     });
 }
