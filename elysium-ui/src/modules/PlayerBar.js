@@ -5,6 +5,7 @@ import { audioEngine } from '../core/audioEngine.js';
 
 export class PlayerBarModule {
     constructor() {
+        this.currentTrack = null; 
         this.injectGlobalPlayerBar();
         this.bindAudioEngineHooks();
     }
@@ -84,9 +85,14 @@ export class PlayerBarModule {
         const timeText = document.getElementById('player-time');
 
         audioEngine.onTrackChange((track, status) => {
+            this.currentTrack = track; 
             titleText.removeAttribute('data-i18n');
             titleText.textContent = track.title;
-            statusText.textContent = status.toUpperCase();
+            
+            // ÄNDERUNG: Wechsle IDLE direkt gegen den Künstlernamen aus!
+            statusText.removeAttribute('data-i18n');
+            statusText.textContent = track.artist || "Unknown Artist";
+            
             playBtn.innerHTML = status === 'playing' ? ICON_PAUSE : ICON_PLAY;
         });
 
@@ -94,12 +100,17 @@ export class PlayerBarModule {
             const prog = audioEngine.getProgress();
             progressFill.style.width = `${prog.percent}%`;
             
+            // ÄNDERUNG: Überschreibe den Text NICHT mehr mit "PLAYING" oder "PAUSED".
+            // Der Künstlername bleibt fest stehen, wir toggeln nur die SVGs.
             if (nativeState === 'playing') {
-                statusText.textContent = 'PLAYING';
                 playBtn.innerHTML = ICON_PAUSE;
             } else if (nativeState === 'paused') {
-                statusText.textContent = 'PAUSED';
                 playBtn.innerHTML = ICON_PLAY;
+            }
+
+            // Sicherheits-Fallback, falls der Name beim State-Wechsel flackert
+            if (this.currentTrack && this.currentTrack.artist) {
+                statusText.textContent = this.currentTrack.artist;
             }
 
             const curMin = Math.floor(prog.current / 60).toString().padStart(2, '0');

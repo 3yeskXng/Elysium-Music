@@ -18,6 +18,11 @@ class ElysiumPluginManager {
             console.log(`[Plugin System] Toggle module "${id}" status to: ${plugin.active}`);
         }
     }
+
+    // NEU: Damit andere Systemteile den Schalter abfragen können!
+    isPluginActive(id) {
+        return this.plugins.has(id) ? this.plugins.get(id).active : false;
+    }
 }
 
 export const pluginManager = new ElysiumPluginManager();
