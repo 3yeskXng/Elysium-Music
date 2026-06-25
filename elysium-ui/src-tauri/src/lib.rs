@@ -81,19 +81,19 @@ async fn get_local_library() -> Result<Vec<TrackPayload>, String> {
                         
                         let path_str = path.to_string_lossy().into_owned();
                         
-                        tracks.push(TrackPayload {
-                            id: uuid::Uuid::new_v4().to_string(),
-                            title,
-                            artist,
-                            duration: "03:30".to_string(), 
-                            duration_secs: 210,
-                            duration_secs_snake: 210,
-                            file_path: path_str.clone(),
-                            filePath: path_str,
-                            album: "Elysium Archive".to_string(),
-                            cover_url_camel: "".to_string(),
-                            cover_url_snake: "".to_string(),
-                        });
+tracks.push(TrackPayload {
+    id: uuid::Uuid::new_v4().to_string(),
+    title,
+    artist,
+    duration: duration_str.clone(),       // <--- HIER DIE VARIABLE NUTZEN!
+    duration_secs: secs_u32,              // <--- HIER DIE VARIABLE NUTZEN!
+    duration_secs_snake: secs_u32,        // <--- HIER DIE VARIABLE NUTZEN!
+    file_path: path_str.clone(),
+    filePath: path_str,
+    album: "Elysium Archive".to_string(),
+    cover_url_camel: "".to_string(),
+    cover_url_snake: "".to_string(),
+});
                     }
                 }
             }
@@ -126,19 +126,16 @@ async fn save_track(title: String, bytes: Vec<u8>) -> Result<TrackPayload, Strin
 
     let path_str = music_dir.to_string_lossy().into_owned();
 
-    Ok(TrackPayload {
-        id: uuid::Uuid::new_v4().to_string(),
-        title: track_title,
-        artist,
-        duration: "03:30".to_string(),
-        duration_secs: 210,
-        duration_secs_snake: 210,
-        file_path: path_str.clone(),
-        filePath: path_str,
-        album: "Elysium Archive".to_string(),
-        cover_url_camel: "".to_string(),
-        cover_url_snake: "".to_string(),
-    })
+Ok(TrackPayload {
+    id: uuid::Uuid::new_v4().to_string(),
+    title: track_title,
+    artist,
+    duration: duration_str,               // <--- VARIABLE STATT "03:30"
+    duration_secs: secs_u32,              // <--- VARIABLE STATT 210
+    duration_secs_snake: secs_u32,        // <--- VARIABLE STATT 210
+    file_path: path_str.clone(),
+    // ... restliche Felder
+})
 }
 
 #[tauri::command]
@@ -160,12 +157,18 @@ async fn download_youtube(_app: AppHandle, query: String) -> Result<TrackPayload
         .await
         .map_err(|e| format!("Failed to execute metadata sequence: {}", e))?;
 
-    let meta_str = String::from_utf8_lossy(&meta_output.stdout);
-    let mut raw_title = query.clone();
-    let mut raw_artist = "YouTube Stream".to_string();
-    let mut duration_str = "03:30".to_string();
-    let mut secs_u32 = 210;
+let meta_str = String::from_utf8_lossy(&meta_output.stdout);
+let mut raw_title = query.clone();
+let mut raw_artist = "YouTube Stream".to_string();
 
+// ECHTE SEKUNDEN PARSEN: Wir versuchen die Zahl aus der Ausgabe zu lesen. 
+// Falls das fehlschlägt (z.B. weil das Programm fehlt), nutzen wir 0 als Fallback.
+let secs_u32 = meta_str.trim().parse::<u32>().unwrap_or(0);
+
+// RECHNE DIE SEKUNDEN IN DAS FORMAT "MM:SS" UM
+let minutes = secs_u32 / 60;
+let seconds = secs_u32 % 60;
+let duration_str = format!("{:02}:{:02}", minutes, seconds);
     if meta_output.status.success() && !meta_str.trim().is_empty() {
         let parts: Vec<&str> = meta_str.trim().split("|||").collect();
         if parts.len() == 3 {
