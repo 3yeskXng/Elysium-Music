@@ -1,6 +1,6 @@
 [package]
 name = "_temp"
-version = "0.1.1"
+version = "0.2.1"
 description = "A music app written by node.js and Tauri/Rust."
 authors = ["you"]
 edition = "2021"
