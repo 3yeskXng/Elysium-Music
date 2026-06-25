@@ -1,5 +1,5 @@
 // src-tauri/src/models.rs
-import serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TrackPayload {

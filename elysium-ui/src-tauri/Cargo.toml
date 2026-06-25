@@ -1,5 +1,5 @@
 [package]
-name = "_temp"
+name = "elysium"
 version = "0.2.1"
 description = "A music app written by node.js and Tauri/Rust."
 authors = ["you"]
