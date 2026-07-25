@@ -1,5 +1,8 @@
 // elysium-ui/src/config/translations.js
-// Centralized i18n translation dictionary for all UI labels
+// Centralized i18n translation dictionary. Pure data — no DOM logic here.
+// To add a language: 1) Add entry to languageRegistry.js, 2) Add translation object below.
+
+import { languageRegistry } from './languageRegistry.js';
 
 export const translations = {
     de: {
@@ -67,20 +70,60 @@ export const translations = {
         log_sub: "Real-time diagnostics for frontend bridge and pipeline events.",
         log_copy: "Copy Logs",
         log_clear: "Clear Console"
+    },
+    es: {
+        appTitle: "Elysium",
+        settingsTitle: "Configuración",
+        settingsSub: "Configuración de interfaces y extensiones del sistema.",
+        langLabel: "Idioma / Language",
+        idleStatus: "LISTO",
+        noTrack: "Sin pista",
+        nav_download: "Descargar",
+        nav_listen: "Escuchar",
+        nav_settings: "Configuración",
+        nav_debug: "Registros",
+        dl_title: "Centro de Descarga de Audio",
+        dl_sub: "Ingresa el nombre de una canción para descargarla directamente vía integración de red.",
+        dl_placeholder: "Ej: Linkin Park - Numb",
+        dl_btn: "Descargar",
+        import_title: "Importación Manual de Archivos",
+        import_sub: "Agrega archivos .opus o .mp3 de tu PC directamente a la biblioteca de la aplicación.",
+        import_btn: "Seleccionar archivo",
+        lib_title: "Tu Biblioteca Musical",
+        lib_sub: "Vista de audio de alta fidelidad con pistas locales y descargadas.",
+        lib_loading: "Escaneando pool de música local...",
+        lib_empty: 'No se encontraron archivos de audio en la carpeta "music/".',
+        pm_title: "Gestor de Plugins",
+        pm_sub: "Extensiones core activas para capacidades de streaming modular.",
+        pm_status_active: "Activo",
+        pm_status_inactive: "Inactivo",
+        pm_btn_disable: "Desactivar",
+        pm_btn_enable: "Activar",
+        log_title: "Monitor de Flujo Elysium",
+        log_sub: "Diagnóstico en tiempo real del puente frontend y eventos del pipeline.",
+        log_copy: "Copiar registros",
+        log_clear: "Limpiar consola"
     }
 };
 
+/**
+ * Applies translations to all [data-i18n] elements in the DOM.
+ * Called by moduleRegistry.applyTranslations() after every module switch.
+ */
 window.elysiumTranslate = function (lang) {
     localStorage.setItem('elysium_language', lang);
     document.documentElement.lang = lang;
 
+    const dict = translations[lang];
+    if (!dict) return;
+
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (!translations[lang] || !translations[lang][key]) return;
+        if (!dict[key]) return;
         if (el.tagName === 'INPUT' && el.hasAttribute('placeholder')) {
-            el.placeholder = translations[lang][key];
+            el.placeholder = dict[key];
         } else {
-            el.textContent = translations[lang][key];
+            el.textContent = dict[key];
         }
     });
 };

@@ -3,6 +3,7 @@
 
 import { ICON_SETTINGS } from '../config/icons.js';
 import { translations } from '../config/translations.js';
+import { getLanguageOptions } from '../config/languageRegistry.js';
 import { pluginManager } from '../core/pluginManager.js';
 import { moduleRegistry } from '../core/moduleRegistry.js';
 
@@ -21,6 +22,7 @@ export const settingsModule = {
         const lang = localStorage.getItem('elysium_language') || 'de';
         const t = translations[lang] || translations.de;
         const plugins = pluginManager.getPlugins();
+        const langOptions = getLanguageOptions(lang);
 
         div.innerHTML = `
             <h2 class="view-title" data-i18n="settingsTitle">${t.settingsTitle}</h2>
@@ -28,8 +30,7 @@ export const settingsModule = {
             <div style="background:var(--bg-sidebar); border:1px solid var(--border-subtle); padding:20px; border-radius:8px; margin-bottom:30px;">
                 <label style="display:block; color:var(--text-main); font-weight:600; margin-bottom:10px; font-size:0.9rem;" data-i18n="langLabel">${t.langLabel}</label>
                 <select id="language-select" style="background:rgba(0,0,0,0.3); border:1px solid var(--border-subtle); color:var(--text-main); padding:8px 12px; border-radius:6px; font-size:0.9rem; outline:none; cursor:pointer;">
-                    <option value="de" ${lang === 'de' ? 'selected' : ''}>Deutsch</option>
-                    <option value="en" ${lang === 'en' ? 'selected' : ''}>English</option>
+                    ${langOptions.map(o => `<option value="${o.code}" ${o.selected ? 'selected' : ''}>${o.label}</option>`).join('')}
                 </select>
             </div>
             <h3 style="color:var(--text-main); font-size:1.2rem; margin-bottom:8px;" data-i18n="pm_title">${t.pm_title}</h3>
@@ -56,7 +57,6 @@ export const settingsModule = {
         div.querySelectorAll('.plugin-toggle-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const pid = e.target.getAttribute('data-plugin-id');
-                const wasActive = pluginManager.isPluginActive(pid);
                 pluginManager.togglePlugin(pid);
                 const nowActive = pluginManager.isPluginActive(pid);
                 log(nowActive ? 'SUCCESS' : 'WARN', `Plugin "${pid}" ${nowActive ? 'enabled' : 'disabled'}`);

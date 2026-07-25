@@ -20,7 +20,7 @@ pub async fn scan_local_library() -> Result<Vec<TrackPayload>, String> {
         let path = entry.path();
         let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
 
-        if ext != "opus" && ext != "mp3" {
+        if ext != "opus" && ext != "mp3" && ext != "webm" {
             continue;
         }
 

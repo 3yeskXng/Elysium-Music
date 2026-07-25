@@ -48,7 +48,7 @@ class AudioEngine {
             log('INFO', `Received ${bytes.length} bytes (${(bytes.length / 1024).toFixed(1)} KB) for "${track.title}"`);
 
             const ext = track.file_path.split('.').pop()?.toLowerCase() || 'opus';
-            const mimeMap = { opus: 'audio/opus', mp3: 'audio/mpeg' };
+            const mimeMap = { opus: 'audio/opus', mp3: 'audio/mpeg', webm: 'audio/webm' };
             const blob = new Blob([new Uint8Array(bytes)], { type: mimeMap[ext] || 'audio/opus' });
             const streamUrl = URL.createObjectURL(blob);
 
