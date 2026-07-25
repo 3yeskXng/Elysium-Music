@@ -2,13 +2,7 @@
 import { ICON_PLAY, ICON_PAUSE, ICON_BACK, ICON_FORWARD } from '../config/icons.js';
 import { translations } from '../config/translations.js';
 import { audioEngine } from '../core/audioEngine.js';
-
-function resolveArtist(artist) {
-    const lang = localStorage.getItem('elysium_language') || 'de';
-    const t = translations[lang] || translations.de;
-    if (!artist || artist.trim() === '') return t.artist_local || 'Local File';
-    return artist;
-}
+import { resolveArtist } from '../utils/resolveArtist.js';
 
 export class PlayerBarModule {
     constructor() {

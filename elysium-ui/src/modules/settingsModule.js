@@ -6,6 +6,7 @@ import { translations } from '../config/translations.js';
 import { getLanguageOptions } from '../config/languageRegistry.js';
 import { pluginManager } from '../core/pluginManager.js';
 import { moduleRegistry } from '../core/moduleRegistry.js';
+import { APP_FOOTER_TEXT } from '../config/appInfo.js';
 
 function log(level, msg) {
     if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Settings', msg);
@@ -45,6 +46,9 @@ export const settingsModule = {
                         <button class="plugin-toggle-btn" data-plugin-id="${p.id}" style="background:${p.active ? 'rgba(255,0,0,0.15)' : 'var(--accent-premium)'}; border:1px solid ${p.active ? '#ff4a4a' : 'none'}; color:${p.active ? '#ff4a4a' : 'white'}; padding:6px 14px; border-radius:6px; font-size:0.85rem; cursor:pointer; transition:all 0.2s;">${p.active ? t.pm_btn_disable : t.pm_btn_enable}</button>
                     </div>
                 `).join('')}
+            </div>
+            <div style="margin-top:40px; padding-top:16px; border-top:1px solid var(--border-subtle); text-align:center; font-size:0.8rem; color:var(--text-muted); user-select:none;">
+                ${APP_FOOTER_TEXT}
             </div>
         `;
 
