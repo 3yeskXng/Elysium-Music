@@ -50,15 +50,15 @@ pub async fn scan_local_library() -> Result<Vec<TrackPayload>, String> {
         tracks.push(TrackPayload {
             id: uuid::Uuid::new_v4().to_string(),
             title: file_name,
-            artist: "Local File".to_string(),
+            artist: String::new(), // Empty — frontend resolves via i18n
             duration: duration_str,
             duration_secs: secs_u32,
             duration_secs_snake: secs_u32,
             file_path: path_str.clone(),
             filePath: path_str,
-            album: "Elysium Archive".to_string(),
-            cover_url_camel: "".to_string(),
-            cover_url_snake: "".to_string(),
+            album: String::new(),
+            cover_url_camel: String::new(),
+            cover_url_snake: String::new(),
         });
     }
 

@@ -3,6 +3,8 @@
 
 import { invokeBackend } from '../api.js';
 import { pluginManager } from '../core/pluginManager.js';
+import { translations } from '../config/translations.js';
+import { showLoader, hideLoader } from '../core/loader.js';
 
 const ICON_DOWNLOAD = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`;
 
@@ -62,6 +64,8 @@ export const downloadModule = {
         const file = e.target.files[0];
         if (!file) return;
         const lang = getLang();
+        const t = translations[lang] || translations.de;
+        showLoader(status.parentElement, t.import_btn || 'Importing...');
         setStatus(status, 'rgba(138,92,246,0.1)', 'var(--accent-premium)',
             lang === 'de' ? `Kopiere "${file.name}"...` : `Copying "${file.name}"...`);
 
@@ -78,6 +82,8 @@ export const downloadModule = {
         } catch (err) {
             setStatus(status, 'rgba(239,68,68,0.1)', '#ef4444', `Error: ${err.message || err}`);
             log('ERROR', `File import failed: "${file.name}" — ${err.message || err}`);
+        } finally {
+            hideLoader(status.parentElement);
         }
         e.target.value = '';
     },
@@ -88,12 +94,14 @@ export const downloadModule = {
         const lang = getLang();
 
         if (!pluginManager.isPluginActive('youtube_core')) {
-            setStatus(status, 'rgba(239,68,68,0.1)', '#ef4444',
-                lang === 'de' ? 'YouTube-Plugin ist in den Einstellungen deaktiviert!' : 'YouTube plugin is disabled in settings!');
-            log('WARN', `Download blocked: plugin "youtube_core" is disabled (query: "${query}")`);
+            const lang = localStorage.getItem('elysium_language') || 'de';
+            const t = translations[lang] || translations.de;
+            setStatus(status, 'rgba(255,255,255,0.05)', 'var(--text-muted)', t.dl_plugin_off || 'YouTube plugin is disabled.');
+            log('INFO', `Download skipped: plugin "youtube_core" is disabled`);
             return;
         }
 
+        showLoader(status.parentElement, lang === 'de' ? 'Lädt herunter...' : 'Downloading...');
         setStatus(status, 'rgba(138,92,246,0.1)', 'var(--accent-premium)',
             lang === 'de' ? `Backend konvertiert und lädt herunter: "${query}"...` : `Backend downloading & converting: "${query}"...`);
         log('INFO', `Download initiated: "${query}" — Handing off to yt-dlp backend pipeline`);
@@ -109,6 +117,8 @@ export const downloadModule = {
             setStatus(status, 'rgba(239,68,68,0.1)', '#ef4444',
                 lang === 'de' ? `Fehler beim Herunterladen: ${err.message || err}` : `Download pipeline failure: ${err.message || err}`);
             log('ERROR', `Download failed for "${query}": ${err.message || err}`);
+        } finally {
+            hideLoader(status.parentElement);
         }
     }
 };

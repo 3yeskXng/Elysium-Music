@@ -36,7 +36,11 @@ export const translations = {
         log_title: "Elysium Engine Stream Monitor",
         log_sub: "Echtzeit-Diagnose der Frontend-Brücke und Pipeline-Events.",
         log_copy: "Logs kopieren",
-        log_clear: "Konsole leeren"
+        log_clear: "Konsole leeren",
+        artist_local: "Lokale Datei",
+        artist_stream: "YouTube Stream",
+        artist_unknown: "Unbekannter Künstler",
+        dl_plugin_off: "YouTube-Plugin ist deaktiviert. Aktiviere es in den Einstellungen, um Songs herunterzuladen."
     },
     en: {
         appTitle: "Elysium",
@@ -69,7 +73,11 @@ export const translations = {
         log_title: "Elysium Engine Stream Monitor",
         log_sub: "Real-time diagnostics for frontend bridge and pipeline events.",
         log_copy: "Copy Logs",
-        log_clear: "Clear Console"
+        log_clear: "Clear Console",
+        artist_local: "Local File",
+        artist_stream: "YouTube Stream",
+        artist_unknown: "Unknown Artist",
+        dl_plugin_off: "YouTube plugin is disabled. Enable it in Settings to download songs."
     },
     es: {
         appTitle: "Elysium",
@@ -102,7 +110,11 @@ export const translations = {
         log_title: "Monitor de Flujo Elysium",
         log_sub: "Diagnóstico en tiempo real del puente frontend y eventos del pipeline.",
         log_copy: "Copiar registros",
-        log_clear: "Limpiar consola"
+        log_clear: "Limpiar consola",
+        artist_local: "Archivo local",
+        artist_stream: "YouTube Stream",
+        artist_unknown: "Artista desconocido",
+        dl_plugin_off: "El plugin de YouTube está desactivado. Actívalo en Configuración para descargar canciones."
     }
 };
 

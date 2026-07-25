@@ -3,11 +3,20 @@
 
 import { invokeBackend } from '../api.js';
 import { audioEngine } from '../core/audioEngine.js';
+import { translations } from '../config/translations.js';
+import { showLoader, hideLoader } from '../core/loader.js';
 
 const ICON_HEADPHONES = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>`;
 
 function log(level, msg) {
     if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Listen', msg);
+}
+
+function resolveArtist(artist) {
+    const lang = localStorage.getItem('elysium_language') || 'de';
+    const t = translations[lang] || translations.de;
+    if (!artist || artist.trim() === '') return t.artist_local || 'Local File';
+    return artist;
 }
 
 export const listenModule = {
@@ -41,9 +50,12 @@ export const listenModule = {
         const box = vp.querySelector('#library-tracks-container');
         if (!box) return;
 
+        const lang = localStorage.getItem('elysium_language') || 'de';
+        const t = translations[lang] || translations.de;
+        showLoader(box, t.lib_loading || 'Loading...');
+
         try {
             this.tracks = await invokeBackend('scan_local_library');
-            const lang = localStorage.getItem('elysium_language') || 'de';
 
             if (this.tracks.length === 0) {
                 box.innerHTML = `<div style="color:var(--text-muted); padding:20px; border:1px dashed var(--border-subtle); border-radius:8px; text-align:center; user-select:text;" data-i18n="lib_empty">
@@ -53,6 +65,7 @@ export const listenModule = {
                 return;
             }
 
+            hideLoader(box);
             box.innerHTML = '';
             this.tracks.forEach((t, i) => this.appendTrackRow(box, t, i));
 
@@ -61,6 +74,7 @@ export const listenModule = {
             }
             log('SUCCESS', `Library loaded: ${this.tracks.length} track(s) — [${this.tracks.map(t => t.title).join(', ')}]`);
         } catch (err) {
+            hideLoader(box);
             box.innerHTML = `<span style="color:#ef4444; user-select:text;">Fehler: ${err.message || err}</span>`;
             log('ERROR', `Library scan failed: ${err.message || err}`);
         }
@@ -71,7 +85,7 @@ export const listenModule = {
         row.className = 'track-row-item';
         row.dataset.trackIndex = index;
         row.style.cssText = `display:flex; justify-content:space-between; align-items:center; padding:14px 18px; background:var(--bg-sidebar); border:1px solid var(--border-subtle); border-left:3px solid transparent; border-radius:6px; cursor:pointer; transition:all 0.2s ease;`;
-        row.innerHTML = `<div><div style="font-weight:600; font-size:0.95rem; color:var(--text-main);">${track.title}</div><div style="font-size:0.8rem; color:var(--text-muted);">${track.artist || 'Unknown Artist'}</div></div><div style="font-size:0.9rem; color:var(--text-muted); font-family:monospace;">${track.duration || '--:--'}</div>`;
+        row.innerHTML = `<div><div style="font-weight:600; font-size:0.95rem; color:var(--text-main);">${track.title}</div><div style="font-size:0.8rem; color:var(--text-muted);">${resolveArtist(track.artist)}</div></div><div style="font-size:0.9rem; color:var(--text-muted); font-family:monospace;">${track.duration || '--:--'}</div>`;
         row.addEventListener('click', () => this.playTrackAt(index));
         box.appendChild(row);
     },

@@ -3,6 +3,13 @@ import { ICON_PLAY, ICON_PAUSE, ICON_BACK, ICON_FORWARD } from '../config/icons.
 import { translations } from '../config/translations.js';
 import { audioEngine } from '../core/audioEngine.js';
 
+function resolveArtist(artist) {
+    const lang = localStorage.getItem('elysium_language') || 'de';
+    const t = translations[lang] || translations.de;
+    if (!artist || artist.trim() === '') return t.artist_local || 'Local File';
+    return artist;
+}
+
 export class PlayerBarModule {
     constructor() {
         this.currentTrack = null; 
@@ -91,7 +98,7 @@ export class PlayerBarModule {
             
             // ÄNDERUNG: Wechsle IDLE direkt gegen den Künstlernamen aus!
             statusText.removeAttribute('data-i18n');
-            statusText.textContent = track.artist || "Unknown Artist";
+            statusText.textContent = resolveArtist(track.artist);
             
             playBtn.innerHTML = status === 'playing' ? ICON_PAUSE : ICON_PLAY;
         });
@@ -109,8 +116,8 @@ export class PlayerBarModule {
             }
 
             // Sicherheits-Fallback, falls der Name beim State-Wechsel flackert
-            if (this.currentTrack && this.currentTrack.artist) {
-                statusText.textContent = this.currentTrack.artist;
+            if (this.currentTrack) {
+                statusText.textContent = resolveArtist(this.currentTrack.artist);
             }
 
             const curMin = Math.floor(prog.current / 60).toString().padStart(2, '0');
