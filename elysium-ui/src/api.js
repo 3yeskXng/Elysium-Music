@@ -25,7 +25,7 @@ export async function invokeBackend(commandName, payload = {}) {
  * Automated fallback generator ensuring UI continuity during standard browser testing cycles
  */
 function fallbackMockData(commandName, payload) {
-    if (commandName === 'get_local_library') {
+    if (commandName === 'scan_local_library') {
         return [
             { id: "mock-1", title: "Elysium Premium Audio (Demo Check)", artist: "Local Opus Asset", duration: "04:20", file_path: "" }
         ];

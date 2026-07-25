@@ -38,7 +38,7 @@ export const listenModule = {
 
         try {
             // Fetch clean array payload from backend system
-            this.tracks = await invokeBackend('get_local_library');
+            this.tracks = await invokeBackend('scan_local_library');
             const currentLang = localStorage.getItem('elysium_language') || 'de';
 
             if (this.tracks.length === 0) {
