@@ -30,21 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. Navigation rendern
     moduleRegistry.renderSidebarNavigation();
 
-    // 3. i18n Tags auf Sidebar anwenden
-    const navSlots = document.getElementById('sidebar-navigation-slots');
-    if (navSlots) {
-        const tabs = navSlots.querySelectorAll('button, a, div.nav-item');
-        if (tabs.length >= 3) {
-            tabs[0].setAttribute('data-i18n', 'nav_download');
-            tabs[1].setAttribute('data-i18n', 'nav_listen');
-            tabs[2].setAttribute('data-i18n', 'nav_settings');
-        }
-    }
-
-    // 4. Globalen Player-Core wecken
+    // 3. Globalen Player-Core wecken
     new PlayerBarModule();
 
-    // 5. Standard-Ansicht starten
+    // 4. Standard-Ansicht starten
     moduleRegistry.setActive('download');
     window.elysiumTranslate(savedLanguage);
 });

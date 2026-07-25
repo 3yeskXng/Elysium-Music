@@ -49,6 +49,9 @@ class AudioEngine {
             if (this.onTrackChangeCallback) this.onTrackChangeCallback(track, 'playing');
         } catch (fault) {
             console.error('[Audio Engine Fault]', fault);
+            if (window.triggerElysiumLog) {
+                window.triggerElysiumLog('ERROR', 'AudioEngine', `Playback failed: ${fault.message || fault}`);
+            }
             if (this.onTrackChangeCallback) this.onTrackChangeCallback(track, 'error');
         }
     }

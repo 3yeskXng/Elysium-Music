@@ -4,15 +4,17 @@ pub mod commands;
 
 use commands::scanner::scan_local_library;
 use commands::download::download_youtube;
+use commands::file_ops::{get_track_bytes, save_track};
 
-// Use Tauri v2 mobile entry point conditional compilation flags if needed down the line
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_shell::init()) // Required core plugin for Tauri v2 CLI commands
+        .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
             scan_local_library,
-            download_youtube
+            download_youtube,
+            get_track_bytes,
+            save_track
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

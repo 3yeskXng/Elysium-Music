@@ -26,10 +26,10 @@ export const downloadModule = {
                 <h3 style="font-size: 1rem; margin-bottom: 8px; color: var(--text-main); font-weight: 600;" data-i18n="import_title">Manueller Datei-Import</h3>
                 <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;" data-i18n="import_sub">Füge vorhandene .opus Dateien von deinem PC direkt über das Interface zur App-Bibliothek hinzu.</p>
                 <button id="import-trigger" data-i18n="import_btn" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); color: var(--text-main); font-weight: 600; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">Datei auswählen & importieren</button>
-                <input type="file" id="hidden-file-input" accept=".opus" style="display: none;">
+                <input type="file" id="hidden-file-input" accept=".opus,.mp3" style="display: none;">
             </div>
 
-            <div id="download-status-box" style="display: none; padding: 16px; border-radius: 6px; font-size: 0.9rem; line-height: 1.4;"></div>
+            <div id="download-status-box" style="display: none; padding: 16px; border-radius: 6px; font-size: 0.9rem; line-height: 1.4; user-select: text;"></div>
         `;
 
         this.wireEvents(viewport);
@@ -67,10 +67,21 @@ export const downloadModule = {
                 statusBox.style.background = 'rgba(34, 197, 94, 0.1)';
                 statusBox.style.color = '#22c55e';
                 statusBox.textContent = currentLang === 'de' ? `Erfolgreich kopiert!` : `Successfully imported!`;
+
+                if (window.triggerElysiumLog) {
+                    window.triggerElysiumLog('SUCCESS', 'Download', `File imported: ${file.name}`);
+                }
+
+                window.dispatchEvent(new CustomEvent('elysium-library-refresh'));
             } catch (err) {
                 statusBox.style.background = 'rgba(239, 68, 68, 0.1)';
                 statusBox.style.color = '#ef4444';
                 statusBox.textContent = `Error: ${err.message || err}`;
+                statusBox.style.userSelect = 'text';
+
+                if (window.triggerElysiumLog) {
+                    window.triggerElysiumLog('ERROR', 'Download', `File import failed: ${err.message || err}`);
+                }
             }
         });
 
@@ -89,6 +100,11 @@ export const downloadModule = {
                 statusBox.textContent = currentLang === 'de'
                     ? "YouTube-Plugin ist in den Einstellungen deaktiviert!"
                     : "YouTube plugin is disabled in settings!";
+                statusBox.style.userSelect = 'text';
+
+                if (window.triggerElysiumLog) {
+                    window.triggerElysiumLog('ERROR', 'Download', 'YouTube plugin is disabled in settings');
+                }
                 return;
             }
 
@@ -110,12 +126,23 @@ export const downloadModule = {
                     : `Success! "${query}" downloaded to music library.`;
                 
                 input.value = '';
+
+                if (window.triggerElysiumLog) {
+                    window.triggerElysiumLog('SUCCESS', 'Download', `Downloaded: "${query}"`);
+                }
+
+                window.dispatchEvent(new CustomEvent('elysium-library-refresh'));
             } catch (err) {
                 statusBox.style.background = 'rgba(239, 68, 68, 0.1)';
                 statusBox.style.color = '#ef4444';
                 statusBox.textContent = currentLang === 'de'
                     ? `Fehler beim Herunterladen: ${err.message || err}`
                     : `Download pipeline failure: ${err.message || err}`;
+                statusBox.style.userSelect = 'text';
+
+                if (window.triggerElysiumLog) {
+                    window.triggerElysiumLog('ERROR', 'Download', `Download failed for "${query}": ${err.message || err}`);
+                }
             }
         });
     }

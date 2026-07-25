@@ -17,6 +17,9 @@ export async function invokeBackend(commandName, payload = {}) {
         }
     } catch (faultBoundary) {
         console.error(`[IPC Engine Fault] Self-healed unhandled exception in core command "${commandName}":`, faultBoundary);
+        if (window.triggerElysiumLog) {
+            window.triggerElysiumLog('ERROR', 'IPC', `Command "${commandName}" failed: ${faultBoundary.message || faultBoundary}`);
+        }
         throw faultBoundary;
     }
 }

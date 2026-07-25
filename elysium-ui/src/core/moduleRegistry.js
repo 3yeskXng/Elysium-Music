@@ -51,11 +51,23 @@ class ModuleRegistry {
         const navContainer = document.getElementById('sidebar-navigation-slots');
         if (!navContainer) return;
 
+        const i18nMap = {
+            download: 'nav_download',
+            listen: 'nav_listen',
+            settings: 'nav_settings',
+            debug: 'nav_debug'
+        };
+
         navContainer.innerHTML = '';
 
         this.modules.forEach((mod) => {
             const btn = document.createElement('button');
             btn.className = `nav-btn ${this.activeModuleId === mod.id ? 'active' : ''}`;
+            
+            const i18nKey = i18nMap[mod.id];
+            if (i18nKey) {
+                btn.setAttribute('data-i18n', i18nKey);
+            }
             
             btn.innerHTML = `
                 <span class="nav-icon">${mod.icon}</span>
