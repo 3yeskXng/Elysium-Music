@@ -1,8 +1,23 @@
 // elysium-ui/src/modules/downloadModule.js
+// YouTube download pipeline and local file import controller
+
 import { invokeBackend } from '../api.js';
 import { pluginManager } from '../core/pluginManager.js';
 
 const ICON_DOWNLOAD = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`;
+
+const getLang = () => localStorage.getItem('elysium_language') || 'de';
+
+function log(level, msg) {
+    if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Download', msg);
+}
+
+function setStatus(box, bg, color, text) {
+    box.style.display = 'block';
+    box.style.background = bg;
+    box.style.color = color;
+    box.textContent = text;
+}
 
 export const downloadModule = {
     id: 'download',
@@ -10,140 +25,90 @@ export const downloadModule = {
     icon: ICON_DOWNLOAD,
 
     render() {
-        const viewport = document.createElement('div');
-        viewport.className = 'view-container animate-fade-in';
-
-        viewport.innerHTML = `
+        const vp = document.createElement('div');
+        vp.className = 'view-container animate-fade-in';
+        vp.innerHTML = `
             <h2 class="view-title" data-i18n="dl_title">Mittelpunkt-Audio-Downloader</h2>
-            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px;" data-i18n="dl_sub">Geben Sie einen Songtitel ein, um ihn direkt via Netzwerkintegration herunterzuladen.</p>
-            
-            <div style="display: flex; gap: 12px; margin-bottom: 32px;">
-                <input type="text" id="download-input" data-i18n="dl_placeholder" placeholder="Z.B. Linkin Park - Numb" style="flex: 1; padding: 12px 16px; background: var(--bg-sidebar); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-main); font-size: 0.95rem; outline: none;">
-                <button id="download-trigger" data-i18n="dl_btn" style="background: var(--accent-premium); border: none; color: white; font-weight: 600; padding: 0 24px; border-radius: 6px; cursor: pointer; font-size: 0.95rem;">Download</button>
+            <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:24px;" data-i18n="dl_sub">Geben Sie einen Songtitel ein, um ihn direkt via Netzwerkintegration herunterzuladen.</p>
+            <div style="display:flex; gap:12px; margin-bottom:32px;">
+                <input type="text" id="download-input" data-i18n="dl_placeholder" placeholder="Z.B. Linkin Park - Numb" style="flex:1; padding:12px 16px; background:var(--bg-sidebar); border:1px solid var(--border-subtle); border-radius:6px; color:var(--text-main); font-size:0.95rem; outline:none;">
+                <button id="download-trigger" data-i18n="dl_btn" style="background:var(--accent-premium); border:none; color:white; font-weight:600; padding:0 24px; border-radius:6px; cursor:pointer; font-size:0.95rem;">Download</button>
             </div>
-
-            <div style="padding: 24px; border: 1px solid var(--border-subtle); background: var(--bg-sidebar); border-radius: 8px; margin-bottom: 24px;">
-                <h3 style="font-size: 1rem; margin-bottom: 8px; color: var(--text-main); font-weight: 600;" data-i18n="import_title">Manueller Datei-Import</h3>
-                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;" data-i18n="import_sub">Füge vorhandene .opus Dateien von deinem PC direkt über das Interface zur App-Bibliothek hinzu.</p>
-                <button id="import-trigger" data-i18n="import_btn" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); color: var(--text-main); font-weight: 600; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">Datei auswählen & importieren</button>
-                <input type="file" id="hidden-file-input" accept=".opus,.mp3" style="display: none;">
+            <div style="padding:24px; border:1px solid var(--border-subtle); background:var(--bg-sidebar); border-radius:8px; margin-bottom:24px;">
+                <h3 style="font-size:1rem; margin-bottom:8px; color:var(--text-main); font-weight:600;" data-i18n="import_title">Manueller Datei-Import</h3>
+                <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:16px;" data-i18n="import_sub">Füge vorhandene .opus oder .mp3 Dateien von deinem PC direkt über das Interface zur App-Bibliothek hinzu.</p>
+                <button id="import-trigger" data-i18n="import_btn" style="background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); color:var(--text-main); font-weight:600; padding:10px 18px; border-radius:6px; cursor:pointer; font-size:0.85rem; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">Datei auswählen & importieren</button>
+                <input type="file" id="hidden-file-input" accept=".opus,.mp3" style="display:none;">
             </div>
-
-            <div id="download-status-box" style="display: none; padding: 16px; border-radius: 6px; font-size: 0.9rem; line-height: 1.4; user-select: text;"></div>
+            <div id="download-status-box" style="display:none; padding:16px; border-radius:6px; font-size:0.9rem; line-height:1.4; user-select:text;"></div>
         `;
-
-        this.wireEvents(viewport);
-        return viewport;
+        this.wireEvents(vp);
+        return vp;
     },
 
-    wireEvents(viewport) {
-        const input = viewport.querySelector('#download-input');
-        const btn = viewport.querySelector('#download-trigger');
-        const statusBox = viewport.querySelector('#download-status-box');
-        const importBtn = viewport.querySelector('#import-trigger');
-        const fileInput = viewport.querySelector('#hidden-file-input');
+    wireEvents(vp) {
+        const input = vp.querySelector('#download-input');
+        const dlBtn = vp.querySelector('#download-trigger');
+        const status = vp.querySelector('#download-status-box');
+        const importBtn = vp.querySelector('#import-trigger');
+        const fileInput = vp.querySelector('#hidden-file-input');
 
-        const getLang = () => localStorage.getItem('elysium_language') || 'de';
-
-        // Local Import File Handling
         importBtn.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+        fileInput.addEventListener('change', (e) => this.handleFileImport(e, status));
+        dlBtn.addEventListener('click', () => this.handleDownload(input, status));
+    },
 
-            const currentLang = getLang();
-            statusBox.style.display = 'block';
-            statusBox.style.background = 'rgba(138, 92, 246, 0.1)';
-            statusBox.style.color = 'var(--accent-premium)';
-            statusBox.textContent = currentLang === 'de' ? `Kopiere "${file.name}"...` : `Copying "${file.name}"...`;
+    async handleFileImport(e, status) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const lang = getLang();
+        setStatus(status, 'rgba(138,92,246,0.1)', 'var(--accent-premium)',
+            lang === 'de' ? `Kopiere "${file.name}"...` : `Copying "${file.name}"...`);
 
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const bytes = Array.from(new Uint8Array(arrayBuffer));
-                const cleanName = file.name.replace('.opus', '');
-                
-                await invokeBackend('save_track', { title: cleanName, bytes });
-                
-                statusBox.style.background = 'rgba(34, 197, 94, 0.1)';
-                statusBox.style.color = '#22c55e';
-                statusBox.textContent = currentLang === 'de' ? `Erfolgreich kopiert!` : `Successfully imported!`;
+        try {
+            const buf = await file.arrayBuffer();
+            const bytes = Array.from(new Uint8Array(buf));
+            const name = file.name.replace(/\.(opus|mp3)$/i, '');
+            await invokeBackend('save_track', { title: name, bytes });
 
-                if (window.triggerElysiumLog) {
-                    window.triggerElysiumLog('SUCCESS', 'Download', `File imported: ${file.name}`);
-                }
+            setStatus(status, 'rgba(34,197,94,0.1)', '#22c55e',
+                lang === 'de' ? `Erfolgreich kopiert!` : `Successfully imported!`);
+            log('SUCCESS', `File imported: "${file.name}" (${(file.size / 1024).toFixed(1)} KB) → music/${name}.opus`);
+            window.dispatchEvent(new CustomEvent('elysium-library-refresh'));
+        } catch (err) {
+            setStatus(status, 'rgba(239,68,68,0.1)', '#ef4444', `Error: ${err.message || err}`);
+            log('ERROR', `File import failed: "${file.name}" — ${err.message || err}`);
+        }
+        e.target.value = '';
+    },
 
-                window.dispatchEvent(new CustomEvent('elysium-library-refresh'));
-            } catch (err) {
-                statusBox.style.background = 'rgba(239, 68, 68, 0.1)';
-                statusBox.style.color = '#ef4444';
-                statusBox.textContent = `Error: ${err.message || err}`;
-                statusBox.style.userSelect = 'text';
+    async handleDownload(input, status) {
+        const query = input.value.trim();
+        if (!query) return;
+        const lang = getLang();
 
-                if (window.triggerElysiumLog) {
-                    window.triggerElysiumLog('ERROR', 'Download', `File import failed: ${err.message || err}`);
-                }
-            }
-        });
+        if (!pluginManager.isPluginActive('youtube_core')) {
+            setStatus(status, 'rgba(239,68,68,0.1)', '#ef4444',
+                lang === 'de' ? 'YouTube-Plugin ist in den Einstellungen deaktiviert!' : 'YouTube plugin is disabled in settings!');
+            log('WARN', `Download blocked: plugin "youtube_core" is disabled (query: "${query}")`);
+            return;
+        }
 
-        // Real YouTube Backend Pipeline Interaction
-        btn.addEventListener('click', async () => {
-            const query = input.value.trim();
-            if (!query) return;
+        setStatus(status, 'rgba(138,92,246,0.1)', 'var(--accent-premium)',
+            lang === 'de' ? `Backend konvertiert und lädt herunter: "${query}"...` : `Backend downloading & converting: "${query}"...`);
+        log('INFO', `Download initiated: "${query}" — Handing off to yt-dlp backend pipeline`);
 
-            const currentLang = getLang();
-            statusBox.style.display = 'block';
-
-            // Guard Check: Block execution immediately if the core YouTube bridge plugin is disabled
-            if (!pluginManager.isPluginActive('youtube_core')) {
-                statusBox.style.background = 'rgba(239, 68, 68, 0.1)';
-                statusBox.style.color = '#ef4444';
-                statusBox.textContent = currentLang === 'de'
-                    ? "YouTube-Plugin ist in den Einstellungen deaktiviert!"
-                    : "YouTube plugin is disabled in settings!";
-                statusBox.style.userSelect = 'text';
-
-                if (window.triggerElysiumLog) {
-                    window.triggerElysiumLog('ERROR', 'Download', 'YouTube plugin is disabled in settings');
-                }
-                return;
-            }
-
-            statusBox.style.background = 'rgba(138, 92, 246, 0.1)';
-            statusBox.style.color = 'var(--accent-premium)';
-            
-            statusBox.textContent = currentLang === 'de'
-                ? `Backend konvertiert und lädt herunter: "${query}"...`
-                : `Backend downloading & converting: "${query}"...`;
-
-            try {
-                // Handover execution completely to the core backend to prevent browser CORS blockades
-                await invokeBackend('download_youtube', { query: query });
-
-                statusBox.style.background = 'rgba(34, 197, 94, 0.1)';
-                statusBox.style.color = '#22c55e';
-                statusBox.textContent = currentLang === 'de'
-                    ? `Erfolgreich! "${query}" wurde im Musikpool hinterlegt.`
-                    : `Success! "${query}" downloaded to music library.`;
-                
-                input.value = '';
-
-                if (window.triggerElysiumLog) {
-                    window.triggerElysiumLog('SUCCESS', 'Download', `Downloaded: "${query}"`);
-                }
-
-                window.dispatchEvent(new CustomEvent('elysium-library-refresh'));
-            } catch (err) {
-                statusBox.style.background = 'rgba(239, 68, 68, 0.1)';
-                statusBox.style.color = '#ef4444';
-                statusBox.textContent = currentLang === 'de'
-                    ? `Fehler beim Herunterladen: ${err.message || err}`
-                    : `Download pipeline failure: ${err.message || err}`;
-                statusBox.style.userSelect = 'text';
-
-                if (window.triggerElysiumLog) {
-                    window.triggerElysiumLog('ERROR', 'Download', `Download failed for "${query}": ${err.message || err}`);
-                }
-            }
-        });
+        try {
+            const result = await invokeBackend('download_youtube', { query });
+            setStatus(status, 'rgba(34,197,94,0.1)', '#22c55e',
+                lang === 'de' ? `Erfolgreich! "${result.title || query}" wurde im Musikpool hinterlegt.` : `Success! "${result.title || query}" downloaded to music library.`);
+            log('SUCCESS', `Download complete: "${result.title || query}" by ${result.artist || 'Unknown'} — Duration: ${result.duration || 'N/A'} — Path: ${result.file_path || 'N/A'}`);
+            input.value = '';
+            window.dispatchEvent(new CustomEvent('elysium-library-refresh'));
+        } catch (err) {
+            setStatus(status, 'rgba(239,68,68,0.1)', '#ef4444',
+                lang === 'de' ? `Fehler beim Herunterladen: ${err.message || err}` : `Download pipeline failure: ${err.message || err}`);
+            log('ERROR', `Download failed for "${query}": ${err.message || err}`);
+        }
     }
 };

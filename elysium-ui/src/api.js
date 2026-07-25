@@ -1,37 +1,31 @@
 // elysium-ui/src/api.js
-// High-End Autonomous Tauri IPC Bridge Framework
+// Tauri IPC bridge with fallback mock data for browser development
 
-/**
- * Executes a secure, isolated asynchronous invocation call to the Tauri Rust core.
- * Features built-in global safety boundaries to prevent UI execution crashes.
- */
+function log(level, msg) {
+    if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'IPC', msg);
+}
+
 export async function invokeBackend(commandName, payload = {}) {
     try {
-        // Guard checking if running inside a valid Tauri webview environment context
         if (window.__TAURI_INTERNALS__) {
             const { invoke } = window.__TAURI_INTERNALS__;
-            return await invoke(commandName, payload);
+            log('INFO', `→ invoke("${commandName}") payload_keys=[${Object.keys(payload).join(', ')}]`);
+            const result = await invoke(commandName, payload);
+            log('INFO', `← invoke("${commandName}") resolved OK`);
+            return result;
         } else {
-            console.warn(`[Tauri IPC Simulation] Command "${commandName}" executed outside native webview frame.`);
+            console.warn(`[IPC] Command "${commandName}" — running in browser fallback mode (no Tauri)`);
             return fallbackMockData(commandName, payload);
         }
-    } catch (faultBoundary) {
-        console.error(`[IPC Engine Fault] Self-healed unhandled exception in core command "${commandName}":`, faultBoundary);
-        if (window.triggerElysiumLog) {
-            window.triggerElysiumLog('ERROR', 'IPC', `Command "${commandName}" failed: ${faultBoundary.message || faultBoundary}`);
-        }
-        throw faultBoundary;
+    } catch (err) {
+        log('ERROR', `invoke("${commandName}") failed: ${err.message || err}`);
+        throw err;
     }
 }
 
-/**
- * Automated fallback generator ensuring UI continuity during standard browser testing cycles
- */
 function fallbackMockData(commandName, payload) {
     if (commandName === 'scan_local_library') {
-        return [
-            { id: "mock-1", title: "Elysium Premium Audio (Demo Check)", artist: "Local Opus Asset", duration: "04:20", file_path: "" }
-        ];
+        return [{ id: "mock-1", title: "Elysium Premium Audio (Demo)", artist: "Local Opus Asset", duration: "04:20", file_path: "" }];
     }
     if (commandName === 'process_download_request') {
         return { id: "mock-dl", title: payload.query, artist: "Stream Cache Match", duration: "03:12", file_path: "" };

@@ -1,5 +1,5 @@
 // elysium-ui/src/core/moduleRegistry.js
-// High-End Architecture: Static Core Module Registry
+// Central module registry and sidebar navigation controller
 
 class ModuleRegistry {
     constructor() {
@@ -8,75 +8,55 @@ class ModuleRegistry {
         this.onViewChangeCallback = null;
     }
 
-    /**
-     * Statically registers a compiled core module into the system matrix
-     * @param {Object} coreModule Guarded structural module interface
-     */
     registerCoreModule(coreModule) {
         if (!coreModule.id || !coreModule.label || !coreModule.icon || typeof coreModule.render !== 'function') {
-            console.error(`[Module System Fault] Rejected invalid structural core component.`);
+            console.error('[Module System] Rejected invalid module:', coreModule);
             return;
         }
         this.modules.set(coreModule.id, coreModule);
     }
 
-    /**
-     * Binds the core layout viewports to module switching sequences
-     */
     onModuleSwitch(callback) {
         this.onViewChangeCallback = callback;
     }
 
-    /**
-     * Switches safely between core views
-     * @param {string} id Unique target module identity
-     */
     setActive(id) {
         if (!this.modules.has(id)) {
-            console.warn(`[Module Engine] Target scope "${id}" does not exist in build matrix.`);
+            console.warn(`[Module Engine] Unknown module "${id}".`);
             return;
         }
         this.activeModuleId = id;
-        
+        this.renderSidebarNavigation();
         if (this.onViewChangeCallback) {
             this.onViewChangeCallback(this.modules.get(id));
         }
-        this.renderSidebarNavigation();
+        this.applyTranslations();
     }
 
-    /**
-     * Computes and renders the sidebar structural slots
-     */
     renderSidebarNavigation() {
-        const navContainer = document.getElementById('sidebar-navigation-slots');
-        if (!navContainer) return;
+        const nav = document.getElementById('sidebar-navigation-slots');
+        if (!nav) return;
 
-        const i18nMap = {
-            download: 'nav_download',
-            listen: 'nav_listen',
-            settings: 'nav_settings',
-            debug: 'nav_debug'
-        };
+        const i18nMap = { download: 'nav_download', listen: 'nav_listen', settings: 'nav_settings', debug: 'nav_debug' };
 
-        navContainer.innerHTML = '';
-
+        nav.innerHTML = '';
         this.modules.forEach((mod) => {
             const btn = document.createElement('button');
             btn.className = `nav-btn ${this.activeModuleId === mod.id ? 'active' : ''}`;
-            
-            const i18nKey = i18nMap[mod.id];
-            if (i18nKey) {
-                btn.setAttribute('data-i18n', i18nKey);
-            }
-            
+
             btn.innerHTML = `
                 <span class="nav-icon">${mod.icon}</span>
-                <span class="nav-label">${mod.label}</span>
+                <span class="nav-label" data-i18n="${i18nMap[mod.id] || ''}">${mod.label}</span>
             `;
 
             btn.addEventListener('click', () => this.setActive(mod.id));
-            navContainer.appendChild(btn);
+            nav.appendChild(btn);
         });
+    }
+
+    applyTranslations() {
+        const lang = localStorage.getItem('elysium_language') || 'de';
+        if (window.elysiumTranslate) window.elysiumTranslate(lang);
     }
 }
 
