@@ -1,6 +1,8 @@
 // elysium-ui/src/core/moduleRegistry.js
 // Central module registry and sidebar navigation controller
 
+import { t } from '../utils/translate.js';
+
 class ModuleRegistry {
     constructor() {
         this.modules = new Map();
@@ -37,16 +39,15 @@ class ModuleRegistry {
         const nav = document.getElementById('sidebar-navigation-slots');
         if (!nav) return;
 
-        const i18nMap = { download: 'nav_download', listen: 'nav_listen', settings: 'nav_settings', debug: 'nav_debug', dependencies: 'nav_dependencies' };
-
         nav.innerHTML = '';
         this.modules.forEach((mod) => {
             const btn = document.createElement('button');
             btn.className = `nav-btn ${this.activeModuleId === mod.id ? 'active' : ''}`;
+            const label = t(mod.label);
 
             btn.innerHTML = `
                 <span class="nav-icon">${mod.icon}</span>
-                <span class="nav-label" data-i18n="${i18nMap[mod.id] || ''}">${mod.label}</span>
+                <span class="nav-label">${label}</span>
             `;
 
             btn.addEventListener('click', () => this.setActive(mod.id));

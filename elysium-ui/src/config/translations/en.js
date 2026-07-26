@@ -66,5 +66,8 @@ export default {
     update_download: "Download update",
     deps_restart_required: "Restart required — changes will take effect after restart.",
     deps_auto_restart: "Auto-restart in",
-    deps_seconds: "seconds"
+    deps_seconds: "seconds",
+    log_copied: "Copied! ✓",
+    log_system_online: "[System] Logger Engine online. Awaiting system triggers...",
+    log_terminal_cleared: "[System] Terminal cleared."
 };

@@ -66,5 +66,8 @@ export default {
     update_download: "Télécharger la mise à jour",
     deps_restart_required: "Redémarrage requis — les modifications prendront effet après le redémarrage.",
     deps_auto_restart: "Redémarrage automatique dans",
-    deps_seconds: "secondes"
+    deps_seconds: "secondes",
+    log_copied: "Copié ! ✓",
+    log_system_online: "[System] Moteur de journalisation en ligne. En attente des événements système...",
+    log_terminal_cleared: "[System] Terminal effacé."
 };

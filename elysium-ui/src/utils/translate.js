@@ -1,6 +1,6 @@
 // elysium-ui/src/utils/translate.js
 // Centralized translation lookup — single source of truth for all t() calls
-// Replaces duplicated t() functions across dependencyInstaller, dependencyService, youtubeService
+// Replaces duplicated t() functions that were scattered across multiple service files
 
 import { translations } from '../config/translations.js';
 

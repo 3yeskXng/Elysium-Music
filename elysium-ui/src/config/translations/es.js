@@ -66,5 +66,8 @@ export default {
     update_download: "Descargar actualización",
     deps_restart_required: "Reinicio necesario — los cambios tendrán efecto después del reinicio.",
     deps_auto_restart: "Reinicio automático en",
-    deps_seconds: "segundos"
+    deps_seconds: "segundos",
+    log_copied: "¡Copiado! ✓",
+    log_system_online: "[System] Motor de registro en línea. Esperando eventos del sistema...",
+    log_terminal_cleared: "[System] Terminal limpiada."
 };

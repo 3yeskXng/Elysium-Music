@@ -2,11 +2,12 @@
 // Music library browser — view shell and event wiring
 
 import { ICON_HEADPHONES } from '../../config/icons.js';
+import { t } from '../../utils/translate.js';
 import { loadLocalTracks, playTrackAt, highlightRow, initSkipEngine, initRefreshListener } from './services/libraryService.js';
 
 export const listenModule = {
     id: 'listen',
-    label: 'Hören',
+    label: 'nav_listen',
     icon: ICON_HEADPHONES,
     tracks: [],
     currentTrackIndex: -1,
@@ -18,10 +19,10 @@ export const listenModule = {
         this.viewportElement = vp;
 
         vp.innerHTML = `
-            <h2 class="view-title" data-i18n="lib_title">Deine Musikbibliothek</h2>
-            <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:24px;" data-i18n="lib_sub">High-Fidelity Audio-Übersicht mit lokalen und heruntergeladenen Titeln.</p>
+            <h2 class="view-title" data-i18n="lib_title">${t('lib_title')}</h2>
+            <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:24px;" data-i18n="lib_sub">${t('lib_sub')}</p>
             <div id="library-tracks-container" style="display:flex; flex-direction:column; gap:8px; margin-bottom:90px;">
-                <span style="color:var(--accent-premium);" data-i18n="lib_loading">Lese lokalen Musik-Pool aus...</span>
+                <span style="color:var(--accent-premium);" data-i18n="lib_loading">${t('lib_loading')}</span>
             </div>
         `;
 

@@ -2,7 +2,7 @@
 // Global fixed-position player bar — DOM injection and control binding
 
 import { ICON_PLAY, ICON_PAUSE, ICON_BACK, ICON_FORWARD } from '../../config/icons.js';
-import { translations } from '../../config/translations.js';
+import { t } from '../../utils/translate.js';
 import { audioEngine } from '../../core/audioEngine.js';
 import { resolveArtist } from '../../utils/resolveArtist.js';
 import { bindAudioEngineHooks } from './services/playbackService.js';
@@ -26,11 +26,10 @@ export class PlayerBarModule {
             align-items: center; justify-content: space-between; padding: 0 32px; z-index: 9999;
         `;
 
-        const current = localStorage.getItem('elysium_language') || 'de';
         playerBar.innerHTML = `
             <div style="display:flex; flex-direction:column; gap:2px; width:30%;">
-                <div id="player-title" data-i18n="noTrack" style="font-weight:600; font-size:0.9rem; color:var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${translations[current].noTrack}</div>
-                <div id="player-status" data-i18n="idleStatus" style="font-size:0.75rem; color:var(--accent-premium); letter-spacing: 1px;">${translations[current].idleStatus}</div>
+                <div id="player-title" data-i18n="noTrack" style="font-weight:600; font-size:0.9rem; color:var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${t('noTrack')}</div>
+                <div id="player-status" data-i18n="idleStatus" style="font-size:0.75rem; color:var(--accent-premium); letter-spacing: 1px;">${t('idleStatus')}</div>
             </div>
             <div style="display:flex; flex-direction:column; align-items:center; gap:10px; width:40%;">
                 <div style="display: flex; align-items: center; gap: 20px;">

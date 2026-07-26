@@ -1,10 +1,19 @@
 // elysium-ui/src/modules/debug/services/logService.js
 // Log backlog management and entry formatting
 
+const LOCALE_MAP = {
+    de: 'de-DE',
+    en: 'en-US',
+    es: 'es-ES',
+    fr: 'fr-FR',
+};
+
 export const logBacklog = [];
 
 export function appendEntry(container, { timestamp, level, module, message }) {
-    const ts = timestamp || new Date().toLocaleTimeString('de-DE', { hour12: false });
+    const lang = localStorage.getItem('elysium_language') || 'de';
+    const locale = LOCALE_MAP[lang] || 'en-US';
+    const ts = timestamp || new Date().toLocaleTimeString(locale, { hour12: false });
     const entry = { timestamp: ts, level, module, message };
     logBacklog.push(entry);
 
