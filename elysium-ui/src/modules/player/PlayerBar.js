@@ -94,8 +94,21 @@ export class PlayerBarModule {
             btn.innerHTML = '<span style="animation:spin 0.8s linear infinite;display:flex;">⏳</span>';
             btn.style.pointerEvents = 'none';
             try {
-                await invokeBackend('download_youtube', { query: this.currentTrack.title });
-                log('INFO', `Downloaded via player: "${this.currentTrack.title}"`);
+                let destPath = null;
+                if (window.__TAURI__ && window.__TAURI__.dialog) {
+                    const { save } = window.__TAURI__.dialog;
+                    const defaultName = `${this.currentTrack.title || 'track'}.opus`;
+                    destPath = await save({
+                        defaultPath: defaultName,
+                        filters: [{ name: 'Opus Audio', extensions: ['opus'] }]
+                    });
+                }
+                if (destPath === null) {
+                    log('INFO', 'Download cancelled by user');
+                    return;
+                }
+                await invokeBackend('download_youtube', { query: this.currentTrack.title, destPath });
+                log('INFO', `Downloaded via player: "${this.currentTrack.title}" → ${destPath}`);
                 window.dispatchEvent(new CustomEvent('elysium-library-refresh'));
             } catch (err) {
                 log('ERROR', `Player download failed: ${err.message || err}`);

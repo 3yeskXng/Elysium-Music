@@ -59,7 +59,17 @@ export function renderTrackResult(container, track) {
         btn.innerHTML = '<span style="animation:spin 0.8s linear infinite;display:flex;">⏳</span>';
         btn.style.pointerEvents = 'none';
         try {
-            await invokeBackend('download_youtube', { query: track.title });
+            let destPath = null;
+            if (window.__TAURI__ && window.__TAURI__.dialog) {
+                const { save } = window.__TAURI__.dialog;
+                const defaultName = `${track.title || 'track'}.opus`;
+                destPath = await save({
+                    defaultPath: defaultName,
+                    filters: [{ name: 'Opus Audio', extensions: ['opus'] }]
+                });
+            }
+            if (destPath === null) return;
+            await invokeBackend('download_youtube', { query: track.title, destPath });
             window.dispatchEvent(new CustomEvent('elysium-library-refresh'));
         } catch (err) {
             log('ERROR', `Download failed: ${err.message || err}`);

@@ -33,7 +33,7 @@ pub async fn search_youtube_metadata(query: String) -> Result<Vec<VideoMetadata>
     let yt_dlp = find_tool("yt-dlp")
         .ok_or("yt-dlp not found. Install it via Settings -> Dependencies.")?;
 
-    let search = format!("ytsearch5:{}", query);
+    let search = format!("ytsearch3:{}", query);
     let output = std::process::Command::new(&yt_dlp)
         .args(["--dump-json", "--no-download", "--no-playlist", &search])
         .output()

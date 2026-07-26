@@ -38,7 +38,20 @@ async function executeDownload(input, status, query) {
     log('INFO', `Download initiated: "${query}" — Handing off to yt-dlp backend pipeline`);
 
     try {
-        const result = await invokeBackend('download_youtube', { query });
+        let destPath = null;
+        if (window.__TAURI__ && window.__TAURI__.dialog) {
+            const { save } = window.__TAURI__.dialog;
+            const defaultName = `${query}.opus`;
+            destPath = await save({
+                defaultPath: defaultName,
+                filters: [{ name: 'Opus Audio', extensions: ['opus'] }]
+            });
+        }
+        if (destPath === null) {
+            setStatus(status, 'rgba(255,255,255,0.05)', 'var(--text-muted)', t('dl_cancelled'));
+            return;
+        }
+        const result = await invokeBackend('download_youtube', { query, destPath });
         setStatus(status, 'rgba(34,197,94,0.1)', '#22c55e',
             t('dl_success').replace('${title}', result.title || query));
         log('SUCCESS', `Download complete: "${result.title || query}" by ${result.artist || 'Unknown'} — Duration: ${result.duration || 'N/A'} — Path: ${result.file_path || 'N/A'}`);

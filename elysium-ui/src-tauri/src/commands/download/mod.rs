@@ -14,8 +14,13 @@ use std::fs;
 use std::path::PathBuf;
 
 #[tauri::command]
-pub async fn download_youtube(query: String) -> Result<TrackPayload, String> {
-    let music_dir = PathBuf::from("music");
+pub async fn download_youtube(query: String, dest_path: Option<String>) -> Result<TrackPayload, String> {
+    let music_dir = if let Some(ref dp) = dest_path {
+        let p = std::path::PathBuf::from(dp);
+        p.parent().map(|pp| pp.to_path_buf()).unwrap_or_else(|| PathBuf::from("music"))
+    } else {
+        PathBuf::from("music")
+    };
     fs::create_dir_all(&music_dir).map_err(|e| format!("Failed to create music dir: {}", e))?;
 
     let provider = YtDlpProvider;
@@ -24,14 +29,22 @@ pub async fn download_youtube(query: String) -> Result<TrackPayload, String> {
     let raw_path = find_output(&music_dir, &result.safe_stem)?;
     let (dur, secs) = probe(raw_path.to_str().unwrap_or(""));
 
-    let title_clean = sanitize(&result.title);
-    let final_path = music_dir.join(format!("{}.opus", title_clean));
-    let resolved = if raw_path != final_path {
-        let p = unique_path(&final_path);
-        fs::rename(&raw_path, &p).map_err(|e| format!("Rename failed: {}", e))?;
-        p
+    let resolved = if let Some(ref dp) = dest_path {
+        let target = unique_path(&PathBuf::from(dp));
+        if raw_path != target {
+            fs::rename(&raw_path, &target).map_err(|e| format!("Rename failed: {}", e))?;
+        }
+        target
     } else {
-        raw_path
+        let title_clean = sanitize(&result.title);
+        let final_path = music_dir.join(format!("{}.opus", title_clean));
+        if raw_path != final_path {
+            let p = unique_path(&final_path);
+            fs::rename(&raw_path, &p).map_err(|e| format!("Rename failed: {}", e))?;
+            p
+        } else {
+            raw_path
+        }
     };
 
     let duration_secs = if secs > 0 { secs } else { result.duration_secs };
