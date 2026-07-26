@@ -44,6 +44,7 @@ export default {
     dl_install_error: "Échec de l'installation",
     dl_install_success: "yt-dlp installé ! Démarrage du téléchargement...",
     dl_ytdlp_installed: "yt-dlp a été installé.",
+    dl_install_needed: "yt-dlp requis. Démarrage de l'installation...",
     dl_downloading: "Téléchargement en cours",
     dl_downloading_status: 'Backend en cours de téléchargement et conversion : "${query}"...',
     dl_success: 'Succès ! "${title}" téléchargé dans la bibliothèque musicale.',

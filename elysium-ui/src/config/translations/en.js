@@ -44,6 +44,7 @@ export default {
     dl_install_error: "Installation failed",
     dl_install_success: "yt-dlp installed! Starting download...",
     dl_ytdlp_installed: "yt-dlp has been installed.",
+    dl_install_needed: "yt-dlp required. Starting installation...",
     dl_downloading: "Downloading",
     dl_downloading_status: 'Backend downloading & converting: "${query}"...',
     dl_success: 'Success! "${title}" downloaded to music library.',

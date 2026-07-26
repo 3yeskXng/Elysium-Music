@@ -44,6 +44,7 @@ export default {
     dl_install_error: "Installation fehlgeschlagen",
     dl_install_success: "yt-dlp installiert! Starte Download...",
     dl_ytdlp_installed: "yt-dlp wurde installiert.",
+    dl_install_needed: "yt-dlp wird benötigt. Installation wird gestartet...",
     dl_downloading: "Lade herunter",
     dl_downloading_status: 'Backend konvertiert und lädt herunter: "${query}"...',
     dl_success: 'Erfolgreich! "${title}" wurde im Musikpool hinterlegt.',
