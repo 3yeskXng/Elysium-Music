@@ -1,6 +1,6 @@
 // src-tauri/src/commands/deps/platform/windows.rs
 // Windows package manager (winget) operations for dependency installation
-// Opens an elevated CMD window via PowerShell Start-Process -Verb RunAs
+// Spawns an elevated CMD window using PowerShell Start-Process -Verb RunAs
 
 use super::super::progress::emit_progress;
 use std::process::Command;
@@ -17,7 +17,7 @@ pub fn check_tool(check_cmd: &str) -> bool {
     cmd.arg(check_cmd);
     
     #[cfg(target_os = "windows")]
-    cmd.creation_flags(CREATE_NO_WINDOW); // Hier MUSS die Konstante rein!
+    cmd.creation_flags(CREATE_NO_WINDOW);
 
     if let Ok(o) = cmd.output() {
         let found = o.status.success();
@@ -33,12 +33,12 @@ fn open_elevated_cmd(
     action_label: &str,
     app: &AppHandle,
 ) -> Result<String, String> {
-    println!("[Deps:Win] Opening elevated CMD to {} {}...", action_label, tool_name);
+    println!("[Deps:Win] Opening elevated CMD for {} {}...", action_label, tool_name);
     emit_progress(
         app,
         tool_name,
         action_label,
-        &format!("Opening {} window for {}...", action_label, tool_name),
+        &format!("Opening Admin CMD window for {}...", tool_name),
     );
 
     let ps_script = format!(
@@ -48,19 +48,15 @@ fn open_elevated_cmd(
 
     let mut cmd = Command::new("powershell");
     cmd.args(["-Command", &ps_script]);
-    #[cfg(target_os = "windows")]
-    cmd.creation_flags(CREATE_NO_WINDOW);
 
-    let output = cmd
-        .spawn()
-        .map_err(|e| format!("Failed to launch PowerShell: {}. Ensure PowerShell is installed.", e))?;
+    cmd.spawn().map_err(|e| {
+        format!(
+            "Failed to launch PowerShell: {}. Ensure PowerShell is available.",
+            e
+        )
+    })?;
 
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    if !stderr.trim().is_empty() {
-        println!("[Deps:Win] PowerShell stderr: {}", stderr.trim());
-    }
-
-    let msg = format!("{} window opened for {}. Check the CMD window.", action_label, tool_name);
+    let msg = format!("Admin CMD window launched for {}.", tool_name);
     emit_progress(app, tool_name, "done", &msg);
     Ok(msg)
 }
