@@ -1,5 +1,6 @@
 // elysium-ui/src/modules/dependencies/services/depProgressService.js
 // Progress event listener for dependency installation/update events from Rust backend
+// Listens to "dep-progress" events and updates the status box in real-time
 
 import { setStatusBox } from './depStatusService.js';
 
@@ -20,7 +21,7 @@ export function listenProgress(toolName, statusBox, onDone = null) {
     const { listen } = window.__TAURI_INTERNALS__;
     const unlisten = listen('dep-progress', (event) => {
         const p = event.payload;
-        if (p.tool !== toolName && p.tool !== 'ffmpeg') return;
+        if (p.tool !== toolName) return;
         log('INFO', `[${p.tool}] ${p.step}: ${p.message}`);
         if (p.step === 'done' || p.step === 'skip') {
             setStatusBox(statusBox, 'rgba(34,197,94,0.1)', '#22c55e', p.message);

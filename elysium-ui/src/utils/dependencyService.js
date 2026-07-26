@@ -1,48 +1,40 @@
 // elysium-ui/src/utils/dependencyService.js
-// Cross-platform dependency check and auto-installer for download pipeline
+// Central dependency checking service
+// Calls check_all_dependencies backend command to verify yt-dlp, ffmpeg, ffprobe availability
 
 import { invokeBackend } from '../api.js';
-import { t } from './translate.js';
 
 function log(level, msg) {
-    if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Dependency', msg);
+    if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Deps', msg);
 }
 
+/**
+ * Check availability of all dependencies via the Rust backend.
+ * @returns {Promise<{ytdlp: boolean, ffmpeg: boolean, ffprobe: boolean}>}
+ */
 export async function checkAllDependencies() {
+    log('INFO', 'Checking all dependencies...');
     try {
-        return await invokeBackend('check_all_dependencies');
-    } catch {
-        return { ytdlp: true, ffmpeg: true, ffprobe: true };
+        const result = await invokeBackend('check_all_dependencies');
+        log('SUCCESS', `Dependencies: ytdlp=${result.ytdlp}, ffmpeg=${result.ffmpeg}, ffprobe=${result.ffprobe}`);
+        return result;
+    } catch (err) {
+        log('ERROR', `check_all_dependencies failed: ${err.message || err}`);
+        return { ytdlp: false, ffmpeg: false, ffprobe: false };
     }
 }
 
-export async function ensureYtDlp(statusBox, onReady) {
-    let status;
+/**
+ * Check availability of a single dependency by name.
+ * @param {'ytdlp'|'ffmpeg'|'ffprobe'} name
+ * @returns {Promise<boolean>}
+ */
+export async function checkDependency(name) {
     try {
-        status = await checkAllDependencies();
-    } catch {
-        status = { ytdlp: true, ffmpeg: true, ffprobe: true };
+        const status = await checkAllDependencies();
+        return !!status[name];
+    } catch (err) {
+        log('ERROR', `checkDependency failed for ${name}: ${err.message || err}`);
+        return false;
     }
-
-    const missing = [];
-    if (!status.ytdlp) missing.push('yt-dlp');
-    if (!status.ffmpeg) missing.push('ffmpeg');
-    if (!status.ffprobe) missing.push('ffprobe');
-
-    if (missing.length === 0) {
-        onReady();
-        return;
-    }
-
-    const parts = missing.map(m => `<strong>${m}</strong>`).join(', ');
-    const hint = t('dl_missing_hint').replace('${deps}', parts);
-
-    statusBox.style.display = 'block';
-    statusBox.style.background = 'rgba(255,180,0,0.1)';
-    statusBox.style.color = '#eab308';
-    statusBox.style.padding = '12px 16px';
-    statusBox.style.borderRadius = '6px';
-    statusBox.style.fontSize = '0.9rem';
-    statusBox.textContent = hint;
-    log('WARN', `Missing dependencies: ${missing.join(', ')}`);
 }

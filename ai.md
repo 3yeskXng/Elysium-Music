@@ -1,7 +1,7 @@
 # ELYSIUM ARCHITECTURE RULES
 
 1. **Modularität:** Schreibe NIEMALS riesige Monolith-Dateien. Lagere Logik immer in kleine, spezialisierte Module aus.
-2. **Dateigröße:** Wenn eine Datei länger als ~150 Zeilen wird, teile sie in Untermodule auf.
+2. **Dateigröße:** Wenn eine Datei länger als ~150 Zeilen wird, teile sie in Untermodule auf. Bevor du eine Datei speicherst oder neu erstellst, ZÄHLE die Zeilen. Wenn eine Datei 150 Zeilen erreicht, MUSS der Schreibprozess sofort gestoppt und die Datei aufgeteilt werden. Du gibst im Chat vor jedem Code-Block die genaue Zeilenzahl an (z. B. [Zeilen: 112/150]). Das Überschreiten der Dateilänge ist ein Stopp-Signal – KEIN Grund für einen HACK!!!-Kommentar!
 3. **Loader & Async-Feedback:** Jede Aktion, die Zeit braucht (Netzwerk-Requests, Download, Rust-IPC), MUSS zwingend einen Loader/Spinner-Status in der UI feuern. Praktisch eine Loader datei und mehrere klene unterdateien siehe 2.
 4. **Tech-Stack:** Tauri, JS, Rust und Moderne Sprachen generell!
 5. **Codekommentare:** Schreibe ganz oben hin wofür die Datei ist und mache die Kommentare auf English!
@@ -20,7 +20,10 @@ src/modules/download/
 12.**Sprachsystem:** Du machst ein ultra-modulares Sprachsystem. Basierend aus Loadern, und den Sprachdateien zu einzelnen Sprachen z.B. de.js. In den Einzelnen Sprachdateien stehen dann die Übersetzungen. Du verwendest gefälligst keine Hardcoded Übersetzungen in dem Code!
 13.**Selber gucken:** Du hälst du dich strikt an unsere Regeln und gehts nach JEDEM Code den du geschrieben hast durch ob du dich wirklich drangehalten hast und besserst im Zweifelsfall nach! Du sollst selber Stichproben an alten Dateien nehmen, ob man die noch kürzen und modularisieren, verbessern kann. Neue Dateien selbstverständlich streng an diese Regeln halten. 
 14.**Testen:** Mit npx tauri dev kannst du selber testen ob das Programm kompiliert, startet und sogar einzelne Funktionen innerhalb des Programms sehen und testen.
-15.**Hack:** Falls du aus technischen Gründen (z.B. temporärer Workaround, externe Library-Limits) eine unsaubere Lösung bauen MUSST (z.B. Hardcode, Notfall-Fallback, Kompromiss bei Dateilänge), markiere die exakte Stelle im Code mit dem Kommentar // HACK!!! [Grund]. *WICHTIG*: Das ist KEIN Freifahrtschein für Faulheit! Versuche IMMER erst die saubere Lösung. Nutzen von HACK!!! für leere Funktionen oder unvollständigen Code ist STRENG VERBOTEN!
+15.**Hack:** 
+*Standard*: Du musst dich zu 100 % an alle Regeln halten (keine Dateien > 150 Zeilen, keine leeren Funktionen, kein Hardcode, keine Mocks).
+*Die Selbst-Anzeige*: Falls du aus irgendeinem Grund (sei es Zeitdruck, technische Blockade ODER weil du eine Regel wie die Dateilänge/Hardcodes im aktuellen Schritt verletzt hast) vom sauberen Standard abweichst, BIST DU VERPFLICHTET, DIE STELLE SOFORT MIT // HACK!!! [Welche Regel wurde verletzt und warum] ZU MARKIEREN.
+*Wichtig* Das lautlose Verstoßen gegen Regeln ist der absolut größte Fehler. Ein Regelverstoß ohne HACK!!!-Markierung gilt als Systemversagen. Wenn du regelwidrig codest, MUSST du dich im Code und im Chat selbst anzeigen!
 16.**Output:** Frage dich am Ende selber:
 - Hast du dich strikt an unsere Regeln gehalten?
 - Hast du alles modular gebaut?

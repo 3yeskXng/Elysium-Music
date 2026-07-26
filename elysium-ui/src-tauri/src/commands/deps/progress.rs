@@ -1,5 +1,6 @@
 // src-tauri/src/commands/deps/progress.rs
 // Dependency progress event types and emitter for real-time frontend logging
+// Emits "dep-progress" events that the frontend listens to for status updates
 
 use tauri::{AppHandle, Emitter};
 
@@ -13,6 +14,7 @@ pub struct DepProgress {
 /// Emit a progress event to the frontend for real-time status updates.
 /// Steps: "download", "extract", "collect", "update", "done", "skip", "error"
 pub fn emit_progress(handle: &AppHandle, tool: &str, step: &str, message: &str) {
+    println!("[Deps:Progress] EMIT -> tool='{}', step='{}', msg='{}'", tool, step, message);
     let _ = handle.emit(
         "dep-progress",
         DepProgress {

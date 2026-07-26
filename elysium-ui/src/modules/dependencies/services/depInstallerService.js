@@ -1,12 +1,12 @@
 // elysium-ui/src/modules/dependencies/services/depInstallerService.js
 // Install and update handlers for yt-dlp, ffmpeg, ffprobe
-// Triggers auto-restart after ffmpeg/ffprobe installation
+// Shows loader, listens to progress events, verifies installation, triggers auto-restart for ffmpeg
 
 import { invokeBackend } from '../../../api.js';
 import { t } from '../../../utils/translate.js';
 import { showLoader, hideLoader } from '../../../core/loader.js';
 import { listenProgress, safeUnlisten } from './depProgressService.js';
-import { setStatusBox } from './depStatusService.js';
+import { checkAllDependencies, setStatusBox } from './depStatusService.js';
 
 function log(level, msg) {
     if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Deps', msg);
@@ -16,7 +16,7 @@ const RESTART_DELAY_MS = 5000;
 
 /**
  * Install a dependency tool by calling the backend command.
- * Shows loader, listens to progress events, and triggers auto-restart for ffmpeg.
+ * Shows loader, listens to progress events, verifies installation, triggers auto-restart for ffmpeg.
  * @param {Object} tool - Tool config { name, check, install, update?, canUpdate }
  * @param {HTMLElement} section - The container section element
  * @param {HTMLElement} statusBox - The status display element
@@ -24,15 +24,32 @@ const RESTART_DELAY_MS = 5000;
  */
 export async function installTool(tool, section, statusBox, onRefresh) {
     let unlistenFn = null;
+    log('INFO', `Starting installation of ${tool.name}...`);
     showLoader(section, `${t('dl_downloading')} ${tool.name}...`);
     unlistenFn = listenProgress(tool.name, statusBox);
 
     try {
-        await invokeBackend(tool.install);
-        log('SUCCESS', `${tool.name} installed`);
+        const result = await invokeBackend(tool.install);
+        log('SUCCESS', `${tool.name} backend returned: ${result}`);
         hideLoader(section);
         unlistenFn = safeUnlisten(unlistenFn);
 
+        log('INFO', `Verifying ${tool.name} installation via check_all_dependencies...`);
+        const status = await checkAllDependencies();
+        let verified = false;
+        if (tool.name === 'yt-dlp') verified = status.ytdlp;
+        else if (tool.name === 'ffmpeg') verified = status.ffmpeg;
+        else if (tool.name === 'ffprobe') verified = status.ffprobe;
+
+        if (!verified) {
+            const errMsg = `${tool.name} download succeeded but verification failed — tool not found`;
+            log('ERROR', errMsg);
+            setStatusBox(statusBox, 'rgba(239,68,68,0.1)', '#ef4444', errMsg);
+            onRefresh();
+            return;
+        }
+
+        log('SUCCESS', `${tool.name} verified successfully on disk`);
         const isFfmpegTool = tool.name === 'ffmpeg' || tool.name === 'ffprobe';
         if (isFfmpegTool) {
             triggerAutoRestart(section, statusBox, onRefresh);
@@ -42,8 +59,8 @@ export async function installTool(tool, section, statusBox, onRefresh) {
     } catch (err) {
         hideLoader(section);
         unlistenFn = safeUnlisten(unlistenFn);
-        setStatusBox(statusBox, 'rgba(239,68,68,0.1)', '#ef4444',
-            `${t('dl_install_error')}: ${err.message || err}`);
+        const errMsg = `${t('dl_install_error')}: ${err.message || err}`;
+        setStatusBox(statusBox, 'rgba(239,68,68,0.1)', '#ef4444', errMsg);
         log('ERROR', `${tool.name} install failed: ${err.message || err}`);
     }
 }
@@ -57,16 +74,17 @@ export async function installTool(tool, section, statusBox, onRefresh) {
  */
 export async function updateTool(tool, section, statusBox, onRefresh) {
     let unlistenFn = null;
+    log('INFO', `Starting update of ${tool.name}...`);
     showLoader(section, `${t('deps_checking_update')} ${tool.name}...`);
     unlistenFn = listenProgress(tool.name, statusBox);
 
     try {
         const result = await invokeBackend(tool.update);
+        log('SUCCESS', `${tool.name} update result: ${result}`);
         hideLoader(section);
         unlistenFn = safeUnlisten(unlistenFn);
         setStatusBox(statusBox, 'rgba(34,197,94,0.1)', '#22c55e',
             result || `${tool.name} ${t('deps_up_to_date')}`);
-        log('SUCCESS', `${tool.name} update: ${result}`);
         onRefresh();
     } catch (err) {
         hideLoader(section);
@@ -107,6 +125,7 @@ function triggerAutoRestart(section, statusBox, onRefresh) {
  */
 async function restartApp() {
     try {
+        log('INFO', 'Restarting application...');
         await invokeBackend('restart_app');
     } catch (err) {
         log('ERROR', `Restart failed: ${err.message || err}`);
