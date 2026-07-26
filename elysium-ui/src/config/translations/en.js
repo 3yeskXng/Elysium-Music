@@ -11,6 +11,7 @@ export default {
     nav_search: "Search",
     nav_settings: "Settings",
     nav_debug: "System Logs",
+    nav_playlists: "Playlists",
     nav_dependencies: "Dependencies",
     dl_title: "Central Audio Downloader",
     dl_sub: "Enter a song title to download it directly via network integration.",

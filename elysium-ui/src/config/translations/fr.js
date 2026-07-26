@@ -11,6 +11,7 @@ export default {
     nav_search: "Recherche",
     nav_settings: "Paramètres",
     nav_debug: "Journaux système",
+    nav_playlists: "Playlists",
     nav_dependencies: "Dépendances",
     dl_title: "Téléchargeur Audio Central",
     dl_sub: "Entrez un titre de chanson pour le télécharger directement via l'intégration réseau.",

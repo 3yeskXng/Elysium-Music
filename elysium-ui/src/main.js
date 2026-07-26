@@ -6,6 +6,7 @@ import { searchModule } from './modules/search/SearchView.js';
 import { debugModule } from './modules/debug/DebugView.js';
 import { settingsModule } from './modules/settings/SettingsView.js';
 import { dependenciesModule } from './modules/dependencies/DependencyView.js';
+import { playlistOverviewModule } from './modules/playlists/PlaylistOverviewView.js';
 import { PlayerBarModule } from './modules/player/PlayerBar.js';
 import { checkForUpdate } from './core/services/updateService.js';
 import { initDepListener } from './modules/deps/services/depService.js';
@@ -35,6 +36,7 @@ function listenForBackendLogs() {
 
 document.addEventListener('DOMContentLoaded', () => {
     moduleRegistry.registerCoreModule(searchModule);
+    moduleRegistry.registerCoreModule(playlistOverviewModule);
     moduleRegistry.registerCoreModule(dependenciesModule);
     moduleRegistry.registerCoreModule(settingsModule);
     moduleRegistry.registerCoreModule(debugModule);
@@ -47,6 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initPlaylistViewListener();
 
     playlistState.load().then(() => {
+        renderPlaylistSidebar(document.getElementById('sidebar-playlist-slots'));
+    }).catch(() => {
         renderPlaylistSidebar(document.getElementById('sidebar-playlist-slots'));
     });
 

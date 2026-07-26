@@ -11,6 +11,7 @@ export default {
     nav_search: "Buscar",
     nav_settings: "Configuración",
     nav_debug: "Registros",
+    nav_playlists: "Playlists",
     nav_dependencies: "Dependencias",
     dl_title: "Centro de Descarga de Audio",
     dl_sub: "Ingresa el nombre de una canción para descargarla directamente vía integración de red.",

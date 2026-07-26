@@ -11,6 +11,7 @@ export default {
     nav_search: "Suche",
     nav_settings: "Einstellungen",
     nav_debug: "System Logs",
+    nav_playlists: "Playlists",
     nav_dependencies: "Abhängigkeiten",
     dl_title: "Mittelpunkt-Audio-Downloader",
     dl_sub: "Geben Sie einen Songtitel ein, um ihn direkt via Netzwerkintegration herunterzuladen.",
