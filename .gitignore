@@ -9,6 +9,7 @@ npm-debug.log*
 *.mp3
 *.m4a
 *.wav
+*.opus
 downloads/
 
 # Downloaded tools (yt-dlp, ffmpeg binaries)

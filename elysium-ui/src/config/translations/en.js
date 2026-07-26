@@ -12,6 +12,7 @@ export default {
     nav_listen: "Listen",
     nav_settings: "Settings",
     nav_debug: "System Logs",
+    nav_dependencies: "Dependencies",
     dl_title: "Central Audio Downloader",
     dl_sub: "Enter a song title to download it directly via network integration.",
     dl_placeholder: "E.g., Linkin Park - Numb",
@@ -62,5 +63,8 @@ export default {
     deps_lib_error: "Error",
     update_available: "A new update is available",
     update_version: "Version",
-    update_download: "Download update"
+    update_download: "Download update",
+    deps_restart_required: "Restart required — changes will take effect after restart.",
+    deps_auto_restart: "Auto-restart in",
+    deps_seconds: "seconds"
 };

@@ -3,15 +3,9 @@
 
 import { invokeBackend } from '../../../api.js';
 import { audioEngine } from '../../../core/audioEngine.js';
-import { translations } from '../../../config/translations.js';
+import { t } from '../../../utils/translate.js';
 import { showLoader, hideLoader } from '../../../core/loader.js';
 import { resolveArtist } from '../../../utils/resolveArtist.js';
-
-function t(key) {
-    const lang = localStorage.getItem('elysium_language') || 'de';
-    const dict = translations[lang] || translations.de;
-    return dict[key] || key;
-}
 
 function log(level, msg) {
     if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Listen', msg);

@@ -1,5 +1,5 @@
 // elysium-ui/src/modules/settings/SettingsView.js
-// Settings panel view — language, plugins, dependencies, and footer
+// Settings panel view — language selection, plugins, and footer
 
 import { ICON_SETTINGS } from '../../config/icons.js';
 import { translations } from '../../config/translations.js';
@@ -7,7 +7,6 @@ import { getLanguageOptions } from '../../config/languageRegistry.js';
 import { pluginManager } from '../../core/pluginManager.js';
 import { APP_FOOTER_TEXT } from '../../config/appInfo.js';
 import { handleLanguageChange, handlePluginToggle } from './services/settingsService.js';
-import { createDependencySection } from './services/dependencyInstaller.js';
 
 export const settingsModule = {
     id: 'settings',
@@ -31,7 +30,6 @@ export const settingsModule = {
                     ${langOptions.map(o => `<option value="${o.code}" ${o.selected ? 'selected' : ''}>${o.label}</option>`).join('')}
                 </select>
             </div>
-            <div id="dependency-section"></div>
             <h3 style="color:var(--text-main); font-size:1.2rem; margin-bottom:8px;" data-i18n="pm_title">${t.pm_title}</h3>
             <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:16px;" data-i18n="pm_sub">${t.pm_sub}</p>
             <div id="plugin-list-container" style="display:flex; flex-direction:column; gap:12px;">
@@ -55,8 +53,6 @@ export const settingsModule = {
         div.querySelectorAll('.plugin-toggle-btn').forEach(btn => {
             btn.addEventListener('click', (e) => handlePluginToggle(e.target.getAttribute('data-plugin-id')));
         });
-
-        createDependencySection(div.querySelector('#dependency-section'));
 
         return div;
     }

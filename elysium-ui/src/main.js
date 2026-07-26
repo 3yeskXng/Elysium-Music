@@ -6,6 +6,7 @@ import { downloadModule } from './modules/download/DownloadView.js';
 import { listenModule } from './modules/listen/ListenView.js';
 import { debugModule } from './modules/debug/DebugView.js';
 import { settingsModule } from './modules/settings/SettingsView.js';
+import { dependenciesModule } from './modules/dependencies/DependencyView.js';
 import { PlayerBarModule } from './modules/player/PlayerBar.js';
 import { checkForUpdate } from './core/services/updateService.js';
 import './config/translations.js';
@@ -32,6 +33,7 @@ function listenForBackendLogs() {
 document.addEventListener('DOMContentLoaded', () => {
     moduleRegistry.registerCoreModule(downloadModule);
     moduleRegistry.registerCoreModule(listenModule);
+    moduleRegistry.registerCoreModule(dependenciesModule);
     moduleRegistry.registerCoreModule(settingsModule);
     moduleRegistry.registerCoreModule(debugModule);
 

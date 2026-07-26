@@ -2,13 +2,7 @@
 // Cross-platform dependency check and auto-installer for download pipeline
 
 import { invokeBackend } from '../api.js';
-import { translations } from '../config/translations.js';
-
-function t(key) {
-    const lang = localStorage.getItem('elysium_language') || 'de';
-    const dict = translations[lang] || translations.de;
-    return dict[key] || key;
-}
+import { t } from './translate.js';
 
 function log(level, msg) {
     if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Dependency', msg);

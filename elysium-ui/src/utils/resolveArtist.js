@@ -1,11 +1,9 @@
 // elysium-ui/src/utils/resolveArtist.js
 // Shared artist name resolution — centralizes the local-file vs artist logic
 
-import { translations } from '../config/translations.js';
+import { t } from './translate.js';
 
 export function resolveArtist(artist) {
-    const lang = localStorage.getItem('elysium_language') || 'de';
-    const t = translations[lang] || translations.de;
-    if (!artist || artist.trim() === '') return t.artist_unknown || 'Unknown Artist';
+    if (!artist || artist.trim() === '') return t('artist_unknown');
     return artist;
 }

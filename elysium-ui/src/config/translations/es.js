@@ -12,6 +12,7 @@ export default {
     nav_listen: "Escuchar",
     nav_settings: "Configuración",
     nav_debug: "Registros",
+    nav_dependencies: "Dependencias",
     dl_title: "Centro de Descarga de Audio",
     dl_sub: "Ingresa el nombre de una canción para descargarla directamente vía integración de red.",
     dl_placeholder: "Ej: Linkin Park - Numb",
@@ -62,5 +63,8 @@ export default {
     deps_lib_error: "Error",
     update_available: "Hay una nueva actualización disponible",
     update_version: "Versión",
-    update_download: "Descargar actualización"
+    update_download: "Descargar actualización",
+    deps_restart_required: "Reinicio necesario — los cambios tendrán efecto después del reinicio.",
+    deps_auto_restart: "Reinicio automático en",
+    deps_seconds: "segundos"
 };

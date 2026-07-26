@@ -1,0 +1,101 @@
+/* elysium-ui/src/styles/sidebar.css */
+/* Sidebar, brand zone, and navigation button styling */
+
+#shell-sidebar {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+    z-index: 10;
+}
+
+.brand-zone {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 40px;
+    padding-left: 8px;
+}
+
+.app-logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.4));
+}
+
+.app-title {
+    font-family: var(--font-premium-cursive);
+    font-size: 2.3rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, #ffffff 30%, #c084fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+#sidebar-navigation-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-grow: 1;
+}
+
+#sidebar-footer-slots {
+    margin-bottom: calc(var(--player-height) + 10px);
+}
+
+.nav-btn {
+    width: 100%;
+    padding: 12px 16px;
+    text-align: left;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.nav-btn:hover {
+    color: var(--text-pure);
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.nav-btn.active {
+    color: var(--text-pure);
+    background-color: rgba(168, 85, 247, 0.1);
+    border-color: rgba(168, 85, 247, 0.2);
+    font-weight: 600;
+}
+
+.nav-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+}
+
+.nav-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: currentColor;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-btn:hover .nav-icon svg {
+    transform: scale(1.06);
+}
+
+.nav-label {
+    font-size: 0.92rem;
+}

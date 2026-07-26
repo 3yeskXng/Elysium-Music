@@ -1,0 +1,55 @@
+/* elysium-ui/src/styles/components.css */
+/* Reusable UI components: inputs, cards, error boundary, typography, animations */
+
+.search-input {
+    width: 100%;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.search-input:focus {
+    border-color: var(--accent-premium);
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.15);
+}
+
+.error-boundary {
+    border: 1px dashed var(--accent-premium);
+    padding: 20px;
+    border-radius: 8px;
+    background: rgba(168, 85, 247, 0.05);
+    color: var(--accent-premium);
+}
+
+.dashboard-preview-text {
+    margin-top: 40px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: -0.1px;
+}
+
+.view-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: -0.4px;
+    margin-bottom: 8px;
+}
+
+@keyframes viewFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: viewFadeIn 0.35s cubic-bezier(0.215, 0.610, 0.355, 1) forwards;
+}

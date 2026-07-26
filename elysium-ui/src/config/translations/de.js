@@ -12,6 +12,7 @@ export default {
     nav_listen: "Hören",
     nav_settings: "Einstellungen",
     nav_debug: "System Logs",
+    nav_dependencies: "Abhängigkeiten",
     dl_title: "Mittelpunkt-Audio-Downloader",
     dl_sub: "Geben Sie einen Songtitel ein, um ihn direkt via Netzwerkintegration herunterzuladen.",
     dl_placeholder: "Z.B. Linkin Park - Numb",
@@ -62,5 +63,8 @@ export default {
     deps_lib_error: "Fehler",
     update_available: "Ein neues Update ist verfügbar",
     update_version: "Version",
-    update_download: "Update herunterladen"
+    update_download: "Update herunterladen",
+    deps_restart_required: "Neustart erforderlich — Änderungen werden nach Neustart wirksam.",
+    deps_auto_restart: "Automatischer Neustart in",
+    deps_seconds: "Sekunden"
 };

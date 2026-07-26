@@ -1,7 +1,6 @@
 // elysium-ui/src/modules/settings/services/settingsService.js
 // Language and plugin toggle handlers
 
-import { translations } from '../../../config/translations.js';
 import { pluginManager } from '../../../core/pluginManager.js';
 import { moduleRegistry } from '../../../core/moduleRegistry.js';
 

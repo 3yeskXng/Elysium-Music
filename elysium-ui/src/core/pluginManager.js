@@ -20,7 +20,7 @@ class ElysiumPluginManager {
         }
     }
 
-    // NEU: Damit andere Systemteile den Schalter abfragen können!
+    // Public query method for other system components to check plugin status
     isPluginActive(id) {
         return this.plugins.has(id) ? this.plugins.get(id).active : false;
     }

@@ -2,14 +2,8 @@
 // Local file import handler — reads .opus/.mp3 and sends to backend
 
 import { invokeBackend } from '../../../api.js';
-import { translations } from '../../../config/translations.js';
+import { t } from '../../../utils/translate.js';
 import { showLoader, hideLoader } from '../../../core/loader.js';
-
-function t(key) {
-    const lang = localStorage.getItem('elysium_language') || 'de';
-    const dict = translations[lang] || translations.de;
-    return dict[key] || key;
-}
 
 function setStatus(box, bg, color, text) {
     box.style.display = 'block';

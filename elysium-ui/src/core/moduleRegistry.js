@@ -37,7 +37,7 @@ class ModuleRegistry {
         const nav = document.getElementById('sidebar-navigation-slots');
         if (!nav) return;
 
-        const i18nMap = { download: 'nav_download', listen: 'nav_listen', settings: 'nav_settings', debug: 'nav_debug' };
+        const i18nMap = { download: 'nav_download', listen: 'nav_listen', settings: 'nav_settings', debug: 'nav_debug', dependencies: 'nav_dependencies' };
 
         nav.innerHTML = '';
         this.modules.forEach((mod) => {

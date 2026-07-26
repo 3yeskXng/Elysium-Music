@@ -11,7 +11,7 @@ use commands::deps::{
     check_yt_dlp, install_yt_dlp, update_yt_dlp,
     check_ffmpeg, install_ffmpeg,
     check_ffprobe, install_ffprobe,
-    check_all_dependencies,
+    check_all_dependencies, restart_app,
 };
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -44,7 +44,8 @@ pub fn run() {
             install_ffmpeg,
             check_ffprobe,
             install_ffprobe,
-            check_all_dependencies
+            check_all_dependencies,
+            restart_app
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
