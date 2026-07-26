@@ -1,7 +1,7 @@
 // src-tauri/src/commands/scanner.rs
 // Local music directory scanner — reads audio files and sidecar .meta metadata
 
-use crate::commands::download::provider::find_ffprobe_path;
+use crate::commands::deps::discovery::find_tool;
 use crate::commands::track_meta::load_meta;
 use crate::models::TrackPayload;
 use std::fs;
@@ -31,7 +31,7 @@ pub async fn scan_local_library() -> Result<Vec<TrackPayload>, String> {
 
     let entries = fs::read_dir(music_dir).map_err(|e| format!("Failed to read music dir: {}", e))?;
 
-    let ffprobe = find_ffprobe_path().ok();
+    let ffprobe = find_tool("ffprobe");
 
     for entry in entries.flatten() {
         let path = entry.path();

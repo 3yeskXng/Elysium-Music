@@ -91,8 +91,11 @@ export function createDependencySection(container) {
                         'var(--accent-premium)', 'white',
                         async () => {
                             installBtn.disabled = true;
-                            installBtn.textContent = t.dl_installing || (lang === 'de' ? 'Installiere...' : 'Installing...');
-                            showLoader(section, `${lang === 'de' ? 'Installiere' : 'Installing'} ${tool.name}...`);
+                            installBtn.textContent = lang === 'de' ? 'Installiere...' : 'Installing...';
+                            const loaderMsg = lang === 'de'
+                                ? `Installiere ${tool.name} herunter...`
+                                : `Downloading ${tool.name}...`;
+                            showLoader(section, loaderMsg);
                             try {
                                 await invokeBackend(tool.install);
                                 log('SUCCESS', `${tool.name} installed`);

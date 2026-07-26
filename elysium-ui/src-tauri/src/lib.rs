@@ -7,7 +7,7 @@ use tauri::Emitter;
 use commands::scanner::scan_local_library;
 use commands::download::download_youtube;
 use commands::file_ops::{get_track_bytes, save_track};
-use commands::dependency_manager::{
+use commands::deps::{
     check_yt_dlp, install_yt_dlp, update_yt_dlp,
     check_ffmpeg, install_ffmpeg,
     check_ffprobe, install_ffprobe,
@@ -21,7 +21,7 @@ pub fn run() {
         .setup(|app| {
             let handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
-                if let Some(path) = commands::dependency_manager::find_tool_static("yt-dlp") {
+                if let Some(path) = commands::deps::find_tool_static("yt-dlp") {
                     if let Ok(output) = Command::new(&path).args(["-U"]).output() {
                         let stdout = String::from_utf8_lossy(&output.stdout);
                         let stderr = String::from_utf8_lossy(&output.stderr);
