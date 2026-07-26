@@ -1,5 +1,6 @@
 // src-tauri/src/deps/paths.rs
 // Centralized path resolution for dependency binaries and temporary downloads.
+// resolve_path() checks the local deps directory first, then falls back to system PATH.
 
 use super::config::{self, ToolDefinition};
 use std::fs;
@@ -31,4 +32,35 @@ pub fn ensure_dirs() -> Result<(), String> {
 
 pub fn cleanup_temp() {
     let _ = fs::remove_dir_all(temp_dir());
+}
+
+/// Resolve a tool binary path. Checks the local deps directory first,
+/// then falls back to system PATH via `where`/`which`.
+pub fn resolve_path(tool_name: &str) -> Option<String> {
+    if let Some(tool) = config::find_tool_definition(tool_name) {
+        let local = binary_path(&tool);
+        if local.exists() {
+            return Some(local.to_string_lossy().to_string());
+        }
+    }
+    find_on_system_path(tool_name)
+}
+
+fn find_on_system_path(name: &str) -> Option<String> {
+    let cmd = if cfg!(target_os = "windows") { "where" } else { "which" };
+    let mut command = std::process::Command::new(cmd);
+    command.arg(name);
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        command.creation_flags(0x08000000);
+    }
+    command.output().ok().and_then(|o| {
+        if o.status.success() {
+            let stdout = String::from_utf8_lossy(&o.stdout);
+            stdout.lines().next().map(|s| s.trim().to_string())
+        } else {
+            None
+        }
+    })
 }
