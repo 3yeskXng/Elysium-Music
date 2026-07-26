@@ -1,6 +1,7 @@
 // src-tauri/src/lib.rs
 pub mod models;
 pub mod commands;
+pub mod deps;
 
 use commands::scanner::scan_local_library;
 use commands::download::download_youtube;
@@ -18,6 +19,11 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .setup(|app| {
             let handle = app.handle().clone();
+
+            let log_dir = deps::logger::get_log_directory();
+            deps::logger::init(log_dir, handle.clone());
+            deps::logger::info("Elysium dependency system initialized");
+
             tauri::async_runtime::spawn(async move {
                 commands::deps::run_startup_tasks(&handle);
             });
