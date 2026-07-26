@@ -9,6 +9,7 @@ import { settingsModule } from './modules/settings/SettingsView.js';
 import { dependenciesModule } from './modules/dependencies/DependencyView.js';
 import { PlayerBarModule } from './modules/player/PlayerBar.js';
 import { checkForUpdate } from './core/services/updateService.js';
+import { initDepListener } from './modules/deps/services/depService.js';
 import './config/translations.js';
 
 moduleRegistry.onModuleSwitch((activeModule) => {
@@ -41,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     moduleRegistry.setActive('download');
 
     listenForBackendLogs();
+    initDepListener();
 
     checkForUpdate().then(info => {
         if (info) console.log(`[Update] New version available: ${info.version}`);

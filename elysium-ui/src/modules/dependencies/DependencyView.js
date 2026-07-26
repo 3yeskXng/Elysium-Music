@@ -7,9 +7,9 @@ import { checkAllDependencies, updateStatusDisplay, setStatusBox, createActionBu
 import { installTool, updateTool } from './services/depInstallerService.js';
 
 const TOOLS = [
-    { name: 'yt-dlp', check: 'check_yt_dlp', install: 'install_yt_dlp', update: 'update_yt_dlp', canUpdate: true },
-    { name: 'ffmpeg', check: 'check_ffmpeg', install: 'install_ffmpeg', canUpdate: false },
-    { name: 'ffprobe', check: 'check_ffprobe', install: 'install_ffprobe', canUpdate: false },
+    { name: 'yt-dlp', canUpdate: true },
+    { name: 'ffmpeg', canUpdate: false },
+    { name: 'ffprobe', canUpdate: false },
 ];
 
 function log(level, msg) {

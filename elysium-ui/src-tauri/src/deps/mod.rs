@@ -8,7 +8,10 @@ pub mod downloader;
 pub mod extract;
 pub mod logger;
 pub mod paths;
+pub mod progress;
 pub mod updater;
+
+use tauri::AppHandle;
 
 pub use config::{
     detect_platform, find_tool_definition, get_deps_directory,
@@ -16,31 +19,60 @@ pub use config::{
 };
 pub use logger::LogEventPayload;
 
-pub async fn ensure_all_tools() {
-    logger::info("Checking dependencies...");
+pub async fn init(app: AppHandle) {
+    let log_dir = logger::get_log_directory();
+    logger::init(log_dir, app.clone());
+    logger::info("Elysium dependency system initialized");
+
     paths::ensure_dirs().unwrap_or_else(|e| logger::error(&e));
+    checker::run_dependency_sync(&app).await;
+}
 
-    let missing = checker::missing_tools();
-    if missing.is_empty() {
-        logger::info("All dependencies are present");
-        updater::check_and_update_all().await;
-        logger::info("Startup tasks complete");
-        return;
-    }
+// ── Tauri commands ─────────────────────────────────────────────
 
-    logger::info(&format!(
-        "{} missing tool(s), starting download...",
-        missing.len()
-    ));
+#[derive(serde::Serialize)]
+pub struct DependencyStatus {
+    pub ytdlp: bool,
+    pub ffmpeg: bool,
+    pub ffprobe: bool,
+}
 
-    for tool in &missing {
-        match downloader::download_and_install(tool).await {
-            Ok(msg) => logger::info(&msg),
-            Err(e) => logger::error(&format!("Install {} failed: {}", tool.name, e)),
+#[tauri::command]
+pub async fn check_all_deps() -> Result<DependencyStatus, String> {
+    let results = checker::check_all();
+    let mut status = DependencyStatus {
+        ytdlp: false,
+        ffmpeg: false,
+        ffprobe: false,
+    };
+    for (name, ok) in results {
+        match name.as_str() {
+            "yt-dlp" => status.ytdlp = ok,
+            "ffmpeg" => status.ffmpeg = ok,
+            "ffprobe" => status.ffprobe = ok,
+            _ => {}
         }
     }
+    Ok(status)
+}
 
-    logger::info("Checking for updates...");
-    updater::check_and_update_all().await;
-    logger::info("Startup tasks complete");
+#[tauri::command]
+pub async fn install_dep(app: AppHandle, name: String) -> Result<String, String> {
+    let tool = config::find_tool_definition(&name)
+        .ok_or_else(|| format!("Unknown tool: {}", name))?;
+    downloader::download_and_install(&tool, &app).await
+}
+
+#[tauri::command]
+pub async fn update_dep(app: AppHandle, name: String) -> Result<String, String> {
+    let tool = config::find_tool_definition(&name)
+        .ok_or_else(|| format!("Unknown tool: {}", name))?;
+    updater::update_tool(&tool, &app).await
+}
+
+#[tauri::command]
+pub async fn restart_app(app: AppHandle) -> Result<(), String> {
+    app.restart();
+    #[allow(unreachable_code)]
+    Ok(())
 }

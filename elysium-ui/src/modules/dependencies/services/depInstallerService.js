@@ -1,6 +1,5 @@
 // elysium-ui/src/modules/dependencies/services/depInstallerService.js
 // Install and update handlers for yt-dlp, ffmpeg, ffprobe
-// Opens external admin terminal for installation, polls for completion
 
 import { invokeBackend } from '../../../api.js';
 import { t } from '../../../utils/translate.js';
@@ -32,12 +31,7 @@ function startPollingVerification(tool, statusBox, onRefresh) {
                 log('SUCCESS', `${tool.name} detected after ${attempts} polls`);
                 setStatusBox(statusBox, 'rgba(34,197,94,0.1)', '#22c55e',
                     `${tool.name} ${t('deps_installed')}`);
-                const isFfmpegTool = tool.name === 'ffmpeg' || tool.name === 'ffprobe';
-                if (isFfmpegTool) {
-                    triggerAutoRestart(statusBox, onRefresh);
-                } else {
-                    onRefresh();
-                }
+                onRefresh();
             } else if (attempts >= POLL_MAX_ATTEMPTS) {
                 clearInterval(interval);
                 log('WARN', `${tool.name} not detected after ${POLL_MAX_ATTEMPTS} polls`);
@@ -57,15 +51,13 @@ export async function installTool(tool, section, statusBox, onRefresh) {
     unlistenFn = await listenProgress(tool.name, statusBox);
 
     try {
-        const result = await invokeBackend(tool.install);
+        const result = await invokeBackend('install_dep', { name: tool.name });
         log('SUCCESS', `${tool.name}: ${result}`);
         hideLoader(section);
         unlistenFn = safeUnlisten(unlistenFn);
-
-        setStatusBox(statusBox, 'rgba(138,92,246,0.1)', 'var(--accent-premium)',
-            t('deps_terminal_opened'));
-        log('INFO', `Polling for ${tool.name} installation completion...`);
-        startPollingVerification(tool, statusBox, onRefresh);
+        setStatusBox(statusBox, 'rgba(34,197,94,0.1)', '#22c55e',
+            `${tool.name} ${t('deps_installed')}`);
+        onRefresh();
     } catch (err) {
         hideLoader(section);
         unlistenFn = safeUnlisten(unlistenFn);
@@ -82,48 +74,18 @@ export async function updateTool(tool, section, statusBox, onRefresh) {
     unlistenFn = await listenProgress(tool.name, statusBox);
 
     try {
-        const result = await invokeBackend(tool.update);
+        const result = await invokeBackend('update_dep', { name: tool.name });
         log('SUCCESS', `${tool.name} update result: ${result}`);
         hideLoader(section);
         unlistenFn = safeUnlisten(unlistenFn);
-
-        setStatusBox(statusBox, 'rgba(138,92,246,0.1)', 'var(--accent-premium)',
-            t('deps_terminal_opened'));
-        log('INFO', `Polling for ${tool.name} update completion...`);
-        startPollingVerification(tool, statusBox, onRefresh);
+        setStatusBox(statusBox, 'rgba(34,197,94,0.1)', '#22c55e',
+            `${tool.name} ${t('deps_installed')}`);
+        onRefresh();
     } catch (err) {
         hideLoader(section);
         unlistenFn = safeUnlisten(unlistenFn);
         setStatusBox(statusBox, 'rgba(239,68,68,0.1)', '#ef4444',
             `${err.message || err}`);
         log('ERROR', `${tool.name} update failed: ${err.message || err}`);
-    }
-}
-
-function triggerAutoRestart(statusBox, onRefresh) {
-    setStatusBox(statusBox, 'rgba(138,92,246,0.1)', 'var(--accent-premium)',
-        t('deps_restart_required'));
-    log('INFO', 'Auto-restart triggered after ffmpeg installation');
-
-    let countdown = 5;
-    const countdownInterval = setInterval(() => {
-        countdown--;
-        if (countdown <= 0) {
-            clearInterval(countdownInterval);
-            restartApp();
-        } else {
-            setStatusBox(statusBox, 'rgba(138,92,246,0.1)', 'var(--accent-premium)',
-                `${t('deps_auto_restart')} ${countdown} ${t('deps_seconds')}`);
-        }
-    }, 1000);
-}
-
-async function restartApp() {
-    try {
-        log('INFO', 'Restarting application...');
-        await invokeBackend('restart_app');
-    } catch (err) {
-        log('ERROR', `Restart failed: ${err.message || err}`);
-        window.location.reload();
     }
 }
