@@ -24,8 +24,8 @@ pub fn run() {
             deps::logger::init(log_dir, handle.clone());
             deps::logger::info("Elysium dependency system initialized");
 
-            tauri::async_runtime::spawn(async move {
-                commands::deps::run_startup_tasks(&handle);
+            tauri::async_runtime::spawn(async {
+                deps::ensure_all_tools().await;
             });
             Ok(())
         })

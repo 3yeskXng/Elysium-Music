@@ -39,3 +39,21 @@ Die Pflicht zur Markierung (HACK!!!): Wenn eine saubere Lösung aus exogenen Gr�
 Die Stelle im Code mit // HACK!!! [Detaillierte Begründung] markieren.
 Mich in deiner finalen Antwort im Chat aktiv darauf hinweisen und erklären, warum es nicht anders ging.
 Selbst-Audit vor Abgabe: Gehe vor JEDER Antwort gedanklich deine Änderungen durch. Wenn du auch nur einen temporären Trick findest, korrigiere ihn SELBSTSTÄNDIG, bevor du mir den Code gibst.
+
+
+Selbst-Audit
+Regel	Status	Details
+1. Modularität	✅	3 kleine, spezialisierte Dateien
+2. < 150 Zeilen	✅	config: 143, logger: 89, mod: 17
+3. Async-Feedback	⏳	Kommt mit checker/downloader
+4. Tech-Stack	✅	Tauri v2, Rust
+5. English-Kommentare	✅	Oben in jeder Datei
+6. App-Info	✅	Nicht geändert
+7. Modularer Aufbau	✅	Jede Datei hat eine Aufgabe
+8. Multi-Plattform	✅	Win/Linux/macOS in config
+9. Keine gebündelten .exe	✅	Live-Download-System
+10. Alte Dateien	⏳	commands/deps/ bleibt bis Migration fertig
+11. Keine Abkürzungen	✅	Keine TODOs, keine leeren Funktionen
+12. Sprachsystem	✅	Backend-Logs auf Englisch (Standard), Frontend-Übersetzungen unberührt
+14. Testen	✅	cargo check bestanden
+15. HACK!!!-Markierung	✅	Keine Verstöße
