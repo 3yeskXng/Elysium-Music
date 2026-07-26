@@ -19,13 +19,13 @@ pub async fn download_youtube(query: String) -> Result<TrackPayload, String> {
     fs::create_dir_all(&music_dir).map_err(|e| format!("Failed to create music dir: {}", e))?;
 
     let provider = YtDlpProvider;
-    let safe_stem = provider.download(&query, &music_dir)?;
+    let result = provider.download(&query, &music_dir)?;
 
-    let raw_path = find_output(&music_dir, &safe_stem)?;
+    let raw_path = find_output(&music_dir, &result.safe_stem)?;
     let (dur, secs) = probe(raw_path.to_str().unwrap_or(""));
 
-    let clean_name = sanitize(&query);
-    let final_path = music_dir.join(format!("{}.opus", clean_name));
+    let title_clean = sanitize(&result.title);
+    let final_path = music_dir.join(format!("{}.opus", title_clean));
     let resolved = if raw_path != final_path {
         let p = unique_path(&final_path);
         fs::rename(&raw_path, &p).map_err(|e| format!("Rename failed: {}", e))?;
@@ -34,14 +34,14 @@ pub async fn download_youtube(query: String) -> Result<TrackPayload, String> {
         raw_path
     };
 
-    let artist = parse_artist_from_query(&query);
+    let artist = parse_artist_from_query(&result.title);
     let meta = TrackMeta {
         artist: artist.clone(),
         source: "download".to_string(),
     };
     save_meta(&resolved, &meta)?;
 
-    build_payload(&resolved, &clean_name, &artist, &dur, secs)
+    build_payload(&resolved, &title_clean, &artist, &dur, secs)
 }
 
 fn build_payload(

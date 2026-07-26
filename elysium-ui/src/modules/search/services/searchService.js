@@ -35,11 +35,11 @@ export function renderTrackResult(container, track) {
         </div>
         <div style="font-size:0.9rem; color:var(--text-muted); font-family:monospace; flex-shrink:0;">${track.duration || '--:--'}</div>
         <button class="search-download-btn" style="background:rgba(138,92,246,0.1); border:none; color:var(--accent-premium);
-            width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex;
+            width:24px; height:24px; border-radius:50%; cursor:pointer; display:flex;
             align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s;"
             title="${t('dl_btn')}">${ICON_DOWNLOAD}</button>
         <button class="search-add-btn" style="background:rgba(255,255,255,0.05); border:none; color:var(--text-muted);
-            width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex;
+            width:24px; height:24px; border-radius:50%; cursor:pointer; display:flex;
             align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s;"
             title="${t('pl_add_to')}">${ICON_PLUS}</button>
     `;

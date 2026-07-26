@@ -52,10 +52,10 @@ export class PlayerBarModule {
             <div style="width:30%; display:flex; align-items:center; justify-content:flex-end; gap:12px;">
                 <div id="player-action-buttons" style="display:none; gap:8px; align-items:center;">
                     <button id="player-download-btn" style="background:rgba(138,92,246,0.1); border:none; color:var(--accent-premium);
-                        width:30px; height:30px; border-radius:50%; cursor:pointer; display:flex;
+                        width:24px; height:24px; border-radius:50%; cursor:pointer; display:flex;
                         align-items:center; justify-content:center; transition:all 0.2s;" title="${t('pl_download')}">${ICON_DOWNLOAD}</button>
                     <button id="player-add-playlist-btn" style="background:rgba(255,255,255,0.05); border:none; color:var(--text-muted);
-                        width:30px; height:30px; border-radius:50%; cursor:pointer; display:flex;
+                        width:24px; height:24px; border-radius:50%; cursor:pointer; display:flex;
                         align-items:center; justify-content:center; transition:all 0.2s;" title="${t('pl_add_playlist')}">${ICON_PLUS}</button>
                 </div>
                 <div style="font-size:0.8rem; color:var(--text-muted); font-family:monospace;" id="player-time">00:00 / 00:00</div>

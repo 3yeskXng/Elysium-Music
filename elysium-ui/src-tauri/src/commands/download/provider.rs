@@ -5,14 +5,19 @@ use crate::deps::checker::find_on_path as find_tool;
 use std::path::Path;
 use std::process::Command;
 
+pub struct DownloadResult {
+    pub safe_stem: String,
+    pub title: String,
+}
+
 pub trait DownloadProvider {
-    fn download(&self, query: &str, music_dir: &Path) -> Result<String, String>;
+    fn download(&self, query: &str, music_dir: &Path) -> Result<DownloadResult, String>;
 }
 
 pub struct YtDlpProvider;
 
 impl DownloadProvider for YtDlpProvider {
-    fn download(&self, query: &str, music_dir: &Path) -> Result<String, String> {
+    fn download(&self, query: &str, music_dir: &Path) -> Result<DownloadResult, String> {
         let safe_stem = crate::commands::download::file_utils::sanitize(query);
         let temp_base = music_dir.join(format!("__dl_{}", safe_stem));
         let output_template = format!("{}.%(ext)s", temp_base.to_string_lossy());
@@ -28,6 +33,8 @@ impl DownloadProvider for YtDlpProvider {
             "0".to_string(),
             "--no-playlist".to_string(),
             "--no-overwrites".to_string(),
+            "--print".to_string(),
+            "title".to_string(),
             "-o".to_string(),
             output_template,
             search,
@@ -56,6 +63,13 @@ impl DownloadProvider for YtDlpProvider {
             ));
         }
 
-        Ok(safe_stem)
+        let title = String::from_utf8_lossy(&dl.stdout)
+            .lines()
+            .next()
+            .unwrap_or(query)
+            .trim()
+            .to_string();
+
+        Ok(DownloadResult { safe_stem, title })
     }
 }

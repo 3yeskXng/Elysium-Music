@@ -4,6 +4,6 @@
 import { t } from './translate.js';
 
 export function resolveArtist(artist) {
-    if (!artist || artist.trim() === '') return t('artist_unknown');
+    if (!artist || artist.trim() === '' || artist === 'Unknown Artist') return t('artist_unknown');
     return artist;
 }

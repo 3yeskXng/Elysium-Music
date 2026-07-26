@@ -48,7 +48,7 @@ pub fn parse_artist_from_query(query: &str) -> String {
 
 pub fn resolve_artist(audio_path: &Path, stem: &str) -> String {
     let meta = load_meta(audio_path);
-    if !meta.artist.is_empty() {
+    if !meta.artist.is_empty() && meta.artist != "Unknown Artist" {
         return meta.artist;
     }
     parse_artist_from_query(stem)
