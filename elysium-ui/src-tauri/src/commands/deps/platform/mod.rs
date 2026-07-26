@@ -1,9 +1,13 @@
 // src-tauri/src/commands/deps/platform/mod.rs
 // Platform detection and tool configuration registry
 // Maps each dependency to its platform-specific package manager ID
+// Conditionally compiles platform modules for cross-platform support
 
-pub mod linux;
+#[cfg(target_os = "windows")]
 pub mod windows;
+
+#[cfg(target_os = "linux")]
+pub mod linux;
 
 #[derive(Debug)]
 pub enum Platform {

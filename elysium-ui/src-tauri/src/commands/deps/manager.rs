@@ -1,6 +1,6 @@
 // src-tauri/src/commands/deps/manager.rs
 // Core dependency manager — orchestrates check/install/update across platforms
-// Delegates to platform-specific modules (winget, apt, dnf, pacman)
+// Delegates to platform-specific modules (winget, apt, dnf)
 
 use super::platform::{self, detect, Platform, tool_configs};
 use super::progress::emit_progress;
@@ -29,9 +29,11 @@ pub fn check(tool_name: &str) -> bool {
     match config {
         Some(cfg) => {
             let found = match detect() {
+                #[cfg(target_os = "windows")]
                 Platform::Windows => platform::windows::check_tool(cfg.check_command),
+                #[cfg(target_os = "linux")]
                 Platform::Linux => platform::linux::check_tool(cfg.check_command),
-                Platform::Unknown => false,
+                _ => false,
             };
             println!("[Deps:Manager] {} check result: {}", tool_name, found);
             found
@@ -61,9 +63,11 @@ pub fn install(tool_name: &str, app: &AppHandle) -> Result<String, String> {
     emit_progress(app, tool_name, "start", &format!("Preparing {} installation...", tool_name));
 
     let result = match detect() {
+        #[cfg(target_os = "windows")]
         Platform::Windows => platform::windows::install_tool(config.winget_id, tool_name, app),
+        #[cfg(target_os = "linux")]
         Platform::Linux => platform::linux::install_tool(config.apt_package, tool_name, app),
-        Platform::Unknown => Err("Unsupported platform".to_string()),
+        _ => Err("Unsupported platform".to_string()),
     };
 
     match &result {
@@ -85,9 +89,11 @@ pub fn update(tool_name: &str, app: &AppHandle) -> Result<String, String> {
     println!("[Deps:Manager] Updating {}", tool_name);
 
     let result = match detect() {
+        #[cfg(target_os = "windows")]
         Platform::Windows => platform::windows::update_tool(config.winget_id, tool_name, app),
+        #[cfg(target_os = "linux")]
         Platform::Linux => platform::linux::update_tool(config.apt_package, tool_name, app),
-        Platform::Unknown => Err("Unsupported platform".to_string()),
+        _ => Err("Unsupported platform".to_string()),
     };
 
     match &result {

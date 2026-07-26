@@ -68,6 +68,8 @@ export default {
     deps_restart_required: "Restart required — changes will take effect after restart.",
     deps_auto_restart: "Auto-restart in",
     deps_seconds: "seconds",
+    deps_terminal_opened: "Installation window opened. Check the terminal.",
+    deps_check_terminal: "Please check the terminal window for installation status.",
     log_copied: "Copied! ✓",
     log_system_online: "[System] Logger Engine online. Awaiting system triggers...",
     log_terminal_cleared: "[System] Terminal cleared."

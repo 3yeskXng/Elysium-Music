@@ -68,6 +68,8 @@ export default {
     deps_restart_required: "Reinicio necesario — los cambios tendrán efecto después del reinicio.",
     deps_auto_restart: "Reinicio automático en",
     deps_seconds: "segundos",
+    deps_terminal_opened: "Ventana de instalación abierta. Verifica la terminal.",
+    deps_check_terminal: "Verifica la ventana de terminal para el estado de instalación.",
     log_copied: "¡Copiado! ✓",
     log_system_online: "[System] Motor de registro en línea. Esperando eventos del sistema...",
     log_terminal_cleared: "[System] Terminal limpiada."

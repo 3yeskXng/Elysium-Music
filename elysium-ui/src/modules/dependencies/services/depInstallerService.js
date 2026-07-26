@@ -1,6 +1,6 @@
 // elysium-ui/src/modules/dependencies/services/depInstallerService.js
 // Install and update handlers for yt-dlp, ffmpeg, ffprobe
-// Shows loader, listens to progress events, verifies installation, triggers auto-restart for ffmpeg
+// Opens external admin terminal for installation, polls for completion
 
 import { invokeBackend } from '../../../api.js';
 import { t } from '../../../utils/translate.js';
@@ -12,16 +12,44 @@ function log(level, msg) {
     if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Deps', msg);
 }
 
-const RESTART_DELAY_MS = 5000;
+const POLL_INTERVAL_MS = 3000;
+const POLL_MAX_ATTEMPTS = 20;
 
-/**
- * Install a dependency tool by calling the backend command.
- * Shows loader, listens to progress events, verifies installation, triggers auto-restart for ffmpeg.
- * @param {Object} tool - Tool config { name, check, install, update?, canUpdate }
- * @param {HTMLElement} section - The container section element
- * @param {HTMLElement} statusBox - The status display element
- * @param {Function} onRefresh - Callback to refresh status after install
- */
+function getToolInstalled(status, toolName) {
+    if (toolName === 'yt-dlp') return status.ytdlp;
+    if (toolName === 'ffmpeg') return status.ffmpeg;
+    return status.ffprobe;
+}
+
+function startPollingVerification(tool, statusBox, onRefresh) {
+    let attempts = 0;
+    const interval = setInterval(async () => {
+        attempts++;
+        try {
+            const status = await checkAllDependencies();
+            if (getToolInstalled(status, tool.name)) {
+                clearInterval(interval);
+                log('SUCCESS', `${tool.name} detected after ${attempts} polls`);
+                setStatusBox(statusBox, 'rgba(34,197,94,0.1)', '#22c55e',
+                    `${tool.name} ${t('deps_installed')}`);
+                const isFfmpegTool = tool.name === 'ffmpeg' || tool.name === 'ffprobe';
+                if (isFfmpegTool) {
+                    triggerAutoRestart(statusBox, onRefresh);
+                } else {
+                    onRefresh();
+                }
+            } else if (attempts >= POLL_MAX_ATTEMPTS) {
+                clearInterval(interval);
+                log('WARN', `${tool.name} not detected after ${POLL_MAX_ATTEMPTS} polls`);
+                setStatusBox(statusBox, 'rgba(251,191,36,0.1)', '#fbbf24',
+                    t('deps_check_terminal'));
+            }
+        } catch (err) {
+            log('ERROR', `Poll check failed: ${err.message || err}`);
+        }
+    }, POLL_INTERVAL_MS);
+}
+
 export async function installTool(tool, section, statusBox, onRefresh) {
     let unlistenFn = null;
     log('INFO', `Starting installation of ${tool.name}...`);
@@ -30,32 +58,14 @@ export async function installTool(tool, section, statusBox, onRefresh) {
 
     try {
         const result = await invokeBackend(tool.install);
-        log('SUCCESS', `${tool.name} backend returned: ${result}`);
+        log('SUCCESS', `${tool.name}: ${result}`);
         hideLoader(section);
         unlistenFn = safeUnlisten(unlistenFn);
 
-        log('INFO', `Verifying ${tool.name} installation via check_all_dependencies...`);
-        const status = await checkAllDependencies();
-        let verified = false;
-        if (tool.name === 'yt-dlp') verified = status.ytdlp;
-        else if (tool.name === 'ffmpeg') verified = status.ffmpeg;
-        else if (tool.name === 'ffprobe') verified = status.ffprobe;
-
-        if (!verified) {
-            const errMsg = `${tool.name} download succeeded but verification failed — tool not found`;
-            log('ERROR', errMsg);
-            setStatusBox(statusBox, 'rgba(239,68,68,0.1)', '#ef4444', errMsg);
-            onRefresh();
-            return;
-        }
-
-        log('SUCCESS', `${tool.name} verified successfully on disk`);
-        const isFfmpegTool = tool.name === 'ffmpeg' || tool.name === 'ffprobe';
-        if (isFfmpegTool) {
-            triggerAutoRestart(section, statusBox, onRefresh);
-        } else {
-            onRefresh();
-        }
+        setStatusBox(statusBox, 'rgba(138,92,246,0.1)', 'var(--accent-premium)',
+            t('deps_terminal_opened'));
+        log('INFO', `Polling for ${tool.name} installation completion...`);
+        startPollingVerification(tool, statusBox, onRefresh);
     } catch (err) {
         hideLoader(section);
         unlistenFn = safeUnlisten(unlistenFn);
@@ -65,13 +75,6 @@ export async function installTool(tool, section, statusBox, onRefresh) {
     }
 }
 
-/**
- * Update yt-dlp by calling the backend update command.
- * @param {Object} tool - Tool config with update command
- * @param {HTMLElement} section - The container section element
- * @param {HTMLElement} statusBox - The status display element
- * @param {Function} onRefresh - Callback to refresh status after update
- */
 export async function updateTool(tool, section, statusBox, onRefresh) {
     let unlistenFn = null;
     log('INFO', `Starting update of ${tool.name}...`);
@@ -83,9 +86,11 @@ export async function updateTool(tool, section, statusBox, onRefresh) {
         log('SUCCESS', `${tool.name} update result: ${result}`);
         hideLoader(section);
         unlistenFn = safeUnlisten(unlistenFn);
-        setStatusBox(statusBox, 'rgba(34,197,94,0.1)', '#22c55e',
-            result || `${tool.name} ${t('deps_up_to_date')}`);
-        onRefresh();
+
+        setStatusBox(statusBox, 'rgba(138,92,246,0.1)', 'var(--accent-premium)',
+            t('deps_terminal_opened'));
+        log('INFO', `Polling for ${tool.name} update completion...`);
+        startPollingVerification(tool, statusBox, onRefresh);
     } catch (err) {
         hideLoader(section);
         unlistenFn = safeUnlisten(unlistenFn);
@@ -95,14 +100,7 @@ export async function updateTool(tool, section, statusBox, onRefresh) {
     }
 }
 
-/**
- * Trigger auto-restart countdown after ffmpeg/ffprobe installation.
- * Shows countdown in status box, then calls restart_app backend command.
- * @param {HTMLElement} section - The container section element
- * @param {HTMLElement} statusBox - The status display element
- * @param {Function} onRefresh - Callback to refresh status
- */
-function triggerAutoRestart(section, statusBox, onRefresh) {
+function triggerAutoRestart(statusBox, onRefresh) {
     setStatusBox(statusBox, 'rgba(138,92,246,0.1)', 'var(--accent-premium)',
         t('deps_restart_required'));
     log('INFO', 'Auto-restart triggered after ffmpeg installation');
@@ -120,9 +118,6 @@ function triggerAutoRestart(section, statusBox, onRefresh) {
     }, 1000);
 }
 
-/**
- * Call the backend to restart the application.
- */
 async function restartApp() {
     try {
         log('INFO', 'Restarting application...');
