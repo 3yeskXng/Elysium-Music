@@ -51,11 +51,24 @@ document.addEventListener('DOMContentLoaded', () => {
     initDepListener();
     initPlaylistViewListener();
 
-    playlistState.load().then(() => {
-        renderPlaylistSidebar(document.getElementById('sidebar-playlist-slots'));
-    }).catch(() => {
-        renderPlaylistSidebar(document.getElementById('sidebar-playlist-slots'));
-    });
+    const sidebarEl = document.getElementById('sidebar-playlist-slots');
+
+    async function loadPlaylists(retryCount) {
+        try {
+            const playlists = await playlistState.load();
+            renderPlaylistSidebar(sidebarEl);
+            if (playlists.length === 0 && retryCount < 3) {
+                setTimeout(() => loadPlaylists(retryCount + 1), 800);
+            }
+        } catch (err) {
+            console.error('[Init] Playlist load error:', err);
+            renderPlaylistSidebar(sidebarEl);
+            if (retryCount < 3) {
+                setTimeout(() => loadPlaylists(retryCount + 1), 800);
+            }
+        }
+    }
+    loadPlaylists(0);
 
     checkForUpdate().then(info => {
         if (info) console.log(`[Update] New version available: ${info.version}`);

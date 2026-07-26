@@ -1,7 +1,8 @@
 // elysium-ui/src/core/audioEngine.js
-// Core audio playback engine with MediaSession integration
+// Core audio playback engine with MediaSession integration and session cache
 
 import { invokeBackend } from '../api.js';
+import { getCachedAudio, storeToCache } from './cache/audioCache.js';
 
 function log(level, msg) {
     if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'AudioEngine', msg);
@@ -42,8 +43,17 @@ class AudioEngine {
         try {
             this.currentTrack = track;
             if (this.onTrackChangeCallback) this.onTrackChangeCallback(track, 'loading');
-            log('INFO', `Loading audio bytes for: "${track.title}" from ${track.file_path}`);
 
+            const cachedUrl = await getCachedAudio(track);
+            if (cachedUrl && cachedUrl.startsWith('blob:')) {
+                log('INFO', `Playing from session cache: "${track.title}"`);
+                this.audio.src = cachedUrl;
+                await this.audio.play();
+                if (this.onTrackChangeCallback) this.onTrackChangeCallback(track, 'playing');
+                return;
+            }
+
+            log('INFO', `Loading audio bytes for: "${track.title}" from ${track.file_path}`);
             const bytes = await invokeBackend('get_track_bytes', { filePath: track.file_path });
             log('INFO', `Received ${bytes.length} bytes (${(bytes.length / 1024).toFixed(1)} KB) for "${track.title}"`);
 
@@ -55,6 +65,8 @@ class AudioEngine {
             this.audio.src = streamUrl;
             await this.audio.play();
             log('SUCCESS', `Playback started: "${track.title}" — Duration: ${this.audio.duration ? Math.floor(this.audio.duration) + 's' : 'calculating...'}`);
+
+            storeToCache(track, track.file_path);
             if (this.onTrackChangeCallback) this.onTrackChangeCallback(track, 'playing');
         } catch (fault) {
             log('ERROR', `Playback failed for "${track?.title}": ${fault.message || fault}`);

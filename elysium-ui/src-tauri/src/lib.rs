@@ -8,6 +8,7 @@ use commands::scanner::scan_local_library;
 use commands::download::download_youtube;
 use commands::file_ops::{get_track_bytes, save_track};
 use commands::metadata::search_youtube_metadata;
+use commands::cache::{cache_store_file, cache_get_file, cache_get_size, cache_evict};
 use deps::{check_all_deps, install_dep, update_dep, restart_app};
 use playlists::commands::{
     get_playlists, create_playlist, delete_playlist, rename_playlist,
@@ -30,6 +31,10 @@ pub fn run() {
             search_youtube_metadata,
             get_track_bytes,
             save_track,
+            cache_store_file,
+            cache_get_file,
+            cache_get_size,
+            cache_evict,
             check_all_deps,
             install_dep,
             update_dep,

@@ -93,5 +93,8 @@ export default {
     pl_add_to: "Agregar a Playlist",
     pl_already: "Ya incluido",
     pl_download: "Descargar Canción",
-    pl_add_playlist: "Agregar a Playlist"
+    pl_add_playlist: "Agregar a Playlist",
+    pl_delete: "Eliminar",
+    pl_remove: "Quitar",
+    search_clear: "Limpiar búsqueda"
 };

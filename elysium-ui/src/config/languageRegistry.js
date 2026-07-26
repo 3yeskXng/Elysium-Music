@@ -7,6 +7,7 @@ export const languageRegistry = [
     { code: 'en', name: 'English', flag: '🇬🇧' },
     { code: 'es', name: 'Español', flag: '🇪🇸' },
     { code: 'fr', name: 'Français', flag: '🇫🇷' },
+    { code: 'ru', name: 'Русский', flag: '🇷🇺' },
 ];
 
 /**
