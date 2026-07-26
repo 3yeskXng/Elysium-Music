@@ -2,7 +2,7 @@
 // Local music directory scanner — reads audio files and sidecar .meta metadata
 
 use crate::deps::checker::find_on_path as find_tool;
-use crate::commands::track_meta::resolve_artist;
+use crate::commands::track_meta::{resolve_artist, resolve_title};
 use crate::models::TrackPayload;
 use std::fs;
 use std::path::Path;
@@ -30,7 +30,6 @@ pub async fn scan_local_library() -> Result<Vec<TrackPayload>, String> {
     }
 
     let entries = fs::read_dir(music_dir).map_err(|e| format!("Failed to read music dir: {}", e))?;
-
     let ffprobe = find_tool("ffprobe");
 
     for entry in entries.flatten() {
@@ -45,6 +44,7 @@ pub async fn scan_local_library() -> Result<Vec<TrackPayload>, String> {
         let file_name = strip_temp_prefix(&raw_name);
         let path_str = path.to_string_lossy().to_string();
         let artist = resolve_artist(&path, &file_name);
+        let title = resolve_title(&path, &file_name);
 
         let mut duration_str = "00:00".to_string();
         let mut secs_u32 = 0u32;
@@ -69,7 +69,7 @@ pub async fn scan_local_library() -> Result<Vec<TrackPayload>, String> {
 
         tracks.push(TrackPayload {
             id: uuid::Uuid::new_v4().to_string(),
-            title: file_name,
+            title,
             artist,
             duration: duration_str,
             duration_secs: secs_u32,

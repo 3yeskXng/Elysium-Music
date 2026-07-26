@@ -8,7 +8,7 @@ pub mod provider;
 use crate::commands::download::file_utils::{find_output, sanitize, unique_path};
 use crate::commands::download::metadata::probe;
 use crate::commands::download::provider::{DownloadProvider, YtDlpProvider};
-use crate::commands::track_meta::{parse_artist_from_query, save_meta, TrackMeta};
+use crate::commands::track_meta::{save_meta, TrackMeta};
 use crate::models::TrackPayload;
 use std::fs;
 use std::path::PathBuf;
@@ -34,14 +34,23 @@ pub async fn download_youtube(query: String) -> Result<TrackPayload, String> {
         raw_path
     };
 
-    let artist = parse_artist_from_query(&result.title);
+    let duration_secs = if secs > 0 { secs } else { result.duration_secs };
     let meta = TrackMeta {
-        artist: artist.clone(),
+        artist: result.artist.clone(),
         source: "download".to_string(),
+        title: result.title.clone(),
+        thumbnail_url: result.thumbnail.clone(),
     };
     save_meta(&resolved, &meta)?;
 
-    build_payload(&resolved, &title_clean, &artist, &dur, secs)
+    build_payload(
+        &resolved,
+        &result.title,
+        &result.artist,
+        &dur,
+        duration_secs,
+        &result.thumbnail,
+    )
 }
 
 fn build_payload(
@@ -50,6 +59,7 @@ fn build_payload(
     artist: &str,
     dur: &str,
     secs: u32,
+    thumbnail: &str,
 ) -> Result<TrackPayload, String> {
     let p = path.to_string_lossy().to_string();
     Ok(TrackPayload {
@@ -62,7 +72,7 @@ fn build_payload(
         file_path: p.clone(),
         filePath: p,
         album: String::new(),
-        cover_url_camel: String::new(),
-        cover_url_snake: String::new(),
+        cover_url_camel: thumbnail.to_string(),
+        cover_url_snake: thumbnail.to_string(),
     })
 }

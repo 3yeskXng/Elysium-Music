@@ -7,6 +7,8 @@ import { debugModule } from './modules/debug/DebugView.js';
 import { settingsModule } from './modules/settings/SettingsView.js';
 import { dependenciesModule } from './modules/dependencies/DependencyView.js';
 import { playlistOverviewModule } from './modules/playlists/PlaylistOverviewView.js';
+import { metadataRegistry } from './core/metadata/metadataRegistry.js';
+import { youtubeMetadataProvider } from './core/metadata/providers/youtubeMetadataProvider.js';
 import { PlayerBarModule } from './modules/player/PlayerBar.js';
 import { checkForUpdate } from './core/services/updateService.js';
 import { initDepListener } from './modules/deps/services/depService.js';
@@ -42,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     moduleRegistry.registerCoreModule(debugModule);
 
     new PlayerBarModule();
+    metadataRegistry.register(youtubeMetadataProvider);
     moduleRegistry.setActive('search');
 
     listenForBackendLogs();
@@ -62,6 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPlaylistSidebar(document.getElementById('sidebar-playlist-slots'));
     });
     window.addEventListener('elysium-close-playlist', () => {
-        moduleRegistry.setActive('search');
+        moduleRegistry.setActive('playlists');
     });
 });

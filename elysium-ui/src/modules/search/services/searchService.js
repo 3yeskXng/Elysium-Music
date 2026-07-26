@@ -1,13 +1,12 @@
 // elysium-ui/src/modules/search/services/searchService.js
-// Search and download handler — local library search + YouTube stream fallback
+// Search handler — local library search + YouTube stream search delegation
 
 import { invokeBackend } from '../../../api.js';
 import { audioEngine } from '../../../core/audioEngine.js';
-import { pluginManager } from '../../../core/pluginManager.js';
-import { ensureYtDlp } from '../../../utils/dependencyService.js';
 import { showLoader, hideLoader } from '../../../core/loader.js';
 import { t } from '../../../utils/translate.js';
 import { showAddToPlaylistModal } from '../../../components/playlists/AddToPlaylistModal.js';
+import { handleStreamSearch, playStreamTrack } from './streamService.js';
 import { ICON_DOWNLOAD, ICON_PLUS } from '../../../config/icons.js';
 
 function log(level, msg) {
@@ -46,18 +45,27 @@ export function renderTrackResult(container, track) {
 
     row.addEventListener('click', (e) => {
         if (e.target.closest('.search-download-btn') || e.target.closest('.search-add-btn')) return;
-        audioEngine.playTrack(track);
-        log('INFO', `Playing: "${track.title}"`);
+        if (track.file_path) {
+            audioEngine.playTrack(track);
+        } else {
+            playStreamTrack(track, container);
+        }
     });
 
     row.querySelector('.search-download-btn').addEventListener('click', async (e) => {
         e.stopPropagation();
+        const btn = row.querySelector('.search-download-btn');
+        const original = btn.innerHTML;
+        btn.innerHTML = '<span style="animation:spin 0.8s linear infinite;display:flex;">⏳</span>';
+        btn.style.pointerEvents = 'none';
         try {
             await invokeBackend('download_youtube', { query: track.title });
-            log('INFO', `Downloaded: "${track.title}"`);
             window.dispatchEvent(new CustomEvent('elysium-library-refresh'));
         } catch (err) {
             log('ERROR', `Download failed: ${err.message || err}`);
+        } finally {
+            btn.innerHTML = original;
+            btn.style.pointerEvents = 'auto';
         }
     });
 
@@ -77,7 +85,6 @@ export async function handleSearch(input, resultsContainer, statusBox) {
 
     showLoader(resultsContainer, t('search_loading'));
     setStatus(statusBox, 'rgba(138,92,246,0.1)', 'var(--accent-premium)', t('search_searching'));
-    log('INFO', `Search query: "${query}"`);
 
     try {
         const localResults = await searchLocal(query);
@@ -94,7 +101,6 @@ export async function handleSearch(input, resultsContainer, statusBox) {
         hideLoader(resultsContainer);
         setStatus(statusBox, 'rgba(239,68,68,0.1)', '#ef4444',
             `${t('dl_error')}: ${err.message || err}`);
-        log('ERROR', `Search failed: ${err.message || err}`);
     }
 }
 
@@ -108,34 +114,4 @@ async function searchLocal(query) {
     } catch (_) {
         return [];
     }
-}
-
-async function handleStreamSearch(query, statusBox, resultsContainer) {
-    if (!pluginManager.isPluginActive('youtube_core')) {
-        hideLoader(resultsContainer);
-        setStatus(statusBox, 'rgba(255,255,255,0.05)', 'var(--text-muted)', t('dl_plugin_off'));
-        return;
-    }
-
-    ensureYtDlp(statusBox, async () => {
-        showLoader(resultsContainer, t('dl_downloading'));
-        setStatus(statusBox, 'rgba(138,92,246,0.1)', 'var(--accent-premium)',
-            t('dl_downloading_status').replace('${query}', query));
-        try {
-            const result = await invokeBackend('download_youtube', { query });
-            hideLoader(resultsContainer);
-            resultsContainer.innerHTML = '';
-            renderTrackResult(resultsContainer, result);
-            setStatus(statusBox, 'rgba(34,197,94,0.1)', '#22c55e',
-                t('dl_success').replace('${title}', result.title || query));
-            audioEngine.playTrack(result);
-            window.dispatchEvent(new CustomEvent('elysium-library-refresh'));
-            log('SUCCESS', `Stream downloaded & playing: "${result.title || query}"`);
-        } catch (err) {
-            hideLoader(resultsContainer);
-            setStatus(statusBox, 'rgba(239,68,68,0.1)', '#ef4444',
-                `${t('dl_error')}: ${err.message || err}`);
-            log('ERROR', `Stream download failed: ${err.message || err}`);
-        }
-    });
 }

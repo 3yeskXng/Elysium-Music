@@ -8,6 +8,7 @@ import { resolveArtist } from '../../utils/resolveArtist.js';
 import { bindAudioEngineHooks } from './services/playbackService.js';
 import { showAddToPlaylistModal } from '../../components/playlists/AddToPlaylistModal.js';
 import { invokeBackend } from '../../api.js';
+import { showLoader, hideLoader } from '../../core/loader.js';
 
 function log(level, msg) {
     if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Player', msg);
@@ -88,12 +89,19 @@ export class PlayerBarModule {
 
         document.getElementById('player-download-btn').addEventListener('click', async () => {
             if (!this.currentTrack) return;
+            const btn = document.getElementById('player-download-btn');
+            const original = btn.innerHTML;
+            btn.innerHTML = '<span style="animation:spin 0.8s linear infinite;display:flex;">⏳</span>';
+            btn.style.pointerEvents = 'none';
             try {
                 await invokeBackend('download_youtube', { query: this.currentTrack.title });
                 log('INFO', `Downloaded via player: "${this.currentTrack.title}"`);
                 window.dispatchEvent(new CustomEvent('elysium-library-refresh'));
             } catch (err) {
                 log('ERROR', `Player download failed: ${err.message || err}`);
+            } finally {
+                btn.innerHTML = original;
+                btn.style.pointerEvents = 'auto';
             }
         });
 

@@ -1,5 +1,5 @@
 // src-tauri/src/commands/track_meta.rs
-// Sidecar .meta file persistence — stores artist and source per audio track
+// Sidecar .meta file persistence — stores artist, source, title, thumbnail per audio track
 // Falls back to parsing "Artist - Title" from filename when no .meta exists
 
 use serde::{Deserialize, Serialize};
@@ -10,8 +10,14 @@ const AUDIO_EXTENSIONS: &[&str] = &["opus", "mp3", "webm"];
 
 #[derive(Serialize, Deserialize, Default, Clone)]
 pub struct TrackMeta {
+    #[serde(default)]
     pub artist: String,
+    #[serde(default)]
     pub source: String,
+    #[serde(default)]
+    pub title: String,
+    #[serde(default)]
+    pub thumbnail_url: String,
 }
 
 pub fn save_meta(audio_path: &Path, meta: &TrackMeta) -> Result<(), String> {
@@ -52,4 +58,12 @@ pub fn resolve_artist(audio_path: &Path, stem: &str) -> String {
         return meta.artist;
     }
     parse_artist_from_query(stem)
+}
+
+pub fn resolve_title(audio_path: &Path, stem: &str) -> String {
+    let meta = load_meta(audio_path);
+    if !meta.title.is_empty() {
+        return meta.title;
+    }
+    stem.to_string()
 }

@@ -2,12 +2,28 @@
 // Pluggable download provider trait — swap yt-dlp for any other backend
 
 use crate::deps::checker::find_on_path as find_tool;
+use serde::Deserialize;
 use std::path::Path;
 use std::process::Command;
 
 pub struct DownloadResult {
     pub safe_stem: String,
     pub title: String,
+    pub artist: String,
+    pub duration_secs: u32,
+    pub thumbnail: String,
+}
+
+#[derive(Deserialize, Default)]
+struct YtDlpJsonMeta {
+    #[serde(default)]
+    title: String,
+    #[serde(default)]
+    uploader: String,
+    #[serde(default, rename = "duration")]
+    duration_secs: Option<f64>,
+    #[serde(default)]
+    thumbnail: String,
 }
 
 pub trait DownloadProvider {
@@ -23,9 +39,40 @@ impl DownloadProvider for YtDlpProvider {
         let output_template = format!("{}.%(ext)s", temp_base.to_string_lossy());
         let search = format!("ytsearch1:{}", query);
         let yt_dlp = find_tool("yt-dlp")
-            .ok_or("yt-dlp not found. Install it via Settings → Dependencies.")?;
+            .ok_or("yt-dlp not found. Install it via Settings -> Dependencies.")?;
 
-        let mut args = vec![
+        let args = vec![
+            "--dump-json".to_string(),
+            "--no-download".to_string(),
+            "--no-playlist".to_string(),
+            search.clone(),
+        ];
+
+        let meta_output = Command::new(&yt_dlp)
+            .args(&args)
+            .output()
+            .map_err(|e| format!("Failed to run yt-dlp metadata: {}", e))?;
+
+        let mut meta = YtDlpJsonMeta::default();
+        if meta_output.status.success() {
+            let stdout = String::from_utf8_lossy(&meta_output.stdout);
+            if let Some(first_line) = stdout.lines().next() {
+                if let Ok(parsed) = serde_json::from_str::<YtDlpJsonMeta>(first_line) {
+                    meta = parsed;
+                }
+            }
+        }
+
+        let title = if meta.title.is_empty() { query.to_string() } else { meta.title.clone() };
+        let artist = if meta.uploader.is_empty() {
+            crate::commands::track_meta::parse_artist_from_query(&title)
+        } else {
+            meta.uploader.clone()
+        };
+        let duration = meta.duration_secs.unwrap_or(0.0) as u32;
+        let thumbnail = meta.thumbnail.clone();
+
+        let mut dl_args = vec![
             "-x".to_string(),
             "--audio-format".to_string(),
             "opus".to_string(),
@@ -33,24 +80,22 @@ impl DownloadProvider for YtDlpProvider {
             "0".to_string(),
             "--no-playlist".to_string(),
             "--no-overwrites".to_string(),
-            "--print".to_string(),
-            "title".to_string(),
             "-o".to_string(),
             output_template,
             search,
         ];
 
         if let Some(ffmpeg_path) = find_tool("ffmpeg") {
-            args.push("--ffmpeg-location".to_string());
+            dl_args.push("--ffmpeg-location".to_string());
             let ffmpeg_dir = std::path::Path::new(&ffmpeg_path)
                 .parent()
                 .map(|p| p.to_string_lossy().to_string())
                 .unwrap_or(ffmpeg_path);
-            args.push(ffmpeg_dir);
+            dl_args.push(ffmpeg_dir);
         }
 
         let dl = Command::new(&yt_dlp)
-            .args(&args)
+            .args(&dl_args)
             .output()
             .map_err(|e| format!("Failed to run yt-dlp at '{}': {}", yt_dlp, e))?;
 
@@ -63,13 +108,12 @@ impl DownloadProvider for YtDlpProvider {
             ));
         }
 
-        let title = String::from_utf8_lossy(&dl.stdout)
-            .lines()
-            .next()
-            .unwrap_or(query)
-            .trim()
-            .to_string();
-
-        Ok(DownloadResult { safe_stem, title })
+        Ok(DownloadResult {
+            safe_stem,
+            title,
+            artist,
+            duration_secs: duration,
+            thumbnail,
+        })
     }
 }
