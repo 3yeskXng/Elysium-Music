@@ -1,16 +1,12 @@
-// elysium-ui/src/modules/settingsModule.js
-// System settings panel: language selection and plugin management
+// elysium-ui/src/modules/settings/SettingsView.js
+// Settings panel view — language, plugins, and footer
 
-import { ICON_SETTINGS } from '../config/icons.js';
-import { translations } from '../config/translations.js';
-import { getLanguageOptions } from '../config/languageRegistry.js';
-import { pluginManager } from '../core/pluginManager.js';
-import { moduleRegistry } from '../core/moduleRegistry.js';
-import { APP_FOOTER_TEXT } from '../config/appInfo.js';
-
-function log(level, msg) {
-    if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Settings', msg);
-}
+import { ICON_SETTINGS } from '../../config/icons.js';
+import { translations } from '../../config/translations.js';
+import { getLanguageOptions } from '../../config/languageRegistry.js';
+import { pluginManager } from '../../core/pluginManager.js';
+import { APP_FOOTER_TEXT } from '../../config/appInfo.js';
+import { handleLanguageChange, handlePluginToggle } from './services/settingsService.js';
 
 export const settingsModule = {
     id: 'settings',
@@ -47,25 +43,15 @@ export const settingsModule = {
                     </div>
                 `).join('')}
             </div>
+            <div id="update-banner" style="display:none; margin-top:20px; padding:14px 18px; background:rgba(138,92,246,0.1); border:1px solid rgba(138,92,246,0.3); border-radius:8px;"></div>
             <div style="margin-top:40px; padding-top:16px; border-top:1px solid var(--border-subtle); text-align:center; font-size:0.8rem; color:var(--text-muted); user-select:none;">
                 ${APP_FOOTER_TEXT}
             </div>
         `;
 
-        div.querySelector('#language-select').addEventListener('change', (e) => {
-            log('INFO', `Language changed to: "${e.target.value}"`);
-            window.elysiumTranslate(e.target.value);
-            moduleRegistry.applyTranslations();
-        });
-
+        div.querySelector('#language-select').addEventListener('change', (e) => handleLanguageChange(e.target.value));
         div.querySelectorAll('.plugin-toggle-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const pid = e.target.getAttribute('data-plugin-id');
-                pluginManager.togglePlugin(pid);
-                const nowActive = pluginManager.isPluginActive(pid);
-                log(nowActive ? 'SUCCESS' : 'WARN', `Plugin "${pid}" ${nowActive ? 'enabled' : 'disabled'}`);
-                moduleRegistry.setActive('settings');
-            });
+            btn.addEventListener('click', (e) => handlePluginToggle(e.target.getAttribute('data-plugin-id')));
         });
 
         return div;

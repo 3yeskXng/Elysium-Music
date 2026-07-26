@@ -1,14 +1,17 @@
-// src/modules/PlayerBar.js
-import { ICON_PLAY, ICON_PAUSE, ICON_BACK, ICON_FORWARD } from '../config/icons.js';
-import { translations } from '../config/translations.js';
-import { audioEngine } from '../core/audioEngine.js';
-import { resolveArtist } from '../utils/resolveArtist.js';
+// elysium-ui/src/modules/player/PlayerBar.js
+// Global fixed-position player bar — DOM injection and control binding
+
+import { ICON_PLAY, ICON_PAUSE, ICON_BACK, ICON_FORWARD } from '../../config/icons.js';
+import { translations } from '../../config/translations.js';
+import { audioEngine } from '../../core/audioEngine.js';
+import { resolveArtist } from '../../utils/resolveArtist.js';
+import { bindAudioEngineHooks } from './services/playbackService.js';
 
 export class PlayerBarModule {
     constructor() {
-        this.currentTrack = null; 
+        this.currentTrack = null;
         this.injectGlobalPlayerBar();
-        this.bindAudioEngineHooks();
+        bindAudioEngineHooks(this);
     }
 
     injectGlobalPlayerBar() {
@@ -22,9 +25,8 @@ export class PlayerBarModule {
             border-top: 1px solid var(--border-subtle); display: flex;
             align-items: center; justify-content: space-between; padding: 0 32px; z-index: 9999;
         `;
-        
+
         const current = localStorage.getItem('elysium_language') || 'de';
-        
         playerBar.innerHTML = `
             <div style="display:flex; flex-direction:column; gap:2px; width:30%;">
                 <div id="player-title" data-i18n="noTrack" style="font-weight:600; font-size:0.9rem; color:var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${translations[current].noTrack}</div>
@@ -44,25 +46,19 @@ export class PlayerBarModule {
             </div>
             <div style="width:30%; text-align:right; font-size:0.8rem; color:var(--text-muted); font-family:monospace;" id="player-time">00:00 / 00:00</div>
         `;
-        
+
         document.body.appendChild(playerBar);
-        this.bindUserInterfaceControls();
+        this.bindControls();
     }
 
-    bindUserInterfaceControls() {
-        const playBtn = document.getElementById('player-play-trigger');
-        const rewindBtn = document.getElementById('player-rewind');
-        const ffBtn = document.getElementById('player-fastforward');
-        const progressTrack = document.getElementById('player-progress-track');
+    bindControls() {
+        document.getElementById('player-play-trigger').addEventListener('click', () => audioEngine.togglePause());
 
-        playBtn.addEventListener('click', () => audioEngine.togglePause());
-
-        rewindBtn.addEventListener('click', () => {
+        document.getElementById('player-rewind').addEventListener('click', () => {
             audioEngine.seek(Math.max(0, audioEngine.audio.currentTime - 10));
         });
 
-        ffBtn.addEventListener('click', () => {
-            console.log("[Player Core] Skip fast-forward triggered.");
+        document.getElementById('player-fastforward').addEventListener('click', () => {
             window.dispatchEvent(new CustomEvent('elysium-skip-next'));
             if (audioEngine.audio) {
                 audioEngine.audio.currentTime = audioEngine.audio.duration || 0;
@@ -70,56 +66,9 @@ export class PlayerBarModule {
             }
         });
 
-        progressTrack.addEventListener('click', (e) => {
-            const rect = progressTrack.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const percentage = clickX / rect.width;
-            audioEngine.seek(percentage * (audioEngine.audio.duration || 0));
-        });
-    }
-
-    bindAudioEngineHooks() {
-        const titleText = document.getElementById('player-title');
-        const statusText = document.getElementById('player-status');
-        const playBtn = document.getElementById('player-play-trigger');
-        const progressFill = document.getElementById('player-progress-fill');
-        const timeText = document.getElementById('player-time');
-
-        audioEngine.onTrackChange((track, status) => {
-            this.currentTrack = track; 
-            titleText.removeAttribute('data-i18n');
-            titleText.textContent = track.title;
-            
-            // ÄNDERUNG: Wechsle IDLE direkt gegen den Künstlernamen aus!
-            statusText.removeAttribute('data-i18n');
-            statusText.textContent = resolveArtist(track.artist);
-            
-            playBtn.innerHTML = status === 'playing' ? ICON_PAUSE : ICON_PLAY;
-        });
-
-        audioEngine.onStatusChange((nativeState) => {
-            const prog = audioEngine.getProgress();
-            progressFill.style.width = `${prog.percent}%`;
-            
-            // ÄNDERUNG: Überschreibe den Text NICHT mehr mit "PLAYING" oder "PAUSED".
-            // Der Künstlername bleibt fest stehen, wir toggeln nur die SVGs.
-            if (nativeState === 'playing') {
-                playBtn.innerHTML = ICON_PAUSE;
-            } else if (nativeState === 'paused') {
-                playBtn.innerHTML = ICON_PLAY;
-            }
-
-            // Sicherheits-Fallback, falls der Name beim State-Wechsel flackert
-            if (this.currentTrack) {
-                statusText.textContent = resolveArtist(this.currentTrack.artist);
-            }
-
-            const curMin = Math.floor(prog.current / 60).toString().padStart(2, '0');
-            const curSec = Math.floor(prog.current % 60).toString().padStart(2, '0');
-            const totMin = isNaN(prog.total) ? "00" : Math.floor(prog.total / 60).toString().padStart(2, '0');
-            const totSec = isNaN(prog.total) ? "00" : Math.floor(prog.total % 60).toString().padStart(2, '0');
-            
-            timeText.textContent = `${curMin}:${curSec} / ${totMin}:${totSec}`;
+        document.getElementById('player-progress-track').addEventListener('click', (e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            audioEngine.seek((e.clientX - rect.left) / rect.width * (audioEngine.audio.duration || 0));
         });
     }
 }

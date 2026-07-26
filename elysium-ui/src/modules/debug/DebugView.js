@@ -1,38 +1,10 @@
-// elysium-ui/src/modules/debugModule.js
-// Real-time system log viewer and diagnostic terminal
+// elysium-ui/src/modules/debug/DebugView.js
+// Real-time system log viewer — terminal UI and event wiring
 
-const ICON_TERMINAL = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>`;
+import { ICON_TERMINAL } from '../../config/icons.js';
+import { logBacklog, appendEntry, formatAll, clearLogs } from './services/logService.js';
 
-const logBacklog = [];
 let activeTerminal = null;
-
-window.addEventListener('elysium-system-log', (e) => {
-    const { level, module, message } = e.detail;
-    const ts = new Date().toLocaleTimeString('de-DE', { hour12: false });
-    const entry = { timestamp: ts, level, module, message };
-    logBacklog.push(entry);
-    if (activeTerminal) appendEntry(activeTerminal, entry);
-});
-
-window.triggerElysiumLog = (level, module, message) => {
-    window.dispatchEvent(new CustomEvent('elysium-system-log', { detail: { level, module, message } }));
-};
-
-function appendEntry(container, { timestamp, level, module, message }) {
-    const row = document.createElement('div');
-    row.style.cssText = 'margin-bottom:6px; user-select:text;';
-
-    const colors = { ERROR: '#ef4444', SUCCESS: '#22c55e', WARN: '#eab308', INFO: '#a1a1aa' };
-    const c = colors[level] || '#a1a1aa';
-
-    row.innerHTML = `<span style="color:#52525b; user-select:text;">[${timestamp}]</span> <span style="color:${c}; font-weight:bold; user-select:text;">[${level.padEnd(7)}]</span> <span style="color:var(--accent-premium); user-select:text;">[${module}]</span> <span style="color:#e4e4e7; user-select:text;">${message}</span>`;
-    container.appendChild(row);
-    container.scrollTop = container.scrollHeight;
-}
-
-function formatAll() {
-    return logBacklog.map(e => `[${e.timestamp}] [${e.level}] [${e.module}] ${e.message}`).join('\n');
-}
 
 export const debugModule = {
     id: 'debug',
@@ -57,7 +29,6 @@ export const debugModule = {
         `;
 
         activeTerminal = vp.querySelector('#dev-terminal-screen');
-
         if (logBacklog.length === 0) {
             activeTerminal.innerHTML = `<div style="color:#52525b;">[System] Logger Engine online. Awaiting system triggers...</div>`;
         } else {
@@ -70,7 +41,7 @@ export const debugModule = {
 
     wireEvents(vp) {
         vp.querySelector('#clear-terminal-btn').addEventListener('click', () => {
-            logBacklog.length = 0;
+            clearLogs();
             if (activeTerminal) activeTerminal.innerHTML = `<div style="color:#52525b;">[System] Terminal cleared.</div>`;
         });
 
@@ -84,4 +55,13 @@ export const debugModule = {
             }).catch(err => console.error('Clipboard failed:', err));
         });
     }
+};
+
+window.addEventListener('elysium-system-log', (e) => {
+    const entry = appendEntry(null, e.detail);
+    if (activeTerminal && entry) activeTerminal.appendChild(entry);
+});
+
+window.triggerElysiumLog = (level, module, message) => {
+    window.dispatchEvent(new CustomEvent('elysium-system-log', { detail: { level, module, message } }));
 };

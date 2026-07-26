@@ -2,11 +2,12 @@
 // Application bootstrap and lifecycle orchestrator
 
 import { moduleRegistry } from './core/moduleRegistry.js';
-import { downloadModule } from './modules/downloadModule.js';
-import { listenModule } from './modules/listenModule.js';
-import { debugModule } from './modules/debugModule.js';
-import { settingsModule } from './modules/settingsModule.js';
-import { PlayerBarModule } from './modules/PlayerBar.js';
+import { downloadModule } from './modules/download/DownloadView.js';
+import { listenModule } from './modules/listen/ListenView.js';
+import { debugModule } from './modules/debug/DebugView.js';
+import { settingsModule } from './modules/settings/SettingsView.js';
+import { PlayerBarModule } from './modules/player/PlayerBar.js';
+import { checkForUpdate } from './core/services/updateService.js';
 import './config/translations.js';
 
 moduleRegistry.onModuleSwitch((activeModule) => {
@@ -25,4 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     new PlayerBarModule();
     moduleRegistry.setActive('download');
+
+    checkForUpdate().then(info => {
+        if (info) console.log(`[Update] New version available: ${info.version}`);
+    });
 });
