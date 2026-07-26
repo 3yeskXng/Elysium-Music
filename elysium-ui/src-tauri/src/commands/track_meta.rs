@@ -1,5 +1,6 @@
 // src-tauri/src/commands/track_meta.rs
 // Sidecar .meta file persistence — stores artist and source per audio track
+// Falls back to parsing "Artist - Title" from filename when no .meta exists
 
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -14,7 +15,11 @@ pub struct TrackMeta {
 }
 
 pub fn save_meta(audio_path: &Path, meta: &TrackMeta) -> Result<(), String> {
-    let meta_path = audio_path.with_extension("opus.meta");
+    let ext = audio_path
+        .extension()
+        .and_then(|e| e.to_str())
+        .unwrap_or("opus");
+    let meta_path = audio_path.with_extension(format!("{}.meta", ext));
     let json = serde_json::to_string(meta).map_err(|e| format!("Meta serialize: {}", e))?;
     fs::write(&meta_path, json).map_err(|e| format!("Meta write: {}", e))
 }
@@ -39,4 +44,12 @@ pub fn parse_artist_from_query(query: &str) -> String {
         }
     }
     "Unknown Artist".to_string()
+}
+
+pub fn resolve_artist(audio_path: &Path, stem: &str) -> String {
+    let meta = load_meta(audio_path);
+    if !meta.artist.is_empty() {
+        return meta.artist;
+    }
+    parse_artist_from_query(stem)
 }

@@ -7,6 +7,12 @@ import { translations } from '../../../config/translations.js';
 import { showLoader, hideLoader } from '../../../core/loader.js';
 import { resolveArtist } from '../../../utils/resolveArtist.js';
 
+function t(key) {
+    const lang = localStorage.getItem('elysium_language') || 'de';
+    const dict = translations[lang] || translations.de;
+    return dict[key] || key;
+}
+
 function log(level, msg) {
     if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Listen', msg);
 }
@@ -17,9 +23,7 @@ export async function loadLocalTracks(module) {
     const box = vp.querySelector('#library-tracks-container');
     if (!box) return;
 
-    const lang = localStorage.getItem('elysium_language') || 'de';
-    const t = translations[lang] || translations.de;
-    showLoader(box, t.lib_loading || 'Loading...');
+    showLoader(box, t('lib_loading'));
 
     try {
         module.tracks = await invokeBackend('scan_local_library');
@@ -27,7 +31,7 @@ export async function loadLocalTracks(module) {
         if (module.tracks.length === 0) {
             hideLoader(box);
             box.innerHTML = `<div style="color:var(--text-muted); padding:20px; border:1px dashed var(--border-subtle); border-radius:8px; text-align:center; user-select:text;" data-i18n="lib_empty">
-                ${lang === 'de' ? 'Keine Audiodateien im Ordner "music/" gefunden.' : 'No audio files found in the "music/" folder.'}
+                ${t('lib_empty')}
             </div>`;
             log('INFO', 'Library scan complete: 0 tracks found');
             return;
@@ -35,7 +39,7 @@ export async function loadLocalTracks(module) {
 
         hideLoader(box);
         box.innerHTML = '';
-        module.tracks.forEach((t, i) => appendTrackRow(box, t, i));
+        module.tracks.forEach((track, i) => appendTrackRow(box, track, i));
 
         if (module.currentTrackIndex >= 0 && module.currentTrackIndex < module.tracks.length) {
             highlightRow(module, module.currentTrackIndex);
@@ -43,7 +47,7 @@ export async function loadLocalTracks(module) {
         log('SUCCESS', `Library loaded: ${module.tracks.length} track(s) — [${module.tracks.map(t => t.title).join(', ')}]`);
     } catch (err) {
         hideLoader(box);
-        box.innerHTML = `<span style="color:#ef4444; user-select:text;">Fehler: ${err.message || err}</span>`;
+        box.innerHTML = `<span style="color:#ef4444; user-select:text;">${t('deps_lib_error')}: ${err.message || err}</span>`;
         log('ERROR', `Library scan failed: ${err.message || err}`);
     }
 }

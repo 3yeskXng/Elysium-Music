@@ -13,6 +13,8 @@ src/modules/download/
 │   ├── youtubeService.js    <-- Nur die Logik für yt-dlp & Downloads
 │   └── localImportService.js<-- Nur das Einlesen lokaler Dateien
 ! Das gilt für alle neuen & teils alten Dateien in diesem Repo!
-8. **Multi-Plattform:** Die App soll auf Windows und Linux laufen. Später auch noch Android & macOS. Und bereit sein für iOS & Web, aber das kommt erst ganz spät.
+8. **Multi-Plattform:** Die App soll auf Windows und Linux laufen. Später auch noch Android & macOS. Und bereit sein für iOS & Web, aber das kommt erst ganz spät. PASSE AUF DAS ALLES AUF ALLEN PLATTFORMEN LÄUFT UND NICHT WINDOWS-only ist
 9. **Abhängigkeiten:** Ich möchte keine riesigen .exe-Dateien für Abhängigkeiten in meinem Programm haben, sondern Live Installer und Updater, die fragen wenn man das Programm startet.
 10.**Alte Dateien:** Entferne dateien und v.a. Große dateien die man nicht mehr benötigt. Fügt dateien die nicht auf git sein sollen in die .gitignore ein.
+11.**Keine Faulheit:** Du hältst dich strikt an alle Regeln und suchst nie den schnellsten, sondern den architektonisch besten Weg. Kürze NIEMALS Code ab (kein // TODO, kein // ... restlicher Code ...). Schreibe immer den vollständigen, voll funktionsfähigen Code aus!
+12.**Sprachsystem:** Du machst ein ultra-modulares Sprachsystem. Basierend aus Loadern, und den Sprachdateien zu einzelnen Sprachen z.B. de.js. In den Einzelnen Sprachdateien stehen dann die Übersetzungen. Du verwendest gefälligst keine Hardcoded Übersetzungen in dem Code!
