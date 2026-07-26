@@ -1,5 +1,5 @@
 // elysium-ui/src/modules/player/services/playbackService.js
-// Audio engine hook bindings — title, status, progress, time display
+// Audio engine hook bindings — title, status, progress, time display, and action buttons
 
 import { ICON_PLAY, ICON_PAUSE } from '../../../config/icons.js';
 import { audioEngine } from '../../../core/audioEngine.js';
@@ -11,6 +11,7 @@ export function bindAudioEngineHooks(playerBar) {
     const playBtn = document.getElementById('player-play-trigger');
     const progressFill = document.getElementById('player-progress-fill');
     const timeText = document.getElementById('player-time');
+    const actionBtns = document.getElementById('player-action-buttons');
 
     audioEngine.onTrackChange((track, status) => {
         playerBar.currentTrack = track;
@@ -19,6 +20,7 @@ export function bindAudioEngineHooks(playerBar) {
         statusText.removeAttribute('data-i18n');
         statusText.textContent = resolveArtist(track.artist);
         playBtn.innerHTML = status === 'playing' ? ICON_PAUSE : ICON_PLAY;
+        if (actionBtns && track.title) actionBtns.style.display = 'flex';
     });
 
     audioEngine.onStatusChange((nativeState) => {

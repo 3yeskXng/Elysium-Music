@@ -1,11 +1,17 @@
 // elysium-ui/src/modules/player/PlayerBar.js
-// Global fixed-position player bar — DOM injection and control binding
+// Global fixed-position player bar — DOM injection, control binding, and playlist action buttons
 
-import { ICON_PLAY, ICON_PAUSE, ICON_BACK, ICON_FORWARD } from '../../config/icons.js';
+import { ICON_PLAY, ICON_PAUSE, ICON_BACK, ICON_FORWARD, ICON_DOWNLOAD, ICON_PLUS } from '../../config/icons.js';
 import { t } from '../../utils/translate.js';
 import { audioEngine } from '../../core/audioEngine.js';
 import { resolveArtist } from '../../utils/resolveArtist.js';
 import { bindAudioEngineHooks } from './services/playbackService.js';
+import { showAddToPlaylistModal } from '../../components/playlists/AddToPlaylistModal.js';
+import { invokeBackend } from '../../api.js';
+
+function log(level, msg) {
+    if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Player', msg);
+}
 
 export class PlayerBarModule {
     constructor() {
@@ -43,7 +49,17 @@ export class PlayerBarModule {
                     <div id="player-progress-fill" style="width:0%; height:100%; background:var(--accent-premium); border-radius:3px; position:absolute; left:0; top:0;"></div>
                 </div>
             </div>
-            <div style="width:30%; text-align:right; font-size:0.8rem; color:var(--text-muted); font-family:monospace;" id="player-time">00:00 / 00:00</div>
+            <div style="width:30%; display:flex; align-items:center; justify-content:flex-end; gap:12px;">
+                <div id="player-action-buttons" style="display:none; gap:8px; align-items:center;">
+                    <button id="player-download-btn" style="background:rgba(138,92,246,0.1); border:none; color:var(--accent-premium);
+                        width:30px; height:30px; border-radius:50%; cursor:pointer; display:flex;
+                        align-items:center; justify-content:center; transition:all 0.2s;" title="${t('pl_download')}">${ICON_DOWNLOAD}</button>
+                    <button id="player-add-playlist-btn" style="background:rgba(255,255,255,0.05); border:none; color:var(--text-muted);
+                        width:30px; height:30px; border-radius:50%; cursor:pointer; display:flex;
+                        align-items:center; justify-content:center; transition:all 0.2s;" title="${t('pl_add_playlist')}">${ICON_PLUS}</button>
+                </div>
+                <div style="font-size:0.8rem; color:var(--text-muted); font-family:monospace;" id="player-time">00:00 / 00:00</div>
+            </div>
         `;
 
         document.body.appendChild(playerBar);
@@ -69,5 +85,26 @@ export class PlayerBarModule {
             const rect = e.currentTarget.getBoundingClientRect();
             audioEngine.seek((e.clientX - rect.left) / rect.width * (audioEngine.audio.duration || 0));
         });
+
+        document.getElementById('player-download-btn').addEventListener('click', async () => {
+            if (!this.currentTrack) return;
+            try {
+                await invokeBackend('download_youtube', { query: this.currentTrack.title });
+                log('INFO', `Downloaded via player: "${this.currentTrack.title}"`);
+                window.dispatchEvent(new CustomEvent('elysium-library-refresh'));
+            } catch (err) {
+                log('ERROR', `Player download failed: ${err.message || err}`);
+            }
+        });
+
+        document.getElementById('player-add-playlist-btn').addEventListener('click', () => {
+            if (!this.currentTrack) return;
+            showAddToPlaylistModal(this.currentTrack);
+        });
+    }
+
+    showActionButtons() {
+        const btns = document.getElementById('player-action-buttons');
+        if (btns) btns.style.display = 'flex';
     }
 }

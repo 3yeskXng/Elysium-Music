@@ -43,7 +43,7 @@ pub fn parse_artist_from_query(query: &str) -> String {
             return candidate.to_string();
         }
     }
-    "Unknown Artist".to_string()
+    String::new()
 }
 
 pub fn resolve_artist(audio_path: &Path, stem: &str) -> String {

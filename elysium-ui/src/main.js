@@ -2,14 +2,16 @@
 // Application bootstrap and lifecycle orchestrator
 
 import { moduleRegistry } from './core/moduleRegistry.js';
-import { downloadModule } from './modules/download/DownloadView.js';
-import { listenModule } from './modules/listen/ListenView.js';
+import { searchModule } from './modules/search/SearchView.js';
 import { debugModule } from './modules/debug/DebugView.js';
 import { settingsModule } from './modules/settings/SettingsView.js';
 import { dependenciesModule } from './modules/dependencies/DependencyView.js';
 import { PlayerBarModule } from './modules/player/PlayerBar.js';
 import { checkForUpdate } from './core/services/updateService.js';
 import { initDepListener } from './modules/deps/services/depService.js';
+import { playlistState } from './components/playlists/services/playlistState.js';
+import { renderPlaylistSidebar } from './components/playlists/PlaylistList.js';
+import { initPlaylistViewListener } from './components/playlists/PlaylistView.js';
 import './config/translations.js';
 
 moduleRegistry.onModuleSwitch((activeModule) => {
@@ -32,19 +34,30 @@ function listenForBackendLogs() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    moduleRegistry.registerCoreModule(downloadModule);
-    moduleRegistry.registerCoreModule(listenModule);
+    moduleRegistry.registerCoreModule(searchModule);
     moduleRegistry.registerCoreModule(dependenciesModule);
     moduleRegistry.registerCoreModule(settingsModule);
     moduleRegistry.registerCoreModule(debugModule);
 
     new PlayerBarModule();
-    moduleRegistry.setActive('download');
+    moduleRegistry.setActive('search');
 
     listenForBackendLogs();
     initDepListener();
+    initPlaylistViewListener();
+
+    playlistState.load().then(() => {
+        renderPlaylistSidebar(document.getElementById('sidebar-playlist-slots'));
+    });
 
     checkForUpdate().then(info => {
         if (info) console.log(`[Update] New version available: ${info.version}`);
+    });
+
+    window.addEventListener('elysium-playlist-created', () => {
+        renderPlaylistSidebar(document.getElementById('sidebar-playlist-slots'));
+    });
+    window.addEventListener('elysium-close-playlist', () => {
+        moduleRegistry.setActive('search');
     });
 });

@@ -44,8 +44,21 @@
     flex-grow: 1;
 }
 
+#sidebar-playlist-slots {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-subtle);
+    margin-bottom: 8px;
+}
+
 #sidebar-footer-slots {
     margin-bottom: calc(var(--player-height) + 10px);
+}
+
+.playlist-sidebar-item.active {
+    background: rgba(168, 85, 247, 0.1);
+    border-color: rgba(168, 85, 247, 0.2);
+    color: var(--text-pure);
 }
 
 .nav-btn {
