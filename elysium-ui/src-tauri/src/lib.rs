@@ -5,7 +5,7 @@ pub mod commands;
 use commands::scanner::scan_local_library;
 use commands::download::download_youtube;
 use commands::file_ops::{get_track_bytes, save_track};
-use commands::dependency_manager::{check_yt_dlp, install_yt_dlp};
+use commands::dependency_manager::{check_yt_dlp, install_yt_dlp, check_ffmpeg, check_all_dependencies};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -17,7 +17,9 @@ pub fn run() {
             get_track_bytes,
             save_track,
             check_yt_dlp,
-            install_yt_dlp
+            install_yt_dlp,
+            check_ffmpeg,
+            check_all_dependencies
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

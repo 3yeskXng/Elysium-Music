@@ -42,6 +42,7 @@ export default {
     dl_installing: "Installiere yt-dlp...",
     dl_install_error: "Installation fehlgeschlagen",
     dl_install_success: "yt-dlp installiert! Starte Download...",
+    dl_ytdlp_installed: "yt-dlp wurde installiert.",
     update_available: "Ein neues Update ist verfügbar",
     update_version: "Version",
     update_download: "Update herunterladen"

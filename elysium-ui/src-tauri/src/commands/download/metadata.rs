@@ -1,10 +1,16 @@
 // src-tauri/src/commands/download/metadata.rs
 // ffprobe metadata extraction for downloaded audio files
 
+use crate::commands::download::provider::find_ffprobe_path;
 use std::process::Command;
 
 pub fn probe(path: &str) -> (String, u32) {
-    let out = Command::new("ffprobe")
+    let ffprobe = match find_ffprobe_path() {
+        Ok(p) => p,
+        Err(_) => return ("00:00".into(), 0),
+    };
+
+    let out = Command::new(&ffprobe)
         .args([
             "-v", "error",
             "-show_entries", "format=duration",

@@ -13,3 +13,6 @@ src/modules/download/
 │   ├── youtubeService.js    <-- Nur die Logik für yt-dlp & Downloads
 │   └── localImportService.js<-- Nur das Einlesen lokaler Dateien
 ! Das gilt für alle neuen & teils alten Dateien in diesem Repo!
+8. **Multi-Plattform:** Die App soll auf Windows und Linux laufen. Später auch noch Android & macOS. Und bereit sein für iOS & Web, aber das kommt erst ganz spät.
+9. **Abhängigkeiten:** Ich möchte keine riesigen .exe-Dateien für Abhängigkeiten in meinem Programm haben, sondern Live Installer und Updater, die fragen wenn man das Programm startet.
+10.**Alte Dateien:** Entferne dateien und v.a. Große dateien die man nicht mehr benötigt. Fügt dateien die nicht auf git sein sollen in die .gitignore ein.
