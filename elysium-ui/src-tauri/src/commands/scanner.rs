@@ -8,12 +8,15 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-fn strip_dl_prefix(name: &str) -> String {
-    if let Some(rest) = name.strip_prefix("__dl_") {
-        rest.to_string()
-    } else {
-        name.to_string()
+fn strip_temp_prefix(name: &str) -> String {
+    let mut result = name;
+    if let Some(rest) = result.strip_prefix("__dl_") {
+        result = rest;
     }
+    if let Some(rest) = result.strip_prefix("Temp_") {
+        result = rest;
+    }
+    result.to_string()
 }
 
 #[tauri::command]
@@ -39,7 +42,7 @@ pub async fn scan_local_library() -> Result<Vec<TrackPayload>, String> {
         }
 
         let raw_name = path.file_stem().and_then(|e| e.to_str()).unwrap_or("Unknown").to_string();
-        let file_name = strip_dl_prefix(&raw_name);
+        let file_name = strip_temp_prefix(&raw_name);
         let path_str = path.to_string_lossy().to_string();
         let meta = load_meta(&path);
 

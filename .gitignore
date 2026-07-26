@@ -1,34 +1,32 @@
-# Dependency directories (where external libraries live)
+# Dependency directories
 node_modules/
-.cache/
-playlists/
 
 # Log files
 *.log
 npm-debug.log*
 
-# Downloaded music / media (so your personal tracks stay local)
+# Downloaded music / media
 *.mp3
 *.m4a
 *.wav
 downloads/
-me.txt
+
+# Downloaded tools (yt-dlp, ffmpeg binaries)
+tools/
 
 # Operating system files
 .DS_Store
 Thumbs.db
 
-# Please change later! NO PACKAGE.JSON HERE!!!
-
 # Tauri / Rust build artifacts
-src-tauri/target/
+elysium-ui/src-tauri/target/
+elysium-ui/src-tauri/gen/
 
-# Tauri third-party dependencies
-src-tauri/gen/
+# Cache & playlists
+.cache/
+playlists/
 
-# Node modules for the frontend
-node_modules/
-.DS_Store
-node.exe
+# Project files not for git
+me.txt
 music/
 plugin-exmpl.txt

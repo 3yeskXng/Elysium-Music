@@ -18,6 +18,17 @@ moduleRegistry.onModuleSwitch((activeModule) => {
     }
 });
 
+function listenForBackendLogs() {
+    if (window.__TAURI_INTERNALS__) {
+        const { listen } = window.__TAURI_INTERNALS__;
+        listen('elysium-log', (event) => {
+            if (window.triggerElysiumLog && event.payload) {
+                window.triggerElysiumLog('INFO', 'Backend', String(event.payload));
+            }
+        });
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     moduleRegistry.registerCoreModule(downloadModule);
     moduleRegistry.registerCoreModule(listenModule);
@@ -26,6 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     new PlayerBarModule();
     moduleRegistry.setActive('download');
+
+    listenForBackendLogs();
 
     checkForUpdate().then(info => {
         if (info) console.log(`[Update] New version available: ${info.version}`);

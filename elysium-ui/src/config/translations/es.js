@@ -43,6 +43,13 @@ export default {
     dl_install_error: "Error en la instalación",
     dl_install_success: "yt-dlp instalado. Iniciando descarga...",
     dl_ytdlp_installed: "yt-dlp ha sido instalado.",
+    deps_title: "Gestionar dependencias",
+    deps_installed: "Instalado",
+    deps_not_installed: "No instalado",
+    deps_check_error: "Error al verificar",
+    deps_installing: "Instalando...",
+    deps_update: "Actualizar (-U)",
+    deps_update_running: "Actualizando...",
     update_available: "Hay una nueva actualización disponible",
     update_version: "Versión",
     update_download: "Descargar actualización"

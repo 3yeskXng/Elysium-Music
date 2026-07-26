@@ -6,6 +6,6 @@ import { translations } from '../config/translations.js';
 export function resolveArtist(artist) {
     const lang = localStorage.getItem('elysium_language') || 'de';
     const t = translations[lang] || translations.de;
-    if (!artist || artist.trim() === '') return t.artist_local || 'Local File';
+    if (!artist || artist.trim() === '') return t.artist_unknown || 'Unknown Artist';
     return artist;
 }

@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
 
+const AUDIO_EXTENSIONS: &[&str] = &["opus", "mp3", "webm"];
+
 #[derive(Serialize, Deserialize, Default, Clone)]
 pub struct TrackMeta {
     pub artist: String,
@@ -18,11 +20,15 @@ pub fn save_meta(audio_path: &Path, meta: &TrackMeta) -> Result<(), String> {
 }
 
 pub fn load_meta(audio_path: &Path) -> TrackMeta {
-    let meta_path = audio_path.with_extension("opus.meta");
-    fs::read_to_string(&meta_path)
-        .ok()
-        .and_then(|s| serde_json::from_str(&s).ok())
-        .unwrap_or_default()
+    for ext in AUDIO_EXTENSIONS {
+        let meta_path = audio_path.with_extension(format!("{}.meta", ext));
+        if let Ok(content) = fs::read_to_string(&meta_path) {
+            if let Ok(meta) = serde_json::from_str(&content) {
+                return meta;
+            }
+        }
+    }
+    TrackMeta::default()
 }
 
 pub fn parse_artist_from_query(query: &str) -> String {
@@ -32,5 +38,5 @@ pub fn parse_artist_from_query(query: &str) -> String {
             return candidate.to_string();
         }
     }
-    "YouTube Stream".to_string()
+    "Unknown Artist".to_string()
 }
