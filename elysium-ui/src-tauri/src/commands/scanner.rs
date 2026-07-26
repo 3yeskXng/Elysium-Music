@@ -1,7 +1,7 @@
 // src-tauri/src/commands/scanner.rs
 // Local music directory scanner — reads audio files and sidecar .meta metadata
 
-use crate::commands::deps::discovery::find_tool;
+use crate::commands::deps::manager::find_tool_path as find_tool;
 use crate::commands::track_meta::resolve_artist;
 use crate::models::TrackPayload;
 use std::fs;

@@ -26,7 +26,7 @@ export async function installTool(tool, section, statusBox, onRefresh) {
     let unlistenFn = null;
     log('INFO', `Starting installation of ${tool.name}...`);
     showLoader(section, `${t('dl_downloading')} ${tool.name}...`);
-    unlistenFn = listenProgress(tool.name, statusBox);
+    unlistenFn = await listenProgress(tool.name, statusBox);
 
     try {
         const result = await invokeBackend(tool.install);
@@ -76,7 +76,7 @@ export async function updateTool(tool, section, statusBox, onRefresh) {
     let unlistenFn = null;
     log('INFO', `Starting update of ${tool.name}...`);
     showLoader(section, `${t('deps_checking_update')} ${tool.name}...`);
-    unlistenFn = listenProgress(tool.name, statusBox);
+    unlistenFn = await listenProgress(tool.name, statusBox);
 
     try {
         const result = await invokeBackend(tool.update);

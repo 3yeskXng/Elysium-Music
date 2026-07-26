@@ -1,21 +1,12 @@
 // src-tauri/src/commands/deps/mod.rs
-// Dependency management module — re-exports all sub-modules and Tauri commands
-// Each tool (yt-dlp, ffmpeg, ffprobe) has its own dedicated module
+// Dependency management module — Tauri commands and re-exports
+// Delegates all logic to manager.rs and platform-specific modules
 
-pub mod discovery;
-pub mod download;
-pub mod extract;
-pub mod ffmpeg;
+pub mod manager;
+pub mod platform;
 pub mod progress;
-pub mod yt_dlp;
 
-use discovery::find_tool;
 use tauri::AppHandle;
-
-/// Static tool lookup for use outside of async context (e.g. in setup).
-pub fn find_tool_static(tool: &str) -> Option<String> {
-    find_tool(tool)
-}
 
 #[derive(serde::Serialize)]
 pub struct DependencyStatus {
@@ -24,61 +15,69 @@ pub struct DependencyStatus {
     pub ffprobe: bool,
 }
 
-// ── Check commands (fast, no I/O) ──────────────────────────────
+pub fn find_tool_static(tool: &str) -> Option<String> {
+    manager::find_tool_path(tool)
+}
+
+pub fn run_startup_tasks(app: &AppHandle) {
+    manager::run_startup_ytdlp_update(app);
+}
+
+// ── Check commands ─────────────────────────────────────────────
 
 #[tauri::command]
 pub async fn check_yt_dlp() -> Result<bool, String> {
-    Ok(yt_dlp::check())
+    Ok(manager::check("yt-dlp"))
 }
 
 #[tauri::command]
 pub async fn check_ffmpeg() -> Result<bool, String> {
-    Ok(ffmpeg::check_ffmpeg())
+    Ok(manager::check("ffmpeg"))
 }
 
 #[tauri::command]
 pub async fn check_ffprobe() -> Result<bool, String> {
-    Ok(ffmpeg::check_ffprobe())
+    Ok(manager::check("ffprobe"))
 }
 
 #[tauri::command]
 pub async fn check_all_dependencies() -> Result<DependencyStatus, String> {
-    Ok(DependencyStatus {
-        ytdlp: yt_dlp::check(),
-        ffmpeg: ffmpeg::check_ffmpeg(),
-        ffprobe: ffmpeg::check_ffprobe(),
-    })
+    Ok(manager::check_all())
 }
 
-// ── Install / Update commands (blocking I/O via spawn_blocking) ─
+// ── Install commands ───────────────────────────────────────────
 
 #[tauri::command]
 pub async fn install_yt_dlp(app: AppHandle) -> Result<String, String> {
-    tokio::task::spawn_blocking(move || yt_dlp::install(&app))
-        .await
-        .map_err(|e| format!("Task failed: {}", e))?
-}
-
-#[tauri::command]
-pub async fn update_yt_dlp(app: AppHandle) -> Result<String, String> {
-    tokio::task::spawn_blocking(move || yt_dlp::update(&app))
+    tokio::task::spawn_blocking(move || manager::install("yt-dlp", &app))
         .await
         .map_err(|e| format!("Task failed: {}", e))?
 }
 
 #[tauri::command]
 pub async fn install_ffmpeg(app: AppHandle) -> Result<String, String> {
-    tokio::task::spawn_blocking(move || ffmpeg::install(&app))
+    tokio::task::spawn_blocking(move || manager::install("ffmpeg", &app))
         .await
         .map_err(|e| format!("Task failed: {}", e))?
 }
 
 #[tauri::command]
 pub async fn install_ffprobe(app: AppHandle) -> Result<String, String> {
-    tokio::task::spawn_blocking(move || ffmpeg::install(&app))
+    tokio::task::spawn_blocking(move || manager::install("ffprobe", &app))
         .await
         .map_err(|e| format!("Task failed: {}", e))?
 }
+
+// ── Update commands ────────────────────────────────────────────
+
+#[tauri::command]
+pub async fn update_yt_dlp(app: AppHandle) -> Result<String, String> {
+    tokio::task::spawn_blocking(move || manager::update("yt-dlp", &app))
+        .await
+        .map_err(|e| format!("Task failed: {}", e))?
+}
+
+// ── Utility commands ───────────────────────────────────────────
 
 #[tauri::command]
 pub async fn restart_app(app: AppHandle) -> Result<(), String> {

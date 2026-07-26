@@ -1,7 +1,7 @@
 // src-tauri/src/commands/download/provider.rs
 // Pluggable download provider trait — swap yt-dlp for any other backend
 
-use crate::commands::deps::discovery::find_tool;
+use crate::commands::deps::manager::find_tool_path as find_tool;
 use std::path::Path;
 use std::process::Command;
 

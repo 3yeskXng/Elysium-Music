@@ -2,8 +2,6 @@
 pub mod models;
 pub mod commands;
 
-use std::process::Command;
-use tauri::Emitter;
 use commands::scanner::scan_local_library;
 use commands::download::download_youtube;
 use commands::file_ops::{get_track_bytes, save_track};
@@ -21,14 +19,7 @@ pub fn run() {
         .setup(|app| {
             let handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
-                if let Some(path) = commands::deps::find_tool_static("yt-dlp") {
-                    if let Ok(output) = Command::new(&path).args(["-U"]).output() {
-                        let stdout = String::from_utf8_lossy(&output.stdout);
-                        let stderr = String::from_utf8_lossy(&output.stderr);
-                        let msg = if stdout.is_empty() { stderr.to_string() } else { stdout.to_string() };
-                        let _ = handle.emit("elysium-log", msg.trim().to_string());
-                    }
-                }
+                commands::deps::run_startup_tasks(&handle);
             });
             Ok(())
         })

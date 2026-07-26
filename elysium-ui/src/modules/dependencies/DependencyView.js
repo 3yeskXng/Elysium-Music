@@ -17,8 +17,11 @@ function log(level, msg) {
 }
 
 function createToolRow(tool, section) {
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'margin-bottom:12px;';
+
     const row = document.createElement('div');
-    row.style.cssText = 'display:flex; align-items:center; gap:12px; margin-bottom:12px; padding:12px; background:rgba(0,0,0,0.2); border-radius:6px;';
+    row.style.cssText = 'display:flex; align-items:center; gap:12px; padding:12px; background:rgba(0,0,0,0.2); border-radius:6px;';
 
     const label = document.createElement('span');
     label.style.cssText = 'font-weight:600; color:var(--text-main); min-width:80px;';
@@ -33,14 +36,16 @@ function createToolRow(tool, section) {
     const actions = document.createElement('div');
     actions.style.cssText = 'display:flex; gap:8px; margin-left:auto;';
 
-    const statusBox = document.createElement('div');
-    statusBox.style.cssText = 'display:none; width:100%; margin-top:8px;';
-
     row.appendChild(label);
     row.appendChild(statusDot);
     row.appendChild(statusLabel);
     row.appendChild(actions);
-    row.appendChild(statusBox);
+
+    const statusBox = document.createElement('div');
+    statusBox.style.cssText = 'display:none; width:100%; margin-top:8px; padding:10px 14px; border-radius:6px; font-size:0.85rem; line-height:1.5; user-select:text;';
+
+    wrapper.appendChild(row);
+    wrapper.appendChild(statusBox);
 
     async function refreshStatus() {
         try {
@@ -88,7 +93,7 @@ function createToolRow(tool, section) {
     }
 
     refreshStatus();
-    return row;
+    return wrapper;
 }
 
 export const dependenciesModule = {

@@ -1,7 +1,7 @@
 // src-tauri/src/commands/download/metadata.rs
 // ffprobe metadata extraction for downloaded audio files
 
-use crate::commands::deps::discovery::find_tool;
+use crate::commands::deps::manager::find_tool_path as find_tool;
 use std::process::Command;
 
 pub fn probe(path: &str) -> (String, u32) {

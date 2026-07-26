@@ -10,16 +10,16 @@ function log(level, msg) {
 
 /**
  * Listen to Tauri dep-progress events for a specific tool.
- * Returns an unlisten function to stop listening.
+ * Returns a promise that resolves to an unlisten function.
  * @param {string} toolName - The tool to listen for ('yt-dlp', 'ffmpeg', 'ffprobe')
  * @param {HTMLElement} statusBox - The status display element
  * @param {Function|null} onDone - Callback when step is 'done' or 'skip'
- * @returns {Function} Unlisten function
+ * @returns {Promise<Function>} Promise resolving to unlisten function
  */
-export function listenProgress(toolName, statusBox, onDone = null) {
+export async function listenProgress(toolName, statusBox, onDone = null) {
     if (!window.__TAURI_INTERNALS__) return () => {};
     const { listen } = window.__TAURI_INTERNALS__;
-    const unlisten = listen('dep-progress', (event) => {
+    const unlisten = await listen('dep-progress', (event) => {
         const p = event.payload;
         if (p.tool !== toolName) return;
         log('INFO', `[${p.tool}] ${p.step}: ${p.message}`);
