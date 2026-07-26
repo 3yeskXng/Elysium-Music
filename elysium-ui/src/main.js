@@ -54,23 +54,29 @@ document.addEventListener('DOMContentLoaded', () => {
     initDepListener();
     initPlaylistViewListener();
 
-    const sidebarEl = document.getElementById('sidebar-playlist-slots');
+    async function loadPlaylists(retryCount = 0) {
+        const MAX_RETRIES = 3;
+        const container = document.getElementById('sidebar-playlist-slots');
 
-    async function loadPlaylists(retryCount) {
         try {
-            const playlists = await playlistState.load();
-            renderPlaylistSidebar(sidebarEl);
-            if (playlists.length === 0 && retryCount < 3) {
-                setTimeout(() => loadPlaylists(retryCount + 1), 800);
-            }
+            // Versuche den State aus dem Storage/Tauri Backend zu laden
+            await playlistState.load();
+            
+            // Sofort im UI rendern (egal ob 0 oder 10 Playlists da sind)
+            renderPlaylistSidebar(container);
         } catch (err) {
-            console.error('[Init] Playlist load error:', err);
-            renderPlaylistSidebar(sidebarEl);
-            if (retryCount < 3) {
-                setTimeout(() => loadPlaylists(retryCount + 1), 800);
+            console.error(`[Init] Playlist load error (Attempt ${retryCount + 1}/${MAX_RETRIES}):`, err);
+            
+            if (retryCount < MAX_RETRIES) {
+                // Falls das Storage-Plugin beim Start noch kurz gebraucht hat: Retry nach 500ms
+                setTimeout(() => loadPlaylists(retryCount + 1), 500);
+            } else {
+                // Bei echtem fehlerhaftem Abbruch leeren State anzeigen
+                renderPlaylistSidebar(container);
             }
         }
     }
+
     loadPlaylists(0);
 
     checkForUpdate().then(info => {
@@ -80,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('elysium-playlist-created', () => {
         renderPlaylistSidebar(document.getElementById('sidebar-playlist-slots'));
     });
+
     window.addEventListener('elysium-close-playlist', () => {
         moduleRegistry.setActive('playlists');
     });
