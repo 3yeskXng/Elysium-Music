@@ -15,8 +15,9 @@ pub fn check_tool(check_cmd: &str) -> bool {
     println!("[Deps:Win] Checking tool: {}", check_cmd);
     let mut cmd = Command::new("where");
     cmd.arg(check_cmd);
+    
     #[cfg(target_os = "windows")]
-    cmd.creation_flags(CREATE_NO_WINDOW);
+    cmd.creation_flags(CREATE_NO_WINDOW); // Hier MUSS die Konstante rein!
 
     if let Ok(o) = cmd.output() {
         let found = o.status.success();
@@ -51,7 +52,7 @@ fn open_elevated_cmd(
     cmd.creation_flags(CREATE_NO_WINDOW);
 
     let output = cmd
-        .output()
+        .spawn()
         .map_err(|e| format!("Failed to launch PowerShell: {}. Ensure PowerShell is installed.", e))?;
 
     let stderr = String::from_utf8_lossy(&output.stderr);
