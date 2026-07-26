@@ -8,7 +8,8 @@ import { ensureYtDlp } from '../../../utils/dependencyService.js';
 import { showLoader, hideLoader } from '../../../core/loader.js';
 import { t } from '../../../utils/translate.js';
 import { metadataRegistry } from '../../../core/metadata/metadataRegistry.js';
-import { renderTrackResult, setStatus } from './searchService.js';
+import { buildTrackRow } from './trackRowBuilder.js';
+import { setStatus } from './searchService.js';
 
 function log(level, msg) {
     if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Stream', msg);
@@ -29,7 +30,7 @@ export async function handleStreamSearch(query, statusBox, resultsContainer) {
             resultsContainer.innerHTML = '';
 
             if (metadataResults.length > 0) {
-                metadataResults.forEach(track => renderTrackResult(resultsContainer, track));
+                metadataResults.forEach(track => resultsContainer.appendChild(buildTrackRow(track, resultsContainer)));
                 setStatus(statusBox, 'rgba(34,197,94,0.1)', '#22c55e',
                     t('search_found_local').replace('${count}', metadataResults.length));
             } else {

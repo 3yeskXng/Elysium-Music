@@ -6,13 +6,14 @@ import en from './en.js';
 import es from './es.js';
 import fr from './fr.js';
 import ru from './ru.js';
+import ptBR from './pt-BR.js';
 
-export const translations = { de, en, es, fr, ru };
+export const translations = { de, en, es, fr, ru, 'pt-BR': ptBR };
 
 window.elysiumTranslate = function (lang) {
     localStorage.setItem('elysium_language', lang);
     document.documentElement.lang = lang;
-    const dict = translations[lang];
+    const dict = translations[lang] || translations.en;
     if (!dict) return;
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');

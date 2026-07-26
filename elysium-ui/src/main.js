@@ -15,6 +15,7 @@ import { initDepListener } from './modules/deps/services/depService.js';
 import { playlistState } from './components/playlists/services/playlistState.js';
 import { renderPlaylistSidebar } from './components/playlists/PlaylistList.js';
 import { initPlaylistViewListener } from './components/playlists/PlaylistView.js';
+import { initializeLanguage } from './config/language/languageDetector.js';
 import './config/translations.js';
 
 moduleRegistry.onModuleSwitch((activeModule) => {
@@ -37,6 +38,8 @@ function listenForBackendLogs() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    initializeLanguage();
+
     moduleRegistry.registerCoreModule(searchModule);
     moduleRegistry.registerCoreModule(playlistOverviewModule);
     moduleRegistry.registerCoreModule(dependenciesModule);

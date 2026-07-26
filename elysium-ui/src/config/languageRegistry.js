@@ -8,6 +8,7 @@ export const languageRegistry = [
     { code: 'es', name: 'Español', flag: '🇪🇸' },
     { code: 'fr', name: 'Français', flag: '🇫🇷' },
     { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+    { code: 'pt-BR', name: 'Português (BR)', flag: '🇧🇷' },
 ];
 
 /**

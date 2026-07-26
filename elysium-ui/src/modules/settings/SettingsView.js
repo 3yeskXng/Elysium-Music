@@ -16,7 +16,7 @@ export const settingsModule = {
     render() {
         const div = document.createElement('div');
         div.className = 'view-container animate-fade-in';
-        const lang = localStorage.getItem('elysium_language') || 'de';
+        const lang = localStorage.getItem('elysium_language') || 'en';
         const plugins = pluginManager.getPlugins();
         const langOptions = getLanguageOptions(lang);
 

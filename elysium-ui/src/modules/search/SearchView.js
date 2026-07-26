@@ -66,9 +66,19 @@ export const searchModule = {
             clearBtn.style.display = input.value.length > 0 ? 'flex' : 'none';
         });
 
+        let debounceTimer = null;
+        const debouncedSearch = () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => handleSearch(input, results, statusBox), 350);
+        };
+
         trigger.addEventListener('click', () => handleSearch(input, results, statusBox));
         input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') handleSearch(input, results, statusBox);
+            if (e.key === 'Enter') {
+                clearTimeout(debounceTimer);
+                handleSearch(input, results, statusBox);
+            }
         });
+        input.addEventListener('input', debouncedSearch);
     }
 };
