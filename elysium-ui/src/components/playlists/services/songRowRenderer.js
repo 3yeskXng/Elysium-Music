@@ -1,5 +1,6 @@
 // elysium-ui/src/components/playlists/services/songRowRenderer.js
-// Renders a single song row — same createElement pattern as PlayerBar buttons
+// Renders a single song row — track bound to row element via WeakMap
+// Zero dependency on audioEngine.currentTrack or any global player state
 
 import { t } from '../../../utils/translate.js';
 import { ICON_PLAY, ICON_TRASH, ICON_DOWNLOAD, ICON_PLUS, ICON_QUEUE } from '../../../config/icons.js';
@@ -8,6 +9,8 @@ import { playSong } from './playlistPlayer.js';
 import { showAddToPlaylistModal } from '../AddToPlaylistModal.js';
 import { queueManager } from '../../queue/services/QueueManager.js';
 import { invokeBackend } from '../../../api.js';
+
+const trackBindMap = new WeakMap();
 
 function log(level, msg) {
     if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Playlists', msg);
@@ -20,6 +23,72 @@ function formatDuration(secs) {
     return `${m}:${s}`;
 }
 
+function handlePlay(e, row) {
+    e.stopPropagation();
+    const track = trackBindMap.get(row);
+    if (track) playSong(track);
+}
+
+function handleDownload(e, row) {
+    e.stopPropagation();
+    const track = trackBindMap.get(row);
+    if (!track) return;
+    const btn = row.querySelector('.sr-dl-btn');
+    const original = btn.innerHTML;
+    btn.innerHTML = '<span style="animation:spin 0.8s linear infinite;display:flex;">⏳</span>';
+    btn.style.pointerEvents = 'none';
+    (async () => {
+        try {
+            let destPath = null;
+            if (window.__TAURI__ && window.__TAURI__.dialog) {
+                const { save } = window.__TAURI__.dialog;
+                destPath = await save({
+                    defaultPath: `${track.title || 'track'}.opus`,
+                    filters: [{ name: 'Opus Audio', extensions: ['opus'] }]
+                });
+            }
+            if (destPath === null) return;
+            await invokeBackend('download_youtube', { query: track.title, destPath });
+            window.dispatchEvent(new CustomEvent('elysium-library-refresh'));
+        } catch (err) {
+            log('ERROR', `Download failed: ${err.message || err}`);
+        } finally {
+            btn.innerHTML = original;
+            btn.style.pointerEvents = 'auto';
+        }
+    })();
+}
+
+function handleAddToPlaylist(e, row) {
+    e.stopPropagation();
+    const track = trackBindMap.get(row);
+    if (track) showAddToPlaylistModal(track);
+}
+
+function handleQueue(e, row) {
+    e.stopPropagation();
+    const track = trackBindMap.get(row);
+    if (track) queueManager.enqueue(track, 'playlist');
+}
+
+function handleRemove(e, row, playlist, onViewChange) {
+    e.stopPropagation();
+    const track = trackBindMap.get(row);
+    if (!track) return;
+    const removeBtn = row.querySelector('.sr-remove-btn');
+    removeBtn.style.color = '#ef4444';
+    (async () => {
+        try {
+            await playlistState.removeSong(playlist.id, track.id);
+            log('INFO', `Removed "${track.title}" from "${playlist.name}"`);
+            if (onViewChange) onViewChange(playlist.id);
+        } catch (err) {
+            log('ERROR', `Remove song failed: ${err.message || err}`);
+            removeBtn.style.color = '';
+        }
+    })();
+}
+
 export function renderSongRow(song, playlist, onViewChange) {
     const row = document.createElement('div');
     row.className = 'playlist-track-actions';
@@ -29,85 +98,27 @@ export function renderSongRow(song, playlist, onViewChange) {
         cursor:pointer; transition:all 0.2s ease;
     `;
 
-    const playBtn = document.createElement('button');
-    playBtn.className = 'player-btn player-btn-play';
-    playBtn.innerHTML = ICON_PLAY;
-    playBtn.title = t('pl_play_all');
-    playBtn.addEventListener('click', () => playSong(song));
+    trackBindMap.set(row, song);
 
-    const info = document.createElement('div');
-    info.style.cssText = 'flex:1; min-width:0;';
-    info.innerHTML = `
-        <div style="font-weight:600;font-size:0.92rem;color:var(--text-main);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${song.title}</div>
-        <div style="font-size:0.8rem;color:var(--text-muted);">${song.artist || t('artist_unknown')}</div>
+    row.innerHTML = `
+        <button class="sr-play-btn player-btn player-btn-play" title="${t('pl_play_all')}">${ICON_PLAY}</button>
+        <div style="flex:1; min-width:0;">
+            <div style="font-weight:600;font-size:0.92rem;color:var(--text-main);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${song.title}</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);">${song.artist || t('artist_unknown')}</div>
+        </div>
+        <span style="font-size:0.85rem;color:var(--text-muted);font-family:monospace;flex-shrink:0;">${formatDuration(song.duration_secs)}</span>
+        <button class="sr-dl-btn player-btn" title="${t('pl_download')}">${ICON_DOWNLOAD}</button>
+        <button class="sr-add-btn player-btn" title="${t('pl_add_to')}">${ICON_PLUS}</button>
+        <button class="sr-queue-btn player-btn" title="${t('queue_add')}">${ICON_QUEUE}</button>
+        <button class="sr-remove-btn player-btn" title="${t('pl_remove')}">${ICON_TRASH}</button>
     `;
 
-    const duration = document.createElement('span');
-    duration.style.cssText = 'font-size:0.85rem;color:var(--text-muted);font-family:monospace;flex-shrink:0;';
-    duration.textContent = formatDuration(song.duration_secs);
+    row.querySelector('.sr-play-btn').addEventListener('click', (e) => handlePlay(e, row));
+    row.querySelector('.sr-dl-btn').addEventListener('click', (e) => handleDownload(e, row));
+    row.querySelector('.sr-add-btn').addEventListener('click', (e) => handleAddToPlaylist(e, row));
+    row.querySelector('.sr-queue-btn').addEventListener('click', (e) => handleQueue(e, row));
+    row.querySelector('.sr-remove-btn').addEventListener('click', (e) => handleRemove(e, row, playlist, onViewChange));
 
-    const dlBtn = document.createElement('button');
-    dlBtn.className = 'player-btn';
-    dlBtn.innerHTML = ICON_DOWNLOAD;
-    dlBtn.title = t('pl_download');
-    dlBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const original = dlBtn.innerHTML;
-        dlBtn.innerHTML = '<span style="animation:spin 0.8s linear infinite;display:flex;">⏳</span>';
-        dlBtn.style.pointerEvents = 'none';
-        try {
-            let destPath = null;
-            if (window.__TAURI__ && window.__TAURI__.dialog) {
-                const { save } = window.__TAURI__.dialog;
-                destPath = await save({ defaultPath: `${song.title || 'track'}.opus`, filters: [{ name: 'Opus Audio', extensions: ['opus'] }] });
-            }
-            if (destPath === null) return;
-            await invokeBackend('download_youtube', { query: song.title, destPath });
-            window.dispatchEvent(new CustomEvent('elysium-library-refresh'));
-        } catch (err) {
-            log('ERROR', `Download failed: ${err.message || err}`);
-        } finally {
-            dlBtn.innerHTML = original;
-            dlBtn.style.pointerEvents = 'auto';
-        }
-    });
-
-    const addBtn = document.createElement('button');
-    addBtn.className = 'player-btn';
-    addBtn.innerHTML = ICON_PLUS;
-    addBtn.title = t('pl_add_to');
-    addBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        showAddToPlaylistModal(song);
-    });
-
-    const queueBtn = document.createElement('button');
-    queueBtn.className = 'player-btn';
-    queueBtn.innerHTML = ICON_QUEUE;
-    queueBtn.title = t('queue_add');
-    queueBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        queueManager.enqueue(song, 'playlist');
-    });
-
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'player-btn';
-    removeBtn.innerHTML = ICON_TRASH;
-    removeBtn.title = t('pl_remove');
-    removeBtn.addEventListener('mouseenter', () => removeBtn.style.color = '#ef4444');
-    removeBtn.addEventListener('mouseleave', () => removeBtn.style.color = '');
-    removeBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        try {
-            await playlistState.removeSong(playlist.id, song.id);
-            log('INFO', `Removed "${song.title}" from "${playlist.name}"`);
-            if (onViewChange) onViewChange(playlist.id);
-        } catch (err) {
-            log('ERROR', `Remove song failed: ${err.message || err}`);
-        }
-    });
-
-    row.append(playBtn, info, duration, dlBtn, addBtn, queueBtn, removeBtn);
     row.addEventListener('mouseenter', () => row.style.background = 'rgba(138,92,246,0.05)');
     row.addEventListener('mouseleave', () => row.style.background = 'var(--bg-sidebar)');
 

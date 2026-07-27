@@ -85,7 +85,8 @@ let closeModal = () => {};
 
 export function showAddToPlaylistModal(song) {
     if (!song) return;
-    if (document.getElementById('add-to-playlist-modal')) return;
+    const stale = document.getElementById('add-to-playlist-modal');
+    if (stale) stale.remove();
 
     playlistState.load();
 
