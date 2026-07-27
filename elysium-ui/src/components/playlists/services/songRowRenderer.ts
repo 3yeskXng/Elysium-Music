@@ -38,18 +38,21 @@ export function renderSongRow(
     if (!(e.target instanceof Element)) return;
     if (e.target.closest('.sr-dl-btn') || e.target.closest('.sr-add-btn') ||
         e.target.closest('.sr-queue-btn') || e.target.closest('.sr-remove-btn')) return;
+    console.log("=== ROW CLICK → PLAY ===", song?.id, song?.title);
     playSong(song);
   });
 
   row.querySelector('.sr-add-btn')!.addEventListener('click', (e) => {
     e.stopPropagation();
     if (!song || !song.id) throw new Error('[Playlist] CRITICAL: song is undefined/null in + handler');
+    console.log("=== CLICK: ADD TO PLAYLIST ===", song?.id, song?.title);
     showAddToPlaylistModal(song);
   });
 
   row.querySelector('.sr-dl-btn')!.addEventListener('click', (e) => {
     e.stopPropagation();
     if (!song || !song.id) throw new Error('[Playlist] CRITICAL: song is undefined/null in Download handler');
+    console.log("=== CLICK: DOWNLOAD BUTTON ===", song?.id, song?.title);
     const btn = row.querySelector('.sr-dl-btn') as HTMLButtonElement;
     const original = btn.innerHTML;
     btn.innerHTML = '<span class="sr-spinner">⏳</span>';
@@ -62,6 +65,8 @@ export function renderSongRow(
             defaultPath: `${song.title || 'track'}.opus`,
             filters: [{ name: 'Opus Audio', extensions: ['opus'] }]
           });
+        } else {
+          console.warn("=== DOWNLOAD: __TAURI__.dialog NOT AVAILABLE === — Tauri v2 may expose dialog differently");
         }
         if (destPath === null) return;
         await invokeBackend('download_youtube', { query: song.title, destPath });

@@ -4,6 +4,7 @@ use std::path::Path;
 
 #[tauri::command]
 pub async fn get_track_bytes(file_path: String) -> Result<Vec<u8>, String> {
+    println!("=== RUST IPC: get_track_bytes === path={}", file_path);
     fs::read(&file_path).map_err(|e| format!("Failed to read file '{}': {}", file_path, e))
 }
 

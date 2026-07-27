@@ -27,14 +27,18 @@ moduleRegistry.onModuleSwitch((activeModule) => {
 });
 
 function listenForBackendLogs() {
-    if (window.__TAURI_INTERNALS__) {
-        const { listen } = window.__TAURI_INTERNALS__;
+    try {
+        const internals = window.__TAURI_INTERNALS__;
+        const listen = internals && typeof internals.listen === 'function'
+            ? internals.listen
+            : window.__TAURI__?.event?.listen;
+        if (typeof listen !== 'function') return;
         listen('elysium-log', (event) => {
             if (window.triggerElysiumLog && event.payload) {
                 window.triggerElysiumLog('INFO', 'Backend', String(event.payload));
             }
         });
-    }
+    } catch (_) { /* Tauri event API not available in this build */ }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

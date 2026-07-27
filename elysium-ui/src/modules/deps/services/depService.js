@@ -15,19 +15,24 @@ export function onDependencyProgress(callback) {
 }
 
 export async function initDepListener() {
-    if (!window.__TAURI_INTERNALS__) return;
-    const { listen } = window.__TAURI_INTERNALS__;
+    try {
+        const internals = window.__TAURI_INTERNALS__;
+        const listen = internals && typeof internals.listen === 'function'
+            ? internals.listen
+            : window.__TAURI__?.event?.listen;
+        if (typeof listen !== 'function') return;
 
-    unlistenProgress = await listen('dep-progress', (event) => {
-        const p = event.payload;
-        log('INFO', `[${p.tool}] ${p.progress.toFixed(0)}% — ${p.status}`);
-        if (progressCallback) progressCallback(p);
-    });
+        unlistenProgress = await listen('dep-progress', (event) => {
+            const p = event.payload;
+            log('INFO', `[${p.tool}] ${p.progress.toFixed(0)}% — ${p.status}`);
+            if (progressCallback) progressCallback(p);
+        });
 
-    unlistenLog = await listen('dep-log-event', (event) => {
-        const l = event.payload;
-        log(l.level, `[deps] ${l.message}`);
-    });
+        unlistenLog = await listen('dep-log-event', (event) => {
+            const l = event.payload;
+            log(l.level, `[deps] ${l.message}`);
+        });
+    } catch (_) { /* Tauri event API not available in this build */ }
 }
 
 export function destroyDepListener() {

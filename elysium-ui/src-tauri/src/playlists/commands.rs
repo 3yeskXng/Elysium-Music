@@ -5,6 +5,7 @@ use super::storage::{self, Playlist, SongInfo};
 
 #[tauri::command]
 pub async fn get_playlists() -> Result<Vec<Playlist>, String> {
+    println!("=== RUST IPC: get_playlists ===");
     storage::load_all()
 }
 
