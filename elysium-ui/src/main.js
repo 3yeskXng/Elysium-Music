@@ -54,30 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initDepListener();
     initPlaylistViewListener();
 
-    async function loadPlaylists(retryCount = 0) {
-        const MAX_RETRIES = 3;
-        const container = document.getElementById('sidebar-playlist-slots');
+    playlistState.load();
 
-        try {
-            // Versuche den State aus dem Storage/Tauri Backend zu laden
-            await playlistState.load();
-            
-            // Sofort im UI rendern (egal ob 0 oder 10 Playlists da sind)
-            renderPlaylistSidebar(container);
-        } catch (err) {
-            console.error(`[Init] Playlist load error (Attempt ${retryCount + 1}/${MAX_RETRIES}):`, err);
-            
-            if (retryCount < MAX_RETRIES) {
-                // Falls das Storage-Plugin beim Start noch kurz gebraucht hat: Retry nach 500ms
-                setTimeout(() => loadPlaylists(retryCount + 1), 500);
-            } else {
-                // Bei echtem fehlerhaftem Abbruch leeren State anzeigen
-                renderPlaylistSidebar(container);
-            }
-        }
-    }
-
-    loadPlaylists(0);
+    window.addEventListener('elysium-playlists-loaded', () => {
+        renderPlaylistSidebar(document.getElementById('sidebar-playlist-slots'));
+    });
 
     checkForUpdate().then(info => {
         if (info) console.log(`[Update] New version available: ${info.version}`);
