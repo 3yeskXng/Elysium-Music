@@ -16,7 +16,6 @@
     --font-global: 'Inter', -apple-system, sans-serif;
 
     --sidebar-width: 230px;
-    --player-height: clamp(55px, 6vh, 80px);
 }
 
 * {
@@ -41,9 +40,10 @@ body, html {
 #app-shell {
     display: grid;
     grid-template-columns: var(--sidebar-width) 1fr;
-    grid-template-rows: 1fr var(--player-height);
+    grid-template-rows: 1fr auto;
     width: 100%;
     height: 100vh;
+    overflow: hidden;
 }
 
 #shell-main-content {
@@ -82,7 +82,6 @@ body, html {
 }
 
 @media (max-height: 600px) {
-    :root { --player-height: 50px; }
     .view-title { margin-bottom: 4px; }
     .view-subtitle { margin-bottom: 12px; }
 }

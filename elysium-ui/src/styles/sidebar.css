@@ -13,7 +13,7 @@
     flex-direction: column;
     padding: 20px 16px;
     z-index: 10;
-    overflow-y: auto;
+    overflow: hidden;
 }
 
 .brand-zone {
@@ -61,7 +61,7 @@
 
 #sidebar-footer-slots {
     flex-shrink: 0;
-    padding-bottom: calc(var(--player-height) + 10px);
+    padding-bottom: 16px;
 }
 
 .playlist-sidebar-item.active {
