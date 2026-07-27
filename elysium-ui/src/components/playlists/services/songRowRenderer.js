@@ -29,6 +29,8 @@ function createIconBtn(icon, title, className) {
         align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s;
     `;
     btn.innerHTML = icon;
+    const svg = btn.querySelector('svg');
+    if (svg) svg.style.pointerEvents = 'none';
     btn.title = title;
     btn.addEventListener('mouseenter', () => btn.style.color = 'var(--text-main)');
     btn.addEventListener('mouseleave', () => btn.style.color = 'var(--text-muted)');
@@ -104,6 +106,8 @@ export function renderSongRow(song, playlist, onViewChange) {
         padding:4px; display:flex; align-items:center; transition:color 0.2s; flex-shrink:0;
     `;
     removeBtn.innerHTML = ICON_TRASH;
+    const rmSvg = removeBtn.querySelector('svg');
+    if (rmSvg) rmSvg.style.pointerEvents = 'none';
     removeBtn.addEventListener('mouseenter', () => removeBtn.style.color = '#ef4444');
     removeBtn.addEventListener('mouseleave', () => removeBtn.style.color = 'var(--text-muted)');
     removeBtn.addEventListener('click', async () => {

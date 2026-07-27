@@ -38,6 +38,7 @@
 
 .player-btn-play { background: var(--accent-premium); color: #fff; }
 .player-btn-play:hover { background: var(--accent-hover, var(--accent-premium)); color: #fff; transform: scale(1.05); }
+.player-btn svg, .player-btn svg * { pointer-events: none; }
 .player-btn svg { width: 18px; height: 18px; }
 .player-btn-play svg { width: 20px; height: 20px; }
 
