@@ -9,7 +9,7 @@ import { dependenciesModule } from './modules/dependencies/DependencyView.js';
 import { playlistOverviewModule } from './modules/playlists/PlaylistOverviewView.js';
 import { metadataRegistry } from './core/metadata/metadataRegistry.js';
 import { youtubeMetadataProvider } from './core/metadata/providers/youtubeMetadataProvider.js';
-import { PlayerBarModule } from './modules/player/PlayerBar.js';
+import { initPlayerBar } from './components/playerbar/PlayerBar.js';
 import { checkForUpdate } from './core/services/updateService.js';
 import { initDepListener } from './modules/deps/services/depService.js';
 import { playlistState } from './components/playlists/services/playlistState.js';
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     moduleRegistry.registerCoreModule(settingsModule);
     moduleRegistry.registerCoreModule(debugModule);
 
-    new PlayerBarModule();
+    initPlayerBar();
     metadataRegistry.register(youtubeMetadataProvider);
     moduleRegistry.setActive('search');
 

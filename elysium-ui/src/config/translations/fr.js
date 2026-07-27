@@ -96,5 +96,16 @@ export default {
     pl_add_playlist: "Ajouter à la playlist",
     pl_delete: "Supprimer",
     pl_remove: "Retirer",
-    search_clear: "Effacer la recherche"
+    search_clear: "Effacer la recherche",
+    lyrics_title: "Paroles",
+    lyrics_loading: "Chargement des paroles...",
+    lyrics_no_lyrics: "Aucune parole disponible pour cette piste",
+    lyrics_edit: "Modifier les paroles",
+    lyrics_save: "Enregistrer",
+    lyrics_cancel: "Annuler",
+    lyrics_edit_placeholder: "Collez les paroles au format LRC ici...",
+    lyrics_source_embedded: "Intégré",
+    lyrics_source_lrc: "Fichier LRC",
+    lyrics_source_custom: "Personnalisé",
+    lyrics_source_none: "Aucune source"
 };

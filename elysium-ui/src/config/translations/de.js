@@ -101,5 +101,16 @@ export default {
     pl_add_playlist: "Zu Playlist hinzufügen",
     pl_delete: "Löschen",
     pl_remove: "Entfernen",
-    search_clear: "Eingabe löschen"
+    search_clear: "Eingabe löschen",
+    lyrics_title: "Liedtexte",
+    lyrics_loading: "Liedtexte werden geladen...",
+    lyrics_no_lyrics: "Keine Liedtexte für diesen Titel verfügbar",
+    lyrics_edit: "Liedtexte bearbeiten",
+    lyrics_save: "Speichern",
+    lyrics_cancel: "Abbrechen",
+    lyrics_edit_placeholder: "LRC-Formatierte Liedtexte hier einfügen...",
+    lyrics_source_embedded: "Eingebettet",
+    lyrics_source_lrc: "LRC-Datei",
+    lyrics_source_custom: "Benutzerdefiniert",
+    lyrics_source_none: "Keine Quelle"
 };

@@ -1,0 +1,77 @@
+/* src/styles/lyrics/lyrics-editor.css */
+/* Edit mode — textarea, footer buttons, source badge in editor */
+
+.lyrics-editor {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+.lyrics-editor-label {
+  font-size: 12px;
+  color: var(--text-secondary, #888);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.lyrics-editor textarea {
+  flex: 1;
+  width: 100%;
+  min-height: 200px;
+  background: var(--surface-secondary, rgba(255,255,255,0.04));
+  border: 1px solid var(--border-subtle, rgba(255,255,255,0.08));
+  border-radius: 8px;
+  color: var(--text-primary, #fff);
+  font-family: 'Inter', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 12px;
+  resize: none;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.lyrics-editor textarea:focus {
+  border-color: var(--accent-primary, #e0aaff);
+}
+
+.lyrics-editor-footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.06));
+}
+
+.lyrics-btn {
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border-subtle, rgba(255,255,255,0.08));
+  transition: all 0.15s ease;
+}
+
+.lyrics-btn-primary {
+  background: var(--accent-primary, #e0aaff);
+  color: var(--bg-primary, #0a0a0a);
+  border-color: var(--accent-primary, #e0aaff);
+}
+
+.lyrics-btn-primary:hover {
+  background: var(--accent-hover, #c77dff);
+  border-color: var(--accent-hover, #c77dff);
+}
+
+.lyrics-btn-secondary {
+  background: var(--surface-secondary, rgba(255,255,255,0.05));
+  color: var(--text-secondary, #888);
+}
+
+.lyrics-btn-secondary:hover {
+  background: var(--surface-hover, rgba(255,255,255,0.08));
+  color: var(--text-primary, #fff);
+}

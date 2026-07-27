@@ -101,5 +101,16 @@ export default {
     pl_add_playlist: "Добавить в плейлист",
     pl_delete: "Удалить",
     pl_remove: "Убрать",
-    search_clear: "Очистить поиск"
+    search_clear: "Очистить поиск",
+    lyrics_title: "Текст песни",
+    lyrics_loading: "Загрузка текста...",
+    lyrics_no_lyrics: "Текст песни недоступен для этого трека",
+    lyrics_edit: "Редактировать текст",
+    lyrics_save: "Сохранить",
+    lyrics_cancel: "Отмена",
+    lyrics_edit_placeholder: "Вставьте текст в формате LRC сюда...",
+    lyrics_source_embedded: "Встроенный",
+    lyrics_source_lrc: "Файл LRC",
+    lyrics_source_custom: "Пользовательский",
+    lyrics_source_none: "Нет источника"
 };

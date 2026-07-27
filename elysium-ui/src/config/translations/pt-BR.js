@@ -101,5 +101,16 @@ export default {
     pl_add_playlist: "Adicionar à Playlist",
     pl_delete: "Excluir",
     pl_remove: "Remover",
-    search_clear: "Limpar busca"
+    search_clear: "Limpar busca",
+    lyrics_title: "Letra",
+    lyrics_loading: "Carregando letra...",
+    lyrics_no_lyrics: "Nenhuma letra disponível para esta faixa",
+    lyrics_edit: "Editar letra",
+    lyrics_save: "Salvar",
+    lyrics_cancel: "Cancelar",
+    lyrics_edit_placeholder: "Cole a letra em formato LRC aqui...",
+    lyrics_source_embedded: "Incorporado",
+    lyrics_source_lrc: "Arquivo LRC",
+    lyrics_source_custom: "Personalizado",
+    lyrics_source_none: "Sem fonte"
 };
