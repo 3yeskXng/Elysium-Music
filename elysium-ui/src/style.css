@@ -15,8 +15,8 @@
     --font-premium-cursive: 'Great Vibes', 'Alex Brush', 'Brush Script MT', cursive;
     --font-global: 'Inter', -apple-system, sans-serif;
 
-    --sidebar-width: 260px;
-    --player-height: 90px;
+    --sidebar-width: clamp(180px, 20vw, 260px);
+    --player-height: clamp(60px, 8vh, 90px);
 }
 
 * {
@@ -47,7 +47,7 @@ body, html {
 #shell-main-content {
     grid-column: 2;
     grid-row: 1;
-    padding: 40px;
+    padding: clamp(16px, 3vw, 40px);
     overflow-y: auto;
     background: radial-gradient(circle at top left, #0d111c 0%, var(--bg-main) 70%);
 }
@@ -66,8 +66,22 @@ body, html {
 }
 
 .view-title {
-    font-size: 1.4rem;
+    font-size: clamp(1rem, 1.4vw, 1.4rem);
     font-weight: 600;
     color: var(--text-pure);
     margin-bottom: 8px;
+}
+
+@media (max-width: 900px) {
+    #app-shell {
+        grid-template-columns: var(--sidebar-width) 1fr;
+    }
+    .view-title { font-size: 1.1rem; }
+}
+
+@media (max-width: 640px) {
+    #app-shell {
+        grid-template-columns: 0 1fr;
+    }
+    .view-title { font-size: 1rem; }
 }

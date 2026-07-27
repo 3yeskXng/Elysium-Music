@@ -44,6 +44,9 @@ export function createPlayerControls(): HTMLElement {
   const progressTrack = document.createElement('div');
   progressTrack.className = 'player-progress-track';
 
+  const progressTrackBg = document.createElement('div');
+  progressTrackBg.className = 'player-progress-track-bg';
+
   const progressFill = document.createElement('div');
   progressFill.className = 'player-progress-fill';
 
@@ -58,7 +61,7 @@ export function createPlayerControls(): HTMLElement {
     playback.seekTo((parseFloat(progressInput.value) / 100) * dur);
   });
 
-  progressTrack.append(progressFill, progressInput);
+  progressTrack.append(progressTrackBg, progressFill, progressInput);
 
   const timeTotal = document.createElement('span');
   timeTotal.className = 'player-time';

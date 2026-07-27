@@ -23,8 +23,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: clamp(32px, 3.5vw, 40px);
+    height: clamp(32px, 3.5vw, 40px);
     border-radius: 50%;
     transition: color 0.2s, transform 0.1s, background 0.2s;
     padding: 0;
@@ -69,27 +69,37 @@
 .player-progress-track {
     position: relative;
     flex: 1;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 2px;
+    height: 14px;
+    display: flex;
+    align-items: center;
     cursor: pointer;
 }
 
 .player-progress-fill {
     position: absolute;
-    top: 0;
+    top: 50%;
     left: 0;
-    height: 100%;
+    transform: translateY(-50%);
+    height: 4px;
     width: 0%;
     background: var(--accent-premium);
     border-radius: 2px;
     pointer-events: none;
 }
 
-.player-progress-input {
+.player-progress-track-bg {
     position: absolute;
-    top: 0;
+    top: 50%;
     left: 0;
+    transform: translateY(-50%);
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+.player-progress-input {
     width: 100%;
     height: 100%;
     margin: 0;
@@ -98,7 +108,8 @@
     appearance: none;
     background: transparent;
     cursor: pointer;
-    z-index: 2;
+    position: relative;
+    z-index: 1;
 }
 
 .player-progress-input::-webkit-slider-runnable-track {
