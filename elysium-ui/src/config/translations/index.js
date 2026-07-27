@@ -6,9 +6,10 @@ import en from './en.js';
 import es from './es.js';
 import fr from './fr.js';
 import ru from './ru.js';
+import tr from './tr.js';
 import ptBR from './pt-BR.js';
 
-export const translations = { de, en, es, fr, ru, 'pt-BR': ptBR };
+export const translations = { de, en, es, fr, ru, tr, 'pt-BR': ptBR };
 
 window.elysiumTranslate = function (lang) {
     localStorage.setItem('elysium_language', lang);
