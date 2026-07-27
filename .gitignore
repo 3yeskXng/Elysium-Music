@@ -25,7 +25,7 @@ elysium-ui/src-tauri/gen/
 
 # Cache & playlists
 .cache/
-playlists/
+/playlists/
 
 # Project files not for git
 me.txt
