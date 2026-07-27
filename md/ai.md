@@ -48,11 +48,12 @@ Selbst-Audit vor Abgabe: Gehe vor JEDER Antwort gedanklich deine Änderungen dur
 - Verwende für externe Datenquellen oder Erweiterungen immer das Provider-/Registry-Muster (wie in metadataRegistry.js), anstatt Funktionen hart in bestehende Module zu verdrahten.
 - Events und Hooks MÜSSEN zentral über einen Publisher/Subscriber bereitgestellt werden, damit sich Plugins später sauber einklinken können (onTrackPlay, onPlaylistCreate etc.).
 20.**TypeScript Zukunft** Um die Codebase langfristig stabil, wartbar und frei von "Altlasten-Chaos" zu halten, wird TypeScript schrittweise im Projekt verankert. 
-- **Neue Kern-Module & Basis-Architektur in TS / TSX:**
+- *Neue Kern-Module & Basis-Architektur in TS / TSX:*
    * Alle neuen grundlegenden Services, IPC-Schnittstellen, Datenmodelle und Kern-Komponenten **müssen** in TypeScript verfasst werden (`.ts` für reine Logik/Services, `.tsx` für UI-Komponenten mit JSX).
-- **JavaScript für schnelle Features & Experimente erlaubt:**
+- *JavaScript für schnelle Features & Experimente erlaubt:*
    * Reine JS/JSX-Dateien sind für schnelle Erweiterungen oder kleine isolierte Features weiterhin gestattet.
    * Es gibt **keinen Zwang**, bestehenden und funktionierenden JS-Code sofort umzuschreiben.
-- **Refactoring-Prinzip ("Boy Scout Rule"):**
+- *Refactoring-Prinzip ("Boy Scout Rule"):*
    * Wenn eine bestehende JS-Datei im Rahmen größerer Umbauten ohnehin stark überarbeitet wird, ist sie bei dieser Gelegenheit in `.ts` bzw `.tsx` umzubennen und zu typisieren.
    * Typen für zentrale Datenstrukturen (z.B. Track, Playlist, AppConfig) sind zentral unter `src/types/` abzulegen und schrittweise wiederzuverwenden.
+- *Wichtig* Das gilt nur für JS module. Rust darf selbstverständlich für Backend weiterhin benutzt werden. TS soll nur dort benutzt werden wo früher JS benutzt wurde.

@@ -3,6 +3,7 @@ pub mod models;
 pub mod commands;
 pub mod deps;
 pub mod playlists;
+pub mod lyrics;
 
 use commands::scanner::scan_local_library;
 use commands::download::download_youtube;
@@ -14,6 +15,7 @@ use playlists::commands::{
     get_playlists, create_playlist, delete_playlist, rename_playlist,
     add_song_to_playlist, remove_song_from_playlist,
 };
+use lyrics::commands::{read_lrc_file, read_embedded_lyrics, read_custom_lyrics, write_custom_lyrics};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -44,7 +46,11 @@ pub fn run() {
             delete_playlist,
             rename_playlist,
             add_song_to_playlist,
-            remove_song_from_playlist
+            remove_song_from_playlist,
+            read_lrc_file,
+            read_embedded_lyrics,
+            read_custom_lyrics,
+            write_custom_lyrics
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
