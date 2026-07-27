@@ -1,5 +1,6 @@
 // src/components/playerbar/services/playbackService.ts
-// Playback state management — wraps audioEngine with clean subscribe/notify API
+// Playback state management — subscribes directly to native Audio element events
+// to avoid conflicts with other modules using audioEngine.onStatusChange (single setter)
 
 import { audioEngine } from '../../../core/audioEngine.js';
 
@@ -49,4 +50,8 @@ export function seekTo(time: number): void {
   notify();
 }
 
-audioEngine.onStatusChange(() => notify());
+const audio = audioEngine.audio;
+audio.addEventListener('timeupdate', () => notify());
+audio.addEventListener('play', () => notify());
+audio.addEventListener('pause', () => notify());
+audio.addEventListener('loadedmetadata', () => notify());

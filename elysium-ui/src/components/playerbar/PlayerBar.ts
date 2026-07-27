@@ -7,6 +7,13 @@ import { createPlayerControls } from './PlayerControls.js';
 import { createPlayerActions } from './PlayerActions.js';
 import { loadTrackLyrics, initLyricsPanel } from '../lyrics/services/LyricsPanel.js';
 
+interface Track {
+  id: string;
+  title: string;
+  artist: string;
+  file_path: string;
+}
+
 function createShell(): void {
   const metaSlot = document.getElementById('player-meta-slot');
   const controlsSlot = document.getElementById('player-controls-slot');
@@ -38,7 +45,7 @@ function createShell(): void {
 }
 
 function bindTrackUpdates(): void {
-  audioEngine.onTrackChange((track) => {
+  audioEngine.onTrackChange((track: Track) => {
     if (!track) return;
     const titleEl = document.getElementById('player-track-title');
     const artistEl = document.getElementById('player-track-artist');

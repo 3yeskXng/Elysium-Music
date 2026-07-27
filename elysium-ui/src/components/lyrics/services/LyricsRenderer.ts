@@ -1,5 +1,5 @@
 // src/components/lyrics/services/LyricsRenderer.ts
-// DOM rendering for lyrics lines, empty state, source badge, and footer
+// DOM rendering for lyrics lines, empty state, and source badge
 
 import type { LyricLine } from './lrcParser.js';
 import type { LyricsSource } from './lyricsService.js';
@@ -55,43 +55,31 @@ function renderEmpty(container: HTMLElement, t: (key: string) => string): void {
   container.innerHTML = `
     <div class="lyrics-empty">
       <div class="lyrics-empty-icon">♪</div>
-      <div class="lyrics-empty-text">${escapeHtml(t('lyricsEmpty'))}</div>
+      <div class="lyrics-empty-text">${escapeHtml(t('lyrics_no_lyrics'))}</div>
     </div>
   `;
 }
 
-export function renderFooter(
-  source: LyricsSource,
-  lineCount: number,
-  t: (key: string) => string,
-  onEdit: () => void
-): HTMLElement {
-  const footer = document.createElement('div');
-  footer.className = 'lyrics-panel-footer';
-
-  const badge = document.createElement('span');
-  badge.className = 'lyrics-source-badge';
-  badge.textContent = source === 'none'
-    ? t('lyricsSourceNone')
-    : `${t('lyricsSource')}: ${t('lyricsSource_' + source)} (${lineCount} ${t('lyricsLines')})`;
-
-  const editBtn = document.createElement('button');
-  editBtn.className = 'lyrics-btn lyrics-btn-secondary';
-  editBtn.textContent = t('lyricsEdit');
-  editBtn.addEventListener('click', onEdit);
-
-  footer.appendChild(badge);
-  footer.appendChild(editBtn);
-  return footer;
+function sourceKeyFor(source: LyricsSource): string {
+  const map: Record<LyricsSource, string> = {
+    embedded: 'lyrics_source_embedded',
+    lrc: 'lyrics_source_lrc',
+    custom: 'lyrics_source_custom',
+    none: 'lyrics_source_none',
+  };
+  return map[source] || 'lyrics_source_none';
 }
 
-export function updateSourceBadge(
+export function renderSourceBadge(
   badge: HTMLElement,
   source: LyricsSource,
   lineCount: number,
   t: (key: string) => string
 ): void {
-  badge.textContent = source === 'none'
-    ? t('lyricsSourceNone')
-    : `${t('lyricsSource')}: ${t('lyricsSource_' + source)} (${lineCount} ${t('lyricsLines')})`;
+  if (source === 'none') {
+    badge.textContent = t('lyrics_source_none');
+  } else {
+    const sourceLabel = t(sourceKeyFor(source));
+    badge.textContent = `${sourceLabel} — ${lineCount} ${t('lyrics_lines_label')}`;
+  }
 }

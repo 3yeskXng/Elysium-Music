@@ -107,5 +107,7 @@ export default {
     lyrics_source_embedded: "Intégré",
     lyrics_source_lrc: "Fichier LRC",
     lyrics_source_custom: "Personnalisé",
-    lyrics_source_none: "Aucune source"
+    lyrics_source_none: "Aucune source",
+    lyrics_source_label: "Source",
+    lyrics_lines_label: "lignes"
 };
