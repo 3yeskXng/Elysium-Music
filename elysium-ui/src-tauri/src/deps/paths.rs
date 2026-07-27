@@ -48,19 +48,14 @@ pub fn resolve_path(tool_name: &str) -> Option<String> {
 
 fn find_on_system_path(name: &str) -> Option<String> {
     let cmd = if cfg!(target_os = "windows") { "where" } else { "which" };
-    let mut command = std::process::Command::new(cmd);
-    command.arg(name);
-    #[cfg(target_os = "windows")]
-    {
-        use std::os::windows::process::CommandExt;
-        command.creation_flags(0x08000000);
+    let output = super::process::no_window_command(cmd)
+        .arg(name)
+        .output()
+        .ok()?;
+    if output.status.success() {
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        stdout.lines().next().map(|s| s.trim().to_string())
+    } else {
+        None
     }
-    command.output().ok().and_then(|o| {
-        if o.status.success() {
-            let stdout = String::from_utf8_lossy(&o.stdout);
-            stdout.lines().next().map(|s| s.trim().to_string())
-        } else {
-            None
-        }
-    })
 }

@@ -2,9 +2,9 @@
 // Pluggable download provider trait — swap yt-dlp for any other backend
 
 use crate::deps::checker::find_on_path as find_tool;
+use crate::deps::process::no_window_command;
 use serde::Deserialize;
 use std::path::Path;
-use std::process::Command;
 
 pub struct DownloadResult {
     pub safe_stem: String,
@@ -48,7 +48,7 @@ impl DownloadProvider for YtDlpProvider {
             search.clone(),
         ];
 
-        let meta_output = Command::new(&yt_dlp)
+        let meta_output = no_window_command(&yt_dlp)
             .args(&args)
             .output()
             .map_err(|e| format!("Failed to run yt-dlp metadata: {}", e))?;
@@ -94,7 +94,7 @@ impl DownloadProvider for YtDlpProvider {
             dl_args.push(ffmpeg_dir);
         }
 
-        let dl = Command::new(&yt_dlp)
+        let dl = no_window_command(&yt_dlp)
             .args(&dl_args)
             .output()
             .map_err(|e| format!("Failed to run yt-dlp at '{}': {}", yt_dlp, e))?;

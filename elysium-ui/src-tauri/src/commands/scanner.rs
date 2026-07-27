@@ -2,11 +2,11 @@
 // Local music directory scanner — reads audio files and sidecar .meta metadata
 
 use crate::deps::checker::find_on_path as find_tool;
+use crate::deps::process::no_window_command;
 use crate::commands::track_meta::{resolve_artist, resolve_title};
 use crate::models::TrackPayload;
 use std::fs;
 use std::path::Path;
-use std::process::Command;
 
 fn strip_temp_prefix(name: &str) -> String {
     let mut result = name;
@@ -50,7 +50,7 @@ pub async fn scan_local_library() -> Result<Vec<TrackPayload>, String> {
         let mut secs_u32 = 0u32;
 
         if let Some(ref ffprobe_path) = ffprobe {
-            let meta_output = Command::new(ffprobe_path)
+            let meta_output = no_window_command(ffprobe_path)
                 .args(["-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nocorrect=1", &path_str])
                 .output();
 

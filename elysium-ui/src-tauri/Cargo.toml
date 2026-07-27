@@ -1,6 +1,6 @@
 [package]
 name = "elysium"
-version = "0.4.0"
+version = "0.4.1"
 description = "A music app written by node.js and Tauri/Rust."
 authors = ["you"]
 edition = "2021"

@@ -8,6 +8,7 @@ pub mod downloader;
 pub mod extract;
 pub mod logger;
 pub mod paths;
+pub mod process;
 pub mod progress;
 pub mod updater;
 

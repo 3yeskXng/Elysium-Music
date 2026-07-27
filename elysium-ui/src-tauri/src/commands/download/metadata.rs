@@ -2,7 +2,7 @@
 // ffprobe metadata extraction for downloaded audio files
 
 use crate::deps::checker::find_on_path as find_tool;
-use std::process::Command;
+use crate::deps::process::no_window_command;
 
 pub fn probe(path: &str) -> (String, u32) {
     let ffprobe = match find_tool("ffprobe") {
@@ -10,7 +10,7 @@ pub fn probe(path: &str) -> (String, u32) {
         None => return ("00:00".into(), 0),
     };
 
-    let out = Command::new(&ffprobe)
+    let out = no_window_command(&ffprobe)
         .args([
             "-v", "error",
             "-show_entries", "format=duration",

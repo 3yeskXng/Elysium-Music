@@ -32,14 +32,9 @@ async fn run_self_update(
     let args_owned: Vec<String> = args.iter().map(|s| s.to_string()).collect();
 
     let output = tokio::task::spawn_blocking(move || {
-        let mut cmd = std::process::Command::new(&binary_clone);
-        cmd.args(&args_owned);
-        #[cfg(target_os = "windows")]
-        {
-            use std::os::windows::process::CommandExt;
-            cmd.creation_flags(0x08000000);
-        }
-        cmd.output()
+        super::process::no_window_command(&binary_clone)
+            .args(&args_owned)
+            .output()
     })
     .await
     .map_err(|e| format!("Task join: {}", e))?

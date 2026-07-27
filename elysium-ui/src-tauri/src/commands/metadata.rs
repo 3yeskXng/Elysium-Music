@@ -3,6 +3,7 @@
 // Returns structured title, artist, duration, thumbnail for search results
 
 use crate::deps::checker::find_on_path as find_tool;
+use crate::deps::process::no_window_command;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -34,7 +35,7 @@ pub async fn search_youtube_metadata(query: String) -> Result<Vec<VideoMetadata>
         .ok_or("yt-dlp not found. Install it via Settings -> Dependencies.")?;
 
     let search = format!("ytsearch3:{}", query);
-    let output = std::process::Command::new(&yt_dlp)
+    let output = no_window_command(&yt_dlp)
         .args(["--dump-json", "--no-download", "--no-playlist", &search])
         .output()
         .map_err(|e| format!("Failed to run yt-dlp: {}", e))?;
