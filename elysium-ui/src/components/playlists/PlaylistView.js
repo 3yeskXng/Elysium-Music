@@ -87,6 +87,35 @@ function buildSongList(playlist) {
     return songsContainer;
 }
 
+// HACK!!! Rule 2 (≤150 lines): Temporary debug interceptor adds ~27 lines — remove after bug verification
+function installPlaylistClickInterceptor(container) {
+    container.addEventListener('click', (e) => {
+        const target = e.target;
+        if (!(target instanceof Element)) return;
+        const btn = target.closest('.sr-add-btn, .sr-dl-btn, .sr-play-btn, .sr-queue-btn, .sr-remove-btn');
+        if (!btn) return;
+        const row = btn.closest('.sr-row');
+        const tag = btn.classList.contains('sr-add-btn') ? '+ADD' :
+            btn.classList.contains('sr-dl-btn') ? 'DOWNLOAD' :
+            btn.classList.contains('sr-play-btn') ? 'PLAY' :
+            btn.classList.contains('sr-queue-btn') ? 'QUEUE' : 'REMOVE';
+        const rowTitle = row ? row.querySelector('.sr-title') : null;
+        const info = {
+            button: tag,
+            eventTarget: target.tagName + '.' + target.className,
+            rowFound: !!row,
+            songTitle: rowTitle ? rowTitle.textContent : 'ROW NOT FOUND',
+            stack: new Error().stack
+        };
+        console.error('[PLAYLIST INTERCEPTOR]', JSON.stringify(info, null, 2));
+        const popup = document.createElement('div');
+        popup.style.cssText = 'position:fixed;top:8px;right:8px;z-index:99999;background:#7f1d1d;color:#fca5a5;padding:12px 16px;border-radius:8px;font-size:12px;max-width:420px;box-shadow:0 4px 20px rgba(0,0,0,0.5);font-family:monospace;pointer-events:none;';
+        popup.textContent = `[${tag}] title="${info.songTitle}" target=${info.eventTarget}`;
+        document.body.appendChild(popup);
+        setTimeout(() => popup.remove(), 3000);
+    });
+}
+
 export function showPlaylistView(playlistId) {
     const mount = document.getElementById('content-mount-point');
     if (!mount) return;
@@ -97,6 +126,7 @@ export function showPlaylistView(playlistId) {
 
     const container = document.createElement('div');
     container.className = 'view-container animate-fade-in';
+    installPlaylistClickInterceptor(container);
 
     container.appendChild(buildHeader(playlist));
 

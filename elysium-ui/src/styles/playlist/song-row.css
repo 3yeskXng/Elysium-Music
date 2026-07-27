@@ -1,7 +1,54 @@
 /* src/styles/playlist/song-row.css */
-/* Song row — pointer-events safety net for SVG icons */
+/* Song row — layout classes and SVG pointer-events safety net */
 
 .playlist-track-actions button svg,
 .playlist-track-actions button svg * {
     pointer-events: none;
+}
+
+.sr-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sr-row--hover {
+    background: rgba(138, 92, 246, 0.05);
+}
+
+.sr-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.sr-title {
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--text-main);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sr-artist {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.sr-duration {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-family: monospace;
+    flex-shrink: 0;
+}
+
+.sr-spinner {
+    animation: spin 0.8s linear infinite;
+    display: flex;
 }

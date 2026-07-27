@@ -6,4 +6,6 @@ export interface Track {
   title: string;
   artist: string;
   file_path: string;
+  duration_secs?: number;
+  duration?: string;
 }

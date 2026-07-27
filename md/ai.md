@@ -51,7 +51,7 @@ Selbst-Audit vor Abgabe: Gehe vor JEDER Antwort gedanklich deine Änderungen dur
 - *Neue Kern-Module & Basis-Architektur in TS / TSX:*
    * Alle neuen grundlegenden Services, IPC-Schnittstellen, Datenmodelle und Kern-Komponenten **müssen** in TypeScript verfasst werden (`.ts` für reine Logik/Services, `.tsx` für UI-Komponenten mit JSX).
 - *JavaScript für schnelle Features & Experimente erlaubt:*
-   * Reine JS/JSX-Dateien sind für schnelle Erweiterungen oder kleine isolierte Features weiterhin gestattet.
+   * Reine JS/JSX-Dateien sind für schnelle Erweiterungen oder kleine isolierte Features nicht mehr gestattet.
    * Es gibt **keinen Zwang**, bestehenden und funktionierenden JS-Code sofort umzuschreiben.
 - *Refactoring-Prinzip ("Boy Scout Rule"):*
    * Wenn eine bestehende JS-Datei im Rahmen größerer Umbauten ohnehin stark überarbeitet wird, ist sie bei dieser Gelegenheit in `.ts` bzw `.tsx` umzubennen und zu typisieren.
