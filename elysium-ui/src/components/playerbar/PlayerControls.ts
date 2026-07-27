@@ -41,26 +41,36 @@ export function createPlayerControls(): HTMLElement {
   const timeCurrent = document.createElement('span');
   timeCurrent.className = 'player-time';
 
-  const progressBar = document.createElement('input');
-  progressBar.type = 'range';
-  progressBar.className = 'player-progress-bar';
-  progressBar.min = '0';
-  progressBar.max = '100';
-  progressBar.value = '0';
-  progressBar.addEventListener('input', () => {
+  const progressTrack = document.createElement('div');
+  progressTrack.className = 'player-progress-track';
+
+  const progressFill = document.createElement('div');
+  progressFill.className = 'player-progress-fill';
+
+  const progressThumb = document.createElement('input');
+  progressThumb.type = 'range';
+  progressThumb.className = 'player-progress-thumb';
+  progressThumb.min = '0';
+  progressThumb.max = '100';
+  progressThumb.value = '0';
+  progressThumb.addEventListener('input', () => {
     const dur = playback.getState().duration;
-    playback.seekTo((parseFloat(progressBar.value) / 100) * dur);
+    playback.seekTo((parseFloat(progressThumb.value) / 100) * dur);
   });
+
+  progressTrack.append(progressFill, progressThumb);
 
   const timeTotal = document.createElement('span');
   timeTotal.className = 'player-time';
 
-  progressWrap.append(timeCurrent, progressBar, timeTotal);
+  progressWrap.append(timeCurrent, progressTrack, timeTotal);
   wrap.append(transport, progressWrap);
 
   playback.subscribe((s) => {
     playBtn.innerHTML = s.isPlaying ? ICON_PAUSE : ICON_PLAY;
-    progressBar.value = s.duration ? ((s.currentTime / s.duration) * 100).toString() : '0';
+    const pct = s.duration ? (s.currentTime / s.duration) * 100 : 0;
+    progressThumb.value = pct.toString();
+    progressFill.style.width = `${pct}%`;
     timeCurrent.textContent = formatTime(s.currentTime);
     timeTotal.textContent = formatTime(s.duration);
   });

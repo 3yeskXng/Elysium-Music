@@ -1,0 +1,71 @@
+/* src/styles/player/player-layout.css */
+/* Player bar shell — grid positioning, meta slot, track info */
+
+#shell-player-bar {
+    grid-column: 2;
+    grid-row: 2;
+    border-top: 1px solid var(--border-subtle);
+    background: rgba(11, 14, 23, 0.85);
+    backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    z-index: 100;
+    height: 75px;
+}
+
+#player-meta-slot {
+    display: flex;
+    align-items: center;
+    width: 30%;
+    min-width: 0;
+    gap: 12px;
+}
+
+.player-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.player-track-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.player-track-artist {
+    font-size: 0.75rem;
+    color: var(--accent-premium);
+    letter-spacing: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#player-controls-slot {
+    display: flex;
+    align-items: center;
+    width: 40%;
+    justify-content: center;
+}
+
+#player-utilities-slot {
+    display: flex;
+    align-items: center;
+    width: 30%;
+    justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+    #shell-player-bar { padding: 0 12px; }
+    #player-meta-slot { width: auto; flex: 1; }
+    #player-controls-slot { width: auto; }
+    #player-utilities-slot { width: auto; }
+    .player-progress-wrap { display: none; }
+}

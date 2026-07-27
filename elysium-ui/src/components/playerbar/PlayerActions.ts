@@ -1,10 +1,11 @@
 // src/components/playerbar/PlayerActions.ts
-// Utility buttons — download, playlist queue, lyrics toggle
+// Utility buttons — download, add to playlist (+), lyrics toggle
 
-import { ICON_DOWNLOAD, ICON_PLAYLIST, ICON_LYRICS } from '../../config/icons.js';
+import { ICON_DOWNLOAD, ICON_PLUS, ICON_LYRICS } from '../../config/icons.js';
 import { toggle as toggleLyrics } from '../lyrics/services/LyricsPanel.js';
 import { audioEngine } from '../../core/audioEngine.js';
 import { invokeBackend } from '../../api.js';
+import { showAddToPlaylistModal } from '../playlists/AddToPlaylistModal.js';
 import { t } from '../../utils/translate.js';
 
 function log(level: string, msg: string): void {
@@ -40,14 +41,14 @@ export function createPlayerActions(): HTMLElement {
     }
   });
 
-  const queueBtn = document.createElement('button');
-  queueBtn.className = 'player-btn';
-  queueBtn.innerHTML = ICON_PLAYLIST;
-  queueBtn.title = t('pl_add_playlist');
-  queueBtn.addEventListener('click', () => {
+  const addBtn = document.createElement('button');
+  addBtn.className = 'player-btn';
+  addBtn.innerHTML = ICON_PLUS;
+  addBtn.title = t('pl_add_playlist');
+  addBtn.addEventListener('click', () => {
     const track = audioEngine.currentTrack;
     if (!track) return;
-    window.dispatchEvent(new CustomEvent('elysium-add-to-playlist', { detail: track }));
+    showAddToPlaylistModal(track);
   });
 
   const lyricsBtn = document.createElement('button');
@@ -56,6 +57,6 @@ export function createPlayerActions(): HTMLElement {
   lyricsBtn.title = t('lyrics_title');
   lyricsBtn.addEventListener('click', () => toggleLyrics());
 
-  wrap.append(dlBtn, queueBtn, lyricsBtn);
+  wrap.append(dlBtn, addBtn, lyricsBtn);
   return wrap;
 }

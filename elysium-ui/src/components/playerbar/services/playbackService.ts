@@ -1,6 +1,6 @@
 // src/components/playerbar/services/playbackService.ts
-// Playback state management — subscribes directly to native Audio element events
-// to avoid conflicts with other modules using audioEngine.onStatusChange (single setter)
+// Playback state management — uses requestAnimationFrame for smooth progress updates
+// and native audio events for play/pause state changes
 
 import { audioEngine } from '../../../core/audioEngine.js';
 
@@ -13,15 +13,35 @@ export interface PlaybackState {
 type PlaybackListener = (s: PlaybackState) => void;
 
 const listeners: Set<PlaybackListener> = new Set();
+let rafId: number | null = null;
 
 function notify(): void {
   const s = getState();
   for (const fn of listeners) fn(s);
 }
 
+function startLoop(): void {
+  if (rafId !== null) return;
+  const tick = (): void => {
+    notify();
+    rafId = requestAnimationFrame(tick);
+  };
+  rafId = requestAnimationFrame(tick);
+}
+
+function stopLoop(): void {
+  if (rafId !== null) {
+    cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+}
+
 export function subscribe(fn: PlaybackListener): () => void {
   listeners.add(fn);
-  return () => listeners.delete(fn);
+  return () => {
+    listeners.delete(fn);
+    if (listeners.size === 0) stopLoop();
+  };
 }
 
 export function getState(): PlaybackState {
@@ -51,7 +71,7 @@ export function seekTo(time: number): void {
 }
 
 const audio = audioEngine.audio;
-audio.addEventListener('timeupdate', () => notify());
-audio.addEventListener('play', () => notify());
-audio.addEventListener('pause', () => notify());
+audio.addEventListener('play', () => { notify(); startLoop(); });
+audio.addEventListener('pause', () => { notify(); stopLoop(); });
+audio.addEventListener('ended', () => { notify(); stopLoop(); });
 audio.addEventListener('loadedmetadata', () => notify());

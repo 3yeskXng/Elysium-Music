@@ -1,0 +1,129 @@
+/* src/styles/player/player-controls.css */
+/* Transport buttons, progress bar with filled track, utility actions */
+
+.player-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.player-transport {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.player-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: color 0.2s, transform 0.1s, background 0.2s;
+    padding: 0;
+}
+
+.player-btn:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.player-btn:active { transform: scale(0.95); }
+
+.player-btn-play {
+    background: var(--accent-premium);
+    color: #fff;
+}
+
+.player-btn-play:hover {
+    background: var(--accent-hover, var(--accent-premium));
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.player-btn svg { width: 18px; height: 18px; }
+.player-btn-play svg { width: 20px; height: 20px; }
+
+.player-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.player-time {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-family: monospace;
+    min-width: 36px;
+    text-align: center;
+}
+
+.player-progress-track {
+    position: relative;
+    flex: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.player-progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    background: var(--accent-premium);
+    border-radius: 2px;
+    pointer-events: none;
+    transition: width 0.1s linear;
+}
+
+.player-progress-thumb {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent-premium);
+    border: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    z-index: 1;
+    padding: 0;
+    margin: 0;
+}
+
+.player-progress-thumb::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent-premium);
+}
+
+.player-progress-thumb::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent-premium);
+    border: none;
+}
+
+.player-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
