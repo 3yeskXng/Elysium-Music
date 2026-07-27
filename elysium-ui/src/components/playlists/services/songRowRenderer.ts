@@ -6,9 +6,9 @@ import type { Track } from '../../../types/Track.js';
 import type { Playlist } from '../../../types/Playlist.js';
 import { t } from '../../../utils/translate.js';
 import { ICON_PLAY, ICON_TRASH, ICON_DOWNLOAD, ICON_PLUS, ICON_QUEUE } from '../../../config/icons.js';
-import { playSong } from './playlistPlayer.js';
-import { showAddToPlaylistModal } from '../AddToPlaylistModal.js';
-import { playlistState } from './playlistState.js';
+import { playSong } from './playlistPlayer';
+import { showAddToPlaylistModal } from '../AddToPlaylistModal';
+import { playlistState } from './playlistState';
 import { queueManager } from '../../queue/services/QueueManager.js';
 import { invokeBackend } from '../../../api.js';
 
@@ -38,21 +38,18 @@ export function renderSongRow(
     if (!(e.target instanceof Element)) return;
     if (e.target.closest('.sr-dl-btn') || e.target.closest('.sr-add-btn') ||
         e.target.closest('.sr-queue-btn') || e.target.closest('.sr-remove-btn')) return;
-    console.log('[Playlist] Row click → Play', song.title, song.id);
     playSong(song);
   });
 
   row.querySelector('.sr-add-btn')!.addEventListener('click', (e) => {
     e.stopPropagation();
     if (!song || !song.id) throw new Error('[Playlist] CRITICAL: song is undefined/null in + handler');
-    console.log('[Playlist] + clicked', song.title, song.id);
     showAddToPlaylistModal(song);
   });
 
   row.querySelector('.sr-dl-btn')!.addEventListener('click', (e) => {
     e.stopPropagation();
     if (!song || !song.id) throw new Error('[Playlist] CRITICAL: song is undefined/null in Download handler');
-    console.log('[Playlist] Download clicked', song.title, song.id);
     const btn = row.querySelector('.sr-dl-btn') as HTMLButtonElement;
     const original = btn.innerHTML;
     btn.innerHTML = '<span class="sr-spinner">⏳</span>';
@@ -81,13 +78,11 @@ export function renderSongRow(
 
   row.querySelector('.sr-queue-btn')!.addEventListener('click', (e) => {
     e.stopPropagation();
-    console.log('[Playlist] Queue clicked', song.title, song.id);
     queueManager.enqueue(song, 'playlist');
   });
 
   row.querySelector('.sr-remove-btn')!.addEventListener('click', (e) => {
     e.stopPropagation();
-    console.log('[Playlist] Remove clicked', song.title, 'from', playlist.name);
     const btn = row.querySelector('.sr-remove-btn') as HTMLButtonElement;
     btn.style.color = '#ef4444';
     (async () => {

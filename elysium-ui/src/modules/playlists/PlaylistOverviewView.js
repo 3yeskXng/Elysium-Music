@@ -12,26 +12,14 @@ const SUBTITLE_SELECTOR = 'data-po-subtitle';
 
 function renderOverviewItem(playlist) {
     const item = document.createElement('div');
-    item.style.cssText = `
-        display:flex; align-items:center; gap:14px; padding:14px 18px;
-        background:var(--bg-card); border:1px solid var(--border-subtle);
-        border-radius:8px; cursor:pointer; transition:all 0.2s;
-    `;
+    item.className = 'pl-overview-item';
     item.innerHTML = `
-        <span style="width:20px; height:20px; flex-shrink:0; color:var(--accent-premium);">${ICON_PLAYLIST}</span>
-        <div style="flex:1; min-width:0;">
-            <div style="font-weight:600; font-size:0.95rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${playlist.name}</div>
-            <div style="font-size:0.8rem; color:var(--text-muted);">${playlist.songs.length} ${playlist.songs.length === 1 ? t('pl_song') : t('pl_songs')}</div>
+        <span style="width:20px;height:20px;flex-shrink:0;color:var(--accent-premium);">${ICON_PLAYLIST}</span>
+        <div class="pl-overview-item-info">
+            <div class="pl-overview-item-name">${playlist.name}</div>
+            <div class="pl-overview-item-count">${playlist.songs.length} ${playlist.songs.length === 1 ? t('pl_song') : t('pl_songs')}</div>
         </div>
     `;
-    item.addEventListener('mouseenter', () => {
-        item.style.borderColor = 'var(--accent-premium)';
-        item.style.background = 'rgba(168,85,247,0.05)';
-    });
-    item.addEventListener('mouseleave', () => {
-        item.style.borderColor = 'var(--border-subtle)';
-        item.style.background = 'var(--bg-card)';
-    });
     item.addEventListener('click', () => showPlaylistView(playlist.id));
     return item;
 }
@@ -40,7 +28,7 @@ function populateList(container) {
     container.innerHTML = '';
     if (!playlistState.playlists || playlistState.playlists.length === 0) {
         const empty = document.createElement('div');
-        empty.style.cssText = 'padding:60px; text-align:center; color:var(--text-muted); border:1px dashed var(--border-subtle); border-radius:8px;';
+        empty.className = 'pl-overview-empty';
         empty.textContent = t('pl_empty');
         container.appendChild(empty);
     } else {
@@ -53,7 +41,7 @@ function updateSubtitle(el) {
     if (count === 0) {
         el.textContent = t('pl_empty');
     } else {
-        el.textContent = `${count} ${count === 1 ? 'Playlist' : 'Playlists'}`;
+        el.textContent = `${count} ${count === 1 ? t('pl_song') : t('pl_songs')}`;
     }
 }
 
@@ -83,7 +71,7 @@ export const playlistOverviewModule = {
         div.dataset.module = 'playlists';
 
         const header = document.createElement('div');
-        header.style.cssText = 'display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;';
+        header.className = 'pl-overview-header';
 
         const titleGroup = document.createElement('div');
         const title = document.createElement('h2');
@@ -92,7 +80,7 @@ export const playlistOverviewModule = {
         titleGroup.appendChild(title);
 
         const subtitle = document.createElement('p');
-        subtitle.style.cssText = 'color:var(--text-muted); font-size:0.9rem;';
+        subtitle.className = 'pl-overview-subtitle';
         subtitle.setAttribute(SUBTITLE_SELECTOR, '');
         updateSubtitle(subtitle);
         titleGroup.appendChild(subtitle);
@@ -100,17 +88,14 @@ export const playlistOverviewModule = {
         header.appendChild(titleGroup);
 
         const createBtn = document.createElement('button');
-        createBtn.style.cssText = `
-            background:var(--accent-premium); border:none; color:white; padding:10px 20px;
-            border-radius:6px; cursor:pointer; font-weight:600; font-size:0.9rem;
-        `;
+        createBtn.className = 'pl-overview-create-btn';
         createBtn.textContent = t('pl_new');
         createBtn.addEventListener('click', () => showCreatePlaylistModal());
         header.appendChild(createBtn);
         div.appendChild(header);
 
         const list = document.createElement('div');
-        list.style.cssText = 'display:flex; flex-direction:column; gap:8px; margin-bottom:90px;';
+        list.className = 'pl-overview-list';
         list.setAttribute(LIST_SELECTOR, '');
         populateList(list);
         div.appendChild(list);

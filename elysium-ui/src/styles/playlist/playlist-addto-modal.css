@@ -1,0 +1,121 @@
+/* src/styles/playlist/playlist-addto-modal.css */
+/* Add-to-playlist modal — playlist options, inline create form, footer */
+
+.pl-addto-header {
+    padding: 20px 24px 12px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.pl-addto-header-sub {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pl-addto-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 12px;
+}
+
+.pl-addto-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.2s;
+    min-height: 44px;
+}
+
+.pl-addto-option:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.pl-addto-option-name {
+    flex: 1;
+    font-size: 0.9rem;
+    color: var(--text-pure);
+}
+
+.pl-addto-option-count {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.pl-addto-option-badge {
+    font-size: 0.7rem;
+    color: var(--accent-premium);
+}
+
+.pl-addto-footer {
+    padding: 12px 24px 20px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.pl-addto-new-btn {
+    width: 100%;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px dashed var(--border-subtle);
+    border-radius: 6px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.88rem;
+    transition: all 0.2s;
+    min-height: 44px;
+}
+
+.pl-addto-new-btn:hover {
+    border-color: var(--accent-premium);
+    color: var(--accent-premium);
+}
+
+.pl-addto-empty {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* Inline create form inside add-to modal */
+.pl-inline-create {
+    padding: 12px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.pl-inline-create-row {
+    display: flex;
+    gap: 8px;
+}
+
+.pl-inline-create-input {
+    flex: 1;
+    padding: 8px 12px;
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    color: var(--text-pure);
+    font-size: 0.88rem;
+    outline: none;
+    min-height: 44px;
+}
+
+.pl-inline-create-input:focus {
+    border-color: var(--accent-premium);
+}
+
+.pl-inline-create-confirm {
+    padding: 8px 14px;
+    background: var(--accent-premium);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    min-height: 44px;
+}

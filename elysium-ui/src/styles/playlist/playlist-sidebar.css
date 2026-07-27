@@ -1,0 +1,108 @@
+/* src/styles/playlist/playlist-sidebar.css */
+/* Sidebar playlist list — items, add button, delete reveal, empty state */
+
+.pl-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.pl-list-section-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+}
+
+.pl-list-add-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    width: 100%;
+    background: transparent;
+    border: 1px dashed var(--border-subtle);
+    border-radius: 6px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.85rem;
+    min-height: 44px;
+}
+
+.pl-list-add-btn:hover {
+    border-color: var(--accent-premium);
+    color: var(--accent-premium);
+}
+
+.pl-list-items {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 6px;
+}
+
+.pl-list-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    text-align: left;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    min-height: 44px;
+}
+
+.pl-list-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: var(--border-subtle);
+}
+
+.pl-list-item-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pl-list-item-count {
+    font-size: 0.75rem;
+    opacity: 0.5;
+    margin-right: 4px;
+}
+
+.pl-list-item-delete {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px 4px;
+    display: none;
+    transition: color 0.2s;
+    flex-shrink: 0;
+    min-width: 44px;
+    min-height: 44px;
+}
+
+.pl-list-item:hover .pl-list-item-delete {
+    display: flex;
+}
+
+.pl-list-item-delete:hover {
+    color: #ef4444;
+}
+
+.pl-list-empty {
+    padding: 12px;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    opacity: 0.5;
+}

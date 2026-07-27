@@ -1,0 +1,83 @@
+/* src/styles/playlist/playlist-create-modal.css */
+/* Create playlist modal — overlay, dialog, input, action buttons */
+
+.pl-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.pl-modal-dialog {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 28px;
+    width: 400px;
+    max-width: 90vw;
+}
+
+.pl-modal-dialog--scrollable {
+    padding: 0;
+    width: 420px;
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.pl-modal-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text-pure);
+}
+
+.pl-modal-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    color: var(--text-pure);
+    font-size: 0.95rem;
+    outline: none;
+    margin-bottom: 20px;
+    min-height: 44px;
+}
+
+.pl-modal-input:focus {
+    border-color: var(--accent-premium);
+}
+
+.pl-modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.pl-modal-btn-cancel {
+    padding: 8px 18px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.9rem;
+    min-height: 44px;
+}
+
+.pl-modal-btn-confirm {
+    padding: 8px 18px;
+    background: var(--accent-premium);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    min-height: 44px;
+}

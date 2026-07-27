@@ -12,9 +12,9 @@ import { youtubeMetadataProvider } from './core/metadata/providers/youtubeMetada
 import { initPlayerBar } from './components/playerbar/PlayerBar.js';
 import { checkForUpdate } from './core/services/updateService.js';
 import { initDepListener } from './modules/deps/services/depService.js';
-import { playlistState } from './components/playlists/services/playlistState.js';
-import { renderPlaylistSidebar } from './components/playlists/PlaylistList.js';
-import { initPlaylistViewListener } from './components/playlists/PlaylistView.js';
+import { playlistState } from './components/playlists/services/playlistState';
+import { renderPlaylistSidebar } from './components/playlists/PlaylistList';
+import { initPlaylistViewListener } from './components/playlists/PlaylistView';
 import { initializeLanguage } from './config/language/languageDetector.js';
 import './config/translations.js';
 

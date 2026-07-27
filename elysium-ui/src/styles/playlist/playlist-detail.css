@@ -1,0 +1,92 @@
+/* src/styles/playlist/playlist-detail.css */
+/* Playlist detail view — header, back/delete buttons, play-all, song list */
+
+.pl-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.pl-detail-spacer {
+    flex: 1;
+}
+
+.pl-detail-back-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+    min-width: 44px;
+    min-height: 44px;
+}
+
+.pl-detail-back-btn:hover {
+    color: var(--text-pure);
+}
+
+.pl-detail-delete-btn {
+    background: none;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    min-height: 44px;
+}
+
+.pl-detail-delete-btn:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.pl-detail-count {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+}
+
+.pl-detail-play-all {
+    background: var(--accent-premium);
+    border: none;
+    color: white;
+    padding: 10px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.1s;
+    min-height: 44px;
+}
+
+.pl-detail-play-all:hover {
+    transform: scale(1.02);
+}
+
+.pl-detail-song-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 90px;
+}
+
+.pl-detail-empty {
+    padding: 40px;
+    text-align: center;
+    color: var(--text-muted);
+    border: 1px dashed var(--border-subtle);
+    border-radius: 8px;
+}
