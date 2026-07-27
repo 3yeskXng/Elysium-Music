@@ -114,5 +114,15 @@ export default {
     lyrics_source_custom: "Personalizado",
     lyrics_source_none: "Sem fonte",
     lyrics_source_label: "Fonte",
-    lyrics_lines_label: "linhas"
+    lyrics_lines_label: "linhas",
+    queue_title: "Fila de reprodução",
+    queue_empty: "A fila está vazia",
+    queue_clear: "Limpar",
+    queue_add: "Adicionar à fila",
+    queue_remove: "Remover",
+    queue_now_playing: "Tocando agora",
+    queue_upcoming: "Próximo",
+    queue_shuffle: "Aleatório",
+    queue_move_up: "Mover para cima",
+    queue_move_down: "Mover para baixo"
 };

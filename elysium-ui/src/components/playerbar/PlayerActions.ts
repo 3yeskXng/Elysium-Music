@@ -1,8 +1,9 @@
 // src/components/playerbar/PlayerActions.ts
-// Utility buttons — download, add to playlist (+), lyrics toggle
+// Utility buttons — download, add to playlist (+), lyrics toggle, queue toggle
 
-import { ICON_DOWNLOAD, ICON_PLUS, ICON_LYRICS } from '../../config/icons.js';
+import { ICON_DOWNLOAD, ICON_PLUS, ICON_LYRICS, ICON_QUEUE } from '../../config/icons.js';
 import { toggle as toggleLyrics } from '../lyrics/services/LyricsPanel.js';
+import { toggle as toggleQueue } from '../queue/PlayerQueue.js';
 import { audioEngine } from '../../core/audioEngine.js';
 import { invokeBackend } from '../../api.js';
 import { showAddToPlaylistModal } from '../playlists/AddToPlaylistModal.js';
@@ -57,6 +58,12 @@ export function createPlayerActions(): HTMLElement {
   lyricsBtn.title = t('lyrics_title');
   lyricsBtn.addEventListener('click', () => toggleLyrics());
 
-  wrap.append(dlBtn, addBtn, lyricsBtn);
+  const queueBtn = document.createElement('button');
+  queueBtn.className = 'player-btn';
+  queueBtn.innerHTML = ICON_QUEUE;
+  queueBtn.title = t('queue_title');
+  queueBtn.addEventListener('click', () => toggleQueue());
+
+  wrap.append(dlBtn, addBtn, lyricsBtn, queueBtn);
   return wrap;
 }

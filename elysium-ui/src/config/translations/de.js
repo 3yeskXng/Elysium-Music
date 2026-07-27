@@ -114,5 +114,15 @@ export default {
     lyrics_source_custom: "Benutzerdefiniert",
     lyrics_source_none: "Keine Quelle",
     lyrics_source_label: "Quelle",
-    lyrics_lines_label: "Zeilen"
+    lyrics_lines_label: "Zeilen",
+    queue_title: "Wiedergabeliste",
+    queue_empty: "Warteschlange ist leer",
+    queue_clear: "Leeren",
+    queue_add: "Zur Warteschlange hinzufügen",
+    queue_remove: "Entfernen",
+    queue_now_playing: "Wird abgespielt",
+    queue_upcoming: "Als Nächstes",
+    queue_shuffle: "Mischen",
+    queue_move_up: "Nach oben",
+    queue_move_down: "Nach unten"
 };

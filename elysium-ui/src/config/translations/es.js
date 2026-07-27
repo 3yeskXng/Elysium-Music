@@ -109,5 +109,15 @@ export default {
     lyrics_source_custom: "Personalizado",
     lyrics_source_none: "Sin fuente",
     lyrics_source_label: "Fuente",
-    lyrics_lines_label: "líneas"
+    lyrics_lines_label: "líneas",
+    queue_title: "Cola de reproducción",
+    queue_empty: "La cola está vacía",
+    queue_clear: "Vaciar",
+    queue_add: "Añadir a la cola",
+    queue_remove: "Quitar",
+    queue_now_playing: "Reproduciendo",
+    queue_upcoming: "Siguiente",
+    queue_shuffle: "Aleatorio",
+    queue_move_up: "Subir",
+    queue_move_down: "Bajar"
 };

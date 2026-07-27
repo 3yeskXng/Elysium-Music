@@ -1,0 +1,110 @@
+/* src/styles/queue/player-queue-entries.css */
+/* Queue entry rows, section labels, empty state */
+
+.queue-section {
+  padding: 0 16px;
+  margin-bottom: 8px;
+}
+
+.queue-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary, #888);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 0 6px;
+}
+
+.queue-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+  min-height: 48px;
+}
+
+.queue-entry:hover {
+  background: var(--surface-hover, rgba(255,255,255,0.04));
+}
+
+.queue-entry-active {
+  background: rgba(168, 85, 247, 0.08);
+  border-left: 3px solid var(--accent-premium, #a855f7);
+  padding-left: 9px;
+}
+
+.queue-entry-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.queue-entry-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary, #fff);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.queue-entry-artist {
+  font-size: 11px;
+  color: var(--text-secondary, #888);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.queue-entry-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.queue-entry-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary, #888);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  font-size: 14px;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+.queue-entry-btn:hover {
+  color: var(--text-primary, #fff);
+  background: var(--surface-hover, rgba(255,255,255,0.08));
+}
+
+.queue-entry-remove:hover {
+  color: #ef4444;
+}
+
+.queue-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  gap: 12px;
+}
+
+.queue-empty-icon {
+  font-size: 32px;
+  opacity: 0.3;
+}
+
+.queue-empty-text {
+  font-size: 13px;
+  color: var(--text-secondary, #888);
+  text-align: center;
+}

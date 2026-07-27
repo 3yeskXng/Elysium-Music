@@ -1,5 +1,5 @@
 // src/components/playerbar/PlayerBar.ts
-// Player bar lifecycle — shell creation, track binding, lyrics sync on track change
+// Player bar lifecycle — shell creation, track binding, lyrics & queue init
 
 import { audioEngine } from '../../core/audioEngine.js';
 import { resolveArtist } from '../../utils/resolveArtist.js';
@@ -7,13 +7,8 @@ import { createPlayerControls } from './PlayerControls.js';
 import { createPlayerActions } from './PlayerActions.js';
 import { createPlayerVolume } from './PlayerVolume.js';
 import { loadTrackLyrics, initLyricsPanel } from '../lyrics/services/LyricsPanel.js';
-
-interface Track {
-  id: string;
-  title: string;
-  artist: string;
-  file_path: string;
-}
+import { initQueuePanel } from '../queue/PlayerQueue.js';
+import type { Track } from '../../types/Track.js';
 
 function createShell(): void {
   const metaSlot = document.getElementById('player-meta-slot');
@@ -45,6 +40,7 @@ function createShell(): void {
   utilsSlot.appendChild(createPlayerActions());
 
   initLyricsPanel();
+  initQueuePanel();
 }
 
 function bindTrackUpdates(): void {

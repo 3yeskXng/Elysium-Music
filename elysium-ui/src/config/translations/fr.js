@@ -109,5 +109,15 @@ export default {
     lyrics_source_custom: "Personnalisé",
     lyrics_source_none: "Aucune source",
     lyrics_source_label: "Source",
-    lyrics_lines_label: "lignes"
+    lyrics_lines_label: "lignes",
+    queue_title: "File de lecture",
+    queue_empty: "La file est vide",
+    queue_clear: "Vider",
+    queue_add: "Ajouter à la file",
+    queue_remove: "Retirer",
+    queue_now_playing: "En cours",
+    queue_upcoming: "À suivre",
+    queue_shuffle: "Mélanger",
+    queue_move_up: "Monter",
+    queue_move_down: "Descendre"
 };

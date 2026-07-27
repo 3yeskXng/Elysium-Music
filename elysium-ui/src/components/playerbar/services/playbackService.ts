@@ -3,6 +3,7 @@
 // and native audio events for play/pause state changes
 
 import { audioEngine } from '../../../core/audioEngine.js';
+import { queueManager } from '../../queue/services/QueueManager.js';
 
 export interface PlaybackState {
   isPlaying: boolean;
@@ -76,5 +77,12 @@ export function seekTo(time: number): void {
 const audio = audioEngine.audio;
 audio.addEventListener('play', () => { notify(); startLoop(); });
 audio.addEventListener('pause', () => { notify(); stopLoop(); });
-audio.addEventListener('ended', () => { notify(); stopLoop(); });
+audio.addEventListener('ended', () => {
+  const next = queueManager.next();
+  if (next) {
+    audioEngine.playTrack(next.track);
+  }
+  notify();
+  stopLoop();
+});
 audio.addEventListener('loadedmetadata', () => notify());

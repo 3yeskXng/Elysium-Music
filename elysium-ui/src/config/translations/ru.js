@@ -114,5 +114,15 @@ export default {
     lyrics_source_custom: "Пользовательский",
     lyrics_source_none: "Нет источника",
     lyrics_source_label: "Источник",
-    lyrics_lines_label: "строк"
+    lyrics_lines_label: "строк",
+    queue_title: "Очередь воспроизведения",
+    queue_empty: "Очередь пуста",
+    queue_clear: "Очистить",
+    queue_add: "Добавить в очередь",
+    queue_remove: "Убрать",
+    queue_now_playing: "Сейчас играет",
+    queue_upcoming: "Далее",
+    queue_shuffle: "Перемешать",
+    queue_move_up: "Вверх",
+    queue_move_down: "Вниз"
 };

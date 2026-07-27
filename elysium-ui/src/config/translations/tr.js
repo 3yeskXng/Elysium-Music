@@ -114,5 +114,15 @@ export default {
     lyrics_source_custom: "Ozel",
     lyrics_source_none: "Kaynak Yok",
     lyrics_source_label: "Kaynak",
-    lyrics_lines_label: "satir"
+    lyrics_lines_label: "satir",
+    queue_title: "Oynatma Kuyrugu",
+    queue_empty: "Kuyruk bos",
+    queue_clear: "Temizle",
+    queue_add: "Kuyruga ekle",
+    queue_remove: "Kaldir",
+    queue_now_playing: "Simdi Oynatiliyor",
+    queue_upcoming: "Siradaki",
+    queue_shuffle: "Karistir",
+    queue_move_up: "Yukari",
+    queue_move_down: "Asagi"
 };

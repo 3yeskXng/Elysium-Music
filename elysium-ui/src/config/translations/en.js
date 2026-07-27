@@ -114,5 +114,15 @@ export default {
     lyrics_source_custom: "Custom",
     lyrics_source_none: "No Source",
     lyrics_source_label: "Source",
-    lyrics_lines_label: "lines"
+    lyrics_lines_label: "lines",
+    queue_title: "Play Queue",
+    queue_empty: "Queue is empty",
+    queue_clear: "Clear",
+    queue_add: "Add to Queue",
+    queue_remove: "Remove",
+    queue_now_playing: "Now Playing",
+    queue_upcoming: "Up Next",
+    queue_shuffle: "Shuffle",
+    queue_move_up: "Move up",
+    queue_move_down: "Move down"
 };

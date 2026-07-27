@@ -30,7 +30,7 @@ src/modules/download/
 16.**Output:** Frage dich am Ende selber:
 - Hast du dich strikt an unsere Regeln gehalten?
 - Hast du alles modular gebaut?
-- Hast du auf Linux geachtet?
+- Hast du auf Linux & Zukunftliches Mobile & Mac geachtet?
 - In welchen Punkten warst du faul, hast du am Ende rübergeguckt und es verbessert?
 - Welche Dateien hast du gestichprobet?
 - Gibt es wirklich keine keine Hardcodes mehr und das Sprachsystem ist vollmodular?
