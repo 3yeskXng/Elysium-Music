@@ -19,19 +19,21 @@
 </head>
 <body>
     <div id="app-shell">
-        <aside id="shell-sidebar">
-            <div class="brand-zone">
-                <img class="app-logo" src="/src/Elysium.png" alt="Elysium Logo" onerror="this.style.display='none'">
-                <span class="app-title" data-i18n="appTitle">Elysium</span>
-            </div>
-            <nav id="sidebar-navigation-slots"></nav>
-            <div id="sidebar-playlist-slots"></div>
-            <div id="sidebar-footer-slots"></div>
-        </aside>
+        <div class="app-body">
+            <aside id="shell-sidebar">
+                <div class="brand-zone">
+                    <img class="app-logo" src="/src/Elysium.png" alt="Elysium Logo" onerror="this.style.display='none'">
+                    <span class="app-title" data-i18n="appTitle">Elysium</span>
+                </div>
+                <nav id="sidebar-navigation-slots"></nav>
+                <div id="sidebar-playlist-slots"></div>
+                <div id="sidebar-footer-slots"></div>
+            </aside>
 
-        <main id="shell-main-content">
-            <div id="content-mount-point"></div>
-        </main>
+            <main id="shell-main-content">
+                <div id="content-mount-point"></div>
+            </main>
+        </div>
 
         <footer id="shell-player-bar">
             <div id="player-meta-slot"></div>

@@ -14,8 +14,11 @@
     "windows": [
       {
         "title": "Elysium Music",
-        "width": 800,
-        "height": 600
+        "width": 979,
+        "height": 723,
+        "minWidth": 815,
+        "minHeight": 640,
+        "resizable": true
       }
     ],
     "security": {
