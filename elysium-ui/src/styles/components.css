@@ -1,5 +1,5 @@
 /* elysium-ui/src/styles/components.css */
-/* Reusable UI components: inputs, cards, error boundary, typography, animations */
+/* Reusable UI components: inputs, cards, error boundary */
 
 .search-input {
     width: 100%;
@@ -30,26 +30,4 @@
     font-size: 1.1rem;
     font-weight: 600;
     letter-spacing: -0.1px;
-}
-
-.view-title {
-    font-size: 1.6rem;
-    font-weight: 600;
-    letter-spacing: -0.4px;
-    margin-bottom: 8px;
-}
-
-@keyframes viewFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(6px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.animate-fade-in {
-    animation: viewFadeIn 0.35s cubic-bezier(0.215, 0.610, 0.355, 1) forwards;
 }
