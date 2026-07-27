@@ -55,54 +55,54 @@ pub async fn write_custom_lyrics(
 }
 
 fn read_id3_uslt(path: &Path) -> Result<Option<String>, String> {
-    use lofty::config::ParseOptions;
+    use lofty::file::TaggedFileExt;
     use lofty::read_from_path;
-    use lofty::tag::{Accessor, Tag, TaggedItem};
+    use lofty::tag::ItemKey;
 
-    let mut tagged_file = read_from_path(path)
+    let tagged_file = read_from_path(path)
         .map_err(|e| format!("Failed to parse MP3: {}", e))?;
     let tag = tagged_file
         .primary_tag()
         .or_else(|| tagged_file.first_tag())
         .ok_or_else(|| "No tag found in file".to_string())?;
 
-    match tag.get_item(&lofty::item::ItemKey::Lyrics) {
+    match tag.get(&ItemKey::Lyrics) {
         Some(item) => Ok(item.value().text().map(|s| s.to_string())),
         None => Ok(None),
     }
 }
 
 fn read_vorbis_lyrics(path: &Path) -> Result<Option<String>, String> {
-    use lofty::config::ParseOptions;
+    use lofty::file::TaggedFileExt;
     use lofty::read_from_path;
-    use lofty::tag::{Accessor, Tag, TaggedItem};
+    use lofty::tag::ItemKey;
 
-    let mut tagged_file = read_from_path(path)
+    let tagged_file = read_from_path(path)
         .map_err(|e| format!("Failed to parse Opus/OGG: {}", e))?;
     let tag = tagged_file
         .primary_tag()
         .or_else(|| tagged_file.first_tag())
         .ok_or_else(|| "No tag found in file".to_string())?;
 
-    match tag.get_item(&lofty::item::ItemKey::Lyrics) {
+    match tag.get(&ItemKey::Lyrics) {
         Some(item) => Ok(item.value().text().map(|s| s.to_string())),
         None => Ok(None),
     }
 }
 
 fn read_flac_lyrics(path: &Path) -> Result<Option<String>, String> {
-    use lofty::config::ParseOptions;
+    use lofty::file::TaggedFileExt;
     use lofty::read_from_path;
-    use lofty::tag::{Accessor, Tag, TaggedItem};
+    use lofty::tag::ItemKey;
 
-    let mut tagged_file = read_from_path(path)
+    let tagged_file = read_from_path(path)
         .map_err(|e| format!("Failed to parse FLAC: {}", e))?;
     let tag = tagged_file
         .primary_tag()
         .or_else(|| tagged_file.first_tag())
         .ok_or_else(|| "No tag found in file".to_string())?;
 
-    match tag.get_item(&lofty::item::ItemKey::Lyrics) {
+    match tag.get(&ItemKey::Lyrics) {
         Some(item) => Ok(item.value().text().map(|s| s.to_string())),
         None => Ok(None),
     }

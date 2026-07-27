@@ -5,6 +5,9 @@ tools/
 # Temporärer Rust-Build-Müll von Tauri (wird gigantisch groß!)
 src-tauri/target/
 
+# Vite-Build-Ausgabe
+dist/
+
 # Von Tauri generierte Dateien
 src-tauri/gen/
 
@@ -17,9 +20,6 @@ yarn-error.log*
 # Betriebssystem-Dateien (z.B. Mac/Windows Thumbnails)
 .DS_Store
 Thumbs.db
-
-1781966821943-player-script.js
-1781966821948-player-script.js
 
 # Nur diese speziellen Cache-Dateien ignorieren, die mit Zahlen beginnen
 [0-9]*-player-script.js
