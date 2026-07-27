@@ -57,12 +57,15 @@ export function togglePlay(): void {
   notify();
 }
 
-export function skipNext(): void {
-  audioEngine.audio.dispatchEvent(new Event('ended'));
+export function fastForward(): void {
+  const audio = audioEngine.audio;
+  if (audio.duration) {
+    audio.currentTime = audio.duration;
+  }
 }
 
-export function skipPrevious(): void {
-  audioEngine.seek(0);
+export function rewind10(): void {
+  audioEngine.seek(Math.max(0, audioEngine.audio.currentTime - 10));
 }
 
 export function seekTo(time: number): void {

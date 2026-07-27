@@ -1,0 +1,58 @@
+/* src/styles/player/player-volume.css */
+/* Volume slider with mute toggle */
+
+.player-volume {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 12px;
+}
+
+.player-volume-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.player-volume-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.player-volume-slider {
+    width: 80px;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(
+        to right,
+        var(--accent-premium) 0%,
+        var(--accent-premium) var(--vol-pct, 100%),
+        rgba(255, 255, 255, 0.08) var(--vol-pct, 100%),
+        rgba(255, 255, 255, 0.08) 100%
+    );
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+
+.player-volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent-premium);
+    cursor: pointer;
+}
+
+.player-volume-slider::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent-premium);
+    border: none;
+    cursor: pointer;
+}
+
+@media (max-width: 640px) {
+    .player-volume { display: none; }
+}

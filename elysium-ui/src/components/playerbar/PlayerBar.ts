@@ -5,6 +5,7 @@ import { audioEngine } from '../../core/audioEngine.js';
 import { resolveArtist } from '../../utils/resolveArtist.js';
 import { createPlayerControls } from './PlayerControls.js';
 import { createPlayerActions } from './PlayerActions.js';
+import { createPlayerVolume } from './PlayerVolume.js';
 import { loadTrackLyrics, initLyricsPanel } from '../lyrics/services/LyricsPanel.js';
 
 interface Track {
@@ -39,6 +40,8 @@ function createShell(): void {
   metaSlot.appendChild(info);
 
   controlsSlot.appendChild(createPlayerControls());
+
+  utilsSlot.appendChild(createPlayerVolume());
   utilsSlot.appendChild(createPlayerActions());
 
   initLyricsPanel();

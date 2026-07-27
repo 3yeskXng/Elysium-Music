@@ -1,5 +1,5 @@
 // src/components/playerbar/PlayerControls.ts
-// Play/pause, prev/next, progress bar — core transport controls
+// Play/pause, rewind/forward, progress bar — core transport controls
 
 import { ICON_PLAY, ICON_PAUSE, ICON_BACK, ICON_FORWARD } from '../../config/icons.js';
 import * as playback from './services/playbackService.js';
@@ -21,7 +21,7 @@ export function createPlayerControls(): HTMLElement {
   const prevBtn = document.createElement('button');
   prevBtn.className = 'player-btn';
   prevBtn.innerHTML = ICON_BACK;
-  prevBtn.addEventListener('click', playback.skipPrevious);
+  prevBtn.addEventListener('click', playback.rewind10);
 
   const playBtn = document.createElement('button');
   playBtn.className = 'player-btn player-btn-play';
@@ -31,7 +31,7 @@ export function createPlayerControls(): HTMLElement {
   const nextBtn = document.createElement('button');
   nextBtn.className = 'player-btn';
   nextBtn.innerHTML = ICON_FORWARD;
-  nextBtn.addEventListener('click', playback.skipNext);
+  nextBtn.addEventListener('click', playback.fastForward);
 
   transport.append(prevBtn, playBtn, nextBtn);
 
@@ -47,18 +47,18 @@ export function createPlayerControls(): HTMLElement {
   const progressFill = document.createElement('div');
   progressFill.className = 'player-progress-fill';
 
-  const progressThumb = document.createElement('input');
-  progressThumb.type = 'range';
-  progressThumb.className = 'player-progress-thumb';
-  progressThumb.min = '0';
-  progressThumb.max = '100';
-  progressThumb.value = '0';
-  progressThumb.addEventListener('input', () => {
+  const progressInput = document.createElement('input');
+  progressInput.type = 'range';
+  progressInput.className = 'player-progress-input';
+  progressInput.min = '0';
+  progressInput.max = '100';
+  progressInput.value = '0';
+  progressInput.addEventListener('input', () => {
     const dur = playback.getState().duration;
-    playback.seekTo((parseFloat(progressThumb.value) / 100) * dur);
+    playback.seekTo((parseFloat(progressInput.value) / 100) * dur);
   });
 
-  progressTrack.append(progressFill, progressThumb);
+  progressTrack.append(progressFill, progressInput);
 
   const timeTotal = document.createElement('span');
   timeTotal.className = 'player-time';
@@ -69,7 +69,7 @@ export function createPlayerControls(): HTMLElement {
   playback.subscribe((s) => {
     playBtn.innerHTML = s.isPlaying ? ICON_PAUSE : ICON_PLAY;
     const pct = s.duration ? (s.currentTime / s.duration) * 100 : 0;
-    progressThumb.value = pct.toString();
+    progressInput.value = pct.toString();
     progressFill.style.width = `${pct}%`;
     timeCurrent.textContent = formatTime(s.currentTime);
     timeTotal.textContent = formatTime(s.duration);
