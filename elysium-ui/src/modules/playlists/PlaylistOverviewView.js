@@ -53,7 +53,6 @@ function updateSubtitle(el) {
     if (count === 0) {
         el.textContent = t('pl_empty');
     } else {
-        // FIX: Richtiger Text für Playlists anstelle von Songs
         el.textContent = `${count} ${count === 1 ? 'Playlist' : 'Playlists'}`;
     }
 }
@@ -95,8 +94,6 @@ export const playlistOverviewModule = {
         const subtitle = document.createElement('p');
         subtitle.style.cssText = 'color:var(--text-muted); font-size:0.9rem;';
         subtitle.setAttribute(SUBTITLE_SELECTOR, '');
-        
-        // FIX: Sicheres Auslesen beim Rendern
         updateSubtitle(subtitle);
         titleGroup.appendChild(subtitle);
 
@@ -115,11 +112,10 @@ export const playlistOverviewModule = {
         const list = document.createElement('div');
         list.style.cssText = 'display:flex; flex-direction:column; gap:8px; margin-bottom:90px;';
         list.setAttribute(LIST_SELECTOR, '');
-        
-        // FIX: Erzwingt das Füllen aus dem aktuellen playlistState beim Aufrufen des Reiters!
         populateList(list);
-        
         div.appendChild(list);
+
+        playlistState.load();
 
         return div;
     }
