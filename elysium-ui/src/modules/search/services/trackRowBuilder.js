@@ -6,7 +6,8 @@ import { audioEngine } from '../../../core/audioEngine.js';
 import { showAddToPlaylistModal } from '../../../components/playlists/AddToPlaylistModal.js';
 import { playStreamTrack } from './streamService.js';
 import { invokeBackend } from '../../../api.js';
-import { ICON_DOWNLOAD, ICON_PLUS } from '../../../config/icons.js';
+import { ICON_DOWNLOAD, ICON_PLUS, ICON_QUEUE } from '../../../config/icons.js';
+import { queueManager } from '../../../components/queue/services/QueueManager.js';
 
 function log(level, msg) {
     if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Search', msg);
@@ -33,10 +34,14 @@ export function buildTrackRow(track, container) {
             width:24px; height:24px; border-radius:50%; cursor:pointer; display:flex;
             align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s;"
             title="${t('pl_add_to')}">${ICON_PLUS}</button>
+        <button class="search-queue-btn" style="background:rgba(255,255,255,0.05); border:none; color:var(--text-muted);
+            width:24px; height:24px; border-radius:50%; cursor:pointer; display:flex;
+            align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s;"
+            title="${t('queue_add')}">${ICON_QUEUE}</button>
     `;
 
     row.addEventListener('click', (e) => {
-        if (e.target.closest('.search-download-btn') || e.target.closest('.search-add-btn')) return;
+        if (e.target.closest('.search-download-btn') || e.target.closest('.search-add-btn') || e.target.closest('.search-queue-btn')) return;
         if (track.file_path) {
             audioEngine.playTrack(track);
         } else {
@@ -70,6 +75,11 @@ export function buildTrackRow(track, container) {
     row.querySelector('.search-add-btn').addEventListener('click', (e) => {
         e.stopPropagation();
         showAddToPlaylistModal(track);
+    });
+
+    row.querySelector('.search-queue-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        queueManager.enqueue(track, 'search');
     });
 
     row.addEventListener('mouseenter', () => row.style.background = 'rgba(138,92,246,0.05)');

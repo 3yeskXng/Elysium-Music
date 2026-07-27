@@ -31,26 +31,13 @@
     transition: color 0.2s, transform 0.1s, background 0.2s;
     padding: 0;
     flex-shrink: 0;
+    position: relative;
 }
-
-.player-btn:hover {
-    color: var(--text-main);
-    background: rgba(255, 255, 255, 0.06);
-}
-
+.player-btn:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.06); }
 .player-btn:active { transform: scale(0.95); }
 
-.player-btn-play {
-    background: var(--accent-premium);
-    color: #fff;
-}
-
-.player-btn-play:hover {
-    background: var(--accent-hover, var(--accent-premium));
-    color: #fff;
-    transform: scale(1.05);
-}
-
+.player-btn-play { background: var(--accent-premium); color: #fff; }
+.player-btn-play:hover { background: var(--accent-hover, var(--accent-premium)); color: #fff; transform: scale(1.05); }
 .player-btn svg { width: 18px; height: 18px; }
 .player-btn-play svg { width: 20px; height: 20px; }
 
@@ -115,12 +102,7 @@
     position: relative;
     z-index: 1;
 }
-
-.player-progress-input::-webkit-slider-runnable-track {
-    background: transparent;
-    height: 4px;
-}
-
+.player-progress-input::-webkit-slider-runnable-track { background: transparent; height: 4px; }
 .player-progress-input::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 14px;
@@ -130,12 +112,7 @@
     margin-top: -5px;
     box-shadow: 0 0 6px rgba(168, 85, 247, 0.4);
 }
-
-.player-progress-input::-moz-range-track {
-    background: transparent;
-    height: 4px;
-}
-
+.player-progress-input::-moz-range-track { background: transparent; height: 4px; }
 .player-progress-input::-moz-range-thumb {
     width: 14px;
     height: 14px;
