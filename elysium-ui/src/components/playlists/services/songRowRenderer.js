@@ -1,5 +1,5 @@
 // elysium-ui/src/components/playlists/services/songRowRenderer.js
-// Renders a single song row with play, info, duration, download, add-to-playlist, add-to-queue, and remove actions
+// Renders a single song row — same createElement pattern as PlayerBar buttons
 
 import { t } from '../../../utils/translate.js';
 import { ICON_PLAY, ICON_TRASH, ICON_DOWNLOAD, ICON_PLUS, ICON_QUEUE } from '../../../config/icons.js';
@@ -20,52 +20,36 @@ function formatDuration(secs) {
     return `${m}:${s}`;
 }
 
-function createIconBtn(icon, title, className) {
-    const btn = document.createElement('button');
-    btn.className = className;
-    btn.style.cssText = `
-        background:none; border:none; color:var(--text-muted); cursor:pointer;
-        width:24px; height:24px; border-radius:50%; display:flex;
-        align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s;
-    `;
-    btn.innerHTML = icon;
-    const svg = btn.querySelector('svg');
-    if (svg) svg.style.pointerEvents = 'none';
-    btn.title = title;
-    btn.addEventListener('mouseenter', () => btn.style.color = 'var(--text-main)');
-    btn.addEventListener('mouseleave', () => btn.style.color = 'var(--text-muted)');
-    return btn;
-}
-
 export function renderSongRow(song, playlist, onViewChange) {
     const row = document.createElement('div');
+    row.className = 'playlist-track-actions';
     row.style.cssText = `
         display:flex; align-items:center; gap:12px; padding:12px 16px;
-        background:var(--bg-sidebar); border:1px solid var(--border-subtle);
-        border-radius:6px; transition:all 0.2s;
+        background:var(--bg-sidebar); border:1px solid var(--border-subtle); border-radius:6px;
+        cursor:pointer; transition:all 0.2s ease;
     `;
 
     const playBtn = document.createElement('button');
-    playBtn.style.cssText = `
-        background:var(--accent-premium); border:none; color:white;
-        width:32px; height:32px; border-radius:50%; cursor:pointer;
-        display:flex; align-items:center; justify-content:center; flex-shrink:0;
-    `;
+    playBtn.className = 'player-btn player-btn-play';
     playBtn.innerHTML = ICON_PLAY;
+    playBtn.title = t('pl_play_all');
     playBtn.addEventListener('click', () => playSong(song));
 
     const info = document.createElement('div');
     info.style.cssText = 'flex:1; min-width:0;';
     info.innerHTML = `
-        <div style="font-weight:600; font-size:0.92rem; color:var(--text-main); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${song.title}</div>
-        <div style="font-size:0.8rem; color:var(--text-muted);">${song.artist || t('artist_unknown')}</div>
+        <div style="font-weight:600;font-size:0.92rem;color:var(--text-main);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${song.title}</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);">${song.artist || t('artist_unknown')}</div>
     `;
 
     const duration = document.createElement('span');
-    duration.style.cssText = 'font-size:0.85rem; color:var(--text-muted); font-family:monospace; flex-shrink:0;';
+    duration.style.cssText = 'font-size:0.85rem;color:var(--text-muted);font-family:monospace;flex-shrink:0;';
     duration.textContent = formatDuration(song.duration_secs);
 
-    const dlBtn = createIconBtn(ICON_DOWNLOAD, t('dl_btn'), 'playlist-dl-btn');
+    const dlBtn = document.createElement('button');
+    dlBtn.className = 'player-btn';
+    dlBtn.innerHTML = ICON_DOWNLOAD;
+    dlBtn.title = t('pl_download');
     dlBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const original = dlBtn.innerHTML;
@@ -88,29 +72,32 @@ export function renderSongRow(song, playlist, onViewChange) {
         }
     });
 
-    const addBtn = createIconBtn(ICON_PLUS, t('pl_add_to'), 'playlist-add-btn');
+    const addBtn = document.createElement('button');
+    addBtn.className = 'player-btn';
+    addBtn.innerHTML = ICON_PLUS;
+    addBtn.title = t('pl_add_to');
     addBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         showAddToPlaylistModal(song);
     });
 
-    const queueBtn = createIconBtn(ICON_QUEUE, t('queue_add'), 'playlist-queue-btn');
+    const queueBtn = document.createElement('button');
+    queueBtn.className = 'player-btn';
+    queueBtn.innerHTML = ICON_QUEUE;
+    queueBtn.title = t('queue_add');
     queueBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         queueManager.enqueue(song, 'playlist');
     });
 
     const removeBtn = document.createElement('button');
-    removeBtn.style.cssText = `
-        background:none; border:none; color:var(--text-muted); cursor:pointer;
-        padding:4px; display:flex; align-items:center; transition:color 0.2s; flex-shrink:0;
-    `;
+    removeBtn.className = 'player-btn';
     removeBtn.innerHTML = ICON_TRASH;
-    const rmSvg = removeBtn.querySelector('svg');
-    if (rmSvg) rmSvg.style.pointerEvents = 'none';
+    removeBtn.title = t('pl_remove');
     removeBtn.addEventListener('mouseenter', () => removeBtn.style.color = '#ef4444');
-    removeBtn.addEventListener('mouseleave', () => removeBtn.style.color = 'var(--text-muted)');
-    removeBtn.addEventListener('click', async () => {
+    removeBtn.addEventListener('mouseleave', () => removeBtn.style.color = '');
+    removeBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
         try {
             await playlistState.removeSong(playlist.id, song.id);
             log('INFO', `Removed "${song.title}" from "${playlist.name}"`);
@@ -121,5 +108,8 @@ export function renderSongRow(song, playlist, onViewChange) {
     });
 
     row.append(playBtn, info, duration, dlBtn, addBtn, queueBtn, removeBtn);
+    row.addEventListener('mouseenter', () => row.style.background = 'rgba(138,92,246,0.05)');
+    row.addEventListener('mouseleave', () => row.style.background = 'var(--bg-sidebar)');
+
     return row;
 }

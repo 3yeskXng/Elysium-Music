@@ -5,11 +5,12 @@ import de from './de.js';
 import en from './en.js';
 import es from './es.js';
 import fr from './fr.js';
+import ja from './ja.js';
 import ru from './ru.js';
 import tr from './tr.js';
 import ptBR from './pt-BR.js';
 
-export const translations = { de, en, es, fr, ru, tr, 'pt-BR': ptBR };
+export const translations = { de, en, es, fr, ja, ru, tr, 'pt-BR': ptBR };
 
 window.elysiumTranslate = function (lang) {
     localStorage.setItem('elysium_language', lang);

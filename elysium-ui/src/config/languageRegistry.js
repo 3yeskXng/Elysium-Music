@@ -10,6 +10,7 @@ export const languageRegistry = [
     { code: 'ru', name: 'Русский', flag: '🇷🇺' },
     { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
     { code: 'pt-BR', name: 'Português (BR)', flag: '🇧🇷' },
+    { code: 'ja', name: '日本語', flag: '🇯🇵' },
 ];
 
 /**
