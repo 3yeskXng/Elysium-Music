@@ -127,5 +127,8 @@ export default {
     queue_move_down: "下に移動",
     toast_close: "通知を閉じる",
     toast_song_removed: "曲がプレイリストから削除されました",
-    toast_playlist_deleted: "プレイリストが削除されました"
+    toast_playlist_deleted: "プレイリストが削除されました",
+    toast_playlist_created: "プレイリストが作成されました",
+    toast_song_added: "曲がプレイリストに追加されました",
+    toast_language_changed: "言語が変更されました"
 };

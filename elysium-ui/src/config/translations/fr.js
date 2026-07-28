@@ -122,5 +122,8 @@ export default {
     queue_move_down: "Descendre",
     toast_close: "Fermer la notification",
     toast_song_removed: "Chanson retirée de la playlist",
-    toast_playlist_deleted: "Playlist supprimée"
+    toast_playlist_deleted: "Playlist supprimée",
+    toast_playlist_created: "Playlist créée",
+    toast_song_added: "Chanson ajoutée à la playlist",
+    toast_language_changed: "Langue modifiée"
 };

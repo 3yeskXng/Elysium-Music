@@ -127,5 +127,8 @@ export default {
     queue_move_down: "Вниз",
     toast_close: "Закрыть уведомление",
     toast_song_removed: "Песня удалена из плейлиста",
-    toast_playlist_deleted: "Плейлист удалён"
+    toast_playlist_deleted: "Плейлист удалён",
+    toast_playlist_created: "Плейлист создан",
+    toast_song_added: "Песня добавлена в плейлист",
+    toast_language_changed: "Язык изменён"
 };

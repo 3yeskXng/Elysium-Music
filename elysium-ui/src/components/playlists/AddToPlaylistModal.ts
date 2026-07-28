@@ -5,18 +5,11 @@ import type { Track } from '../../types/Track.js';
 import { t } from '../../utils/translate.js';
 import { ICON_PLAYLIST } from '../../config/icons.js';
 import { playlistState } from './services/playlistState.js';
-import { cacheForPlaylist } from '../../core/cache/audioCache.js';
-
-function log(level: string, msg: string): void {
-  if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Playlists', msg);
-}
+import { addSongToPlaylistWithToast, createAndAddSongWithToast } from './services/playlistActions.js';
 
 function showCreateInline(container: HTMLElement, song: Track): void {
   const existing = container.querySelector('.pl-inline-create');
-  if (existing) {
-    existing.remove();
-    return;
-  }
+  if (existing) { existing.remove(); return; }
 
   const form = document.createElement('div');
   form.className = 'pl-inline-create';
@@ -43,17 +36,8 @@ function showCreateInline(container: HTMLElement, song: Track): void {
   const doCreate = async (): Promise<void> => {
     const name = input.value.trim();
     if (!name) return;
-    try {
-      const created = await playlistState.create(name);
-      await playlistState.addSong(created.id, song);
-      if (song.file_path) cacheForPlaylist(song.id, song.file_path);
-      log('INFO', `Created playlist "${name}" and added "${song.title}"`);
-      window.dispatchEvent(new CustomEvent('elysium-playlist-created'));
-      closeModal();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      log('ERROR', `Create & add failed: ${msg}`);
-    }
+    await createAndAddSongWithToast(name, song);
+    closeModal();
   };
 
   confirmBtn.addEventListener('click', doCreate);
@@ -81,15 +65,8 @@ function renderPlaylistOption(
 
   option.addEventListener('click', async () => {
     if (alreadyIn) return;
-    try {
-      await playlistState.addSong(playlist.id, song);
-      if (song.file_path) cacheForPlaylist(song.id, song.file_path);
-      log('INFO', `Added "${song.title}" to "${playlist.name}"`);
-      closeModal();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      log('ERROR', `Add to playlist failed: ${msg}`);
-    }
+    await addSongToPlaylistWithToast(playlist.id, playlist.name, song);
+    closeModal();
   });
 
   listContainer.appendChild(option);

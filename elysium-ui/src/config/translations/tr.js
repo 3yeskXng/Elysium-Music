@@ -127,5 +127,8 @@ export default {
     queue_move_down: "Asagi",
     toast_close: "Bildirimi kapat",
     toast_song_removed: "Şarkı oynatma listesinden kaldırıldı",
-    toast_playlist_deleted: "Oynatma listesi silindi"
+    toast_playlist_deleted: "Oynatma listesi silindi",
+    toast_playlist_created: "Oynatma listesi oluşturuldu",
+    toast_song_added: "Şarkı oynatma listesine eklendi",
+    toast_language_changed: "Dil değiştirildi"
 };

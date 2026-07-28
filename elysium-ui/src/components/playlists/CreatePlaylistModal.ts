@@ -60,6 +60,9 @@ export function showCreatePlaylistModal(): void {
     try {
       await playlistState.create(name);
       log('INFO', `Playlist created: "${name}"`);
+      window.dispatchEvent(new CustomEvent('elysium-toast', {
+        detail: { type: 'info', title: t('toast_playlist_created'), message: name, duration: 3000 }
+      }));
       closeModal();
       window.dispatchEvent(new CustomEvent('elysium-playlist-created'));
     } catch (err: unknown) {
