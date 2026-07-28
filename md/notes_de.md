@@ -1,7 +1,7 @@
 Unter tauri.conf.json kann man Version, Name und Minimale/Standard-Fenstergröße ändern.
 
 Git:
-
+git tag -a v0.5.0 -m ""
 
 Plan:
 - Dateien löschen(0.6)
