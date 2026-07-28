@@ -108,6 +108,7 @@ export default {
     lyrics_source_lrc: "Fichier LRC",
     lyrics_source_custom: "Personnalisé",
     lyrics_source_none: "Aucune source",
+    lyrics_source_lrclib: "LRCLIB",
     lyrics_source_label: "Source",
     lyrics_lines_label: "lignes",
     queue_title: "File de lecture",

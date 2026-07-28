@@ -65,6 +65,7 @@ function sourceKeyFor(source: LyricsSource): string {
     embedded: 'lyrics_source_embedded',
     lrc: 'lyrics_source_lrc',
     custom: 'lyrics_source_custom',
+    lrclib: 'lyrics_source_lrclib',
     none: 'lyrics_source_none',
   };
   return map[source] || 'lyrics_source_none';

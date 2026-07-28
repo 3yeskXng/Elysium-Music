@@ -113,6 +113,7 @@ export default {
     lyrics_source_lrc: "Файл LRC",
     lyrics_source_custom: "Пользовательский",
     lyrics_source_none: "Нет источника",
+    lyrics_source_lrclib: "LRCLIB",
     lyrics_source_label: "Источник",
     lyrics_lines_label: "строк",
     queue_title: "Очередь воспроизведения",

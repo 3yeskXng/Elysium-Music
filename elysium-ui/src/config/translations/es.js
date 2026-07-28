@@ -108,6 +108,7 @@ export default {
     lyrics_source_lrc: "Archivo LRC",
     lyrics_source_custom: "Personalizado",
     lyrics_source_none: "Sin fuente",
+    lyrics_source_lrclib: "LRCLIB",
     lyrics_source_label: "Fuente",
     lyrics_lines_label: "líneas",
     queue_title: "Cola de reproducción",

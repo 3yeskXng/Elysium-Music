@@ -113,6 +113,7 @@ export default {
     lyrics_source_lrc: "LRC Dosyasi",
     lyrics_source_custom: "Ozel",
     lyrics_source_none: "Kaynak Yok",
+    lyrics_source_lrclib: "LRCLIB",
     lyrics_source_label: "Kaynak",
     lyrics_lines_label: "satir",
     queue_title: "Oynatma Kuyrugu",

@@ -113,6 +113,7 @@ export default {
     lyrics_source_lrc: "LRCファイル",
     lyrics_source_custom: "カスタム",
     lyrics_source_none: "ソースなし",
+    lyrics_source_lrclib: "LRCLIB",
     lyrics_source_label: "ソース",
     lyrics_lines_label: "行",
     queue_title: "再生キュー",

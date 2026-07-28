@@ -1,10 +1,13 @@
 // src/components/lyrics/services/lyricsService.ts
-// IPC bridge for lyrics backend commands — load embedded, LRC, and custom lyrics
+// IPC bridge for lyrics backend commands — loads lyrics via priority chain (embedded → lrc → custom → lrclib)
 
 import { invokeBackend } from '../../../api.js';
 import { parseLrc, type ParsedLyrics } from './lrcParser.js';
+import { lyricsSourceRegistry } from './sources/sourceRegistry.js';
+import { lrclibProvider } from './sources/lrclibSource.js';
+import type { Track } from '../../../types/Track.js';
 
-export type LyricsSource = 'embedded' | 'lrc' | 'custom' | 'none';
+export type LyricsSource = 'embedded' | 'lrc' | 'custom' | 'lrclib' | 'none';
 
 export interface LyricsResult {
   raw: string | null;
@@ -12,15 +15,11 @@ export interface LyricsResult {
   source: LyricsSource;
 }
 
-interface Track {
-  id: string;
-  title: string;
-  file_path: string;
-}
-
 function log(level: string, msg: string): void {
   if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Lyrics', msg);
 }
+
+lyricsSourceRegistry.register(lrclibProvider);
 
 async function tryEmbeddedLyrics(filePath: string): Promise<string | null> {
   try {
@@ -62,6 +61,17 @@ async function tryCustomLyrics(trackId: string): Promise<string | null> {
   return null;
 }
 
+async function tryLrclib(track: Track): Promise<string | null> {
+  try {
+    const provider = lyricsSourceRegistry.getProvider('lrclib');
+    if (!provider) return null;
+    return await provider.resolve(track);
+  } catch (err) {
+    log('ERROR', `LRCLIB resolve failed: ${err}`);
+  }
+  return null;
+}
+
 export async function loadLyrics(track: Track): Promise<LyricsResult> {
   const empty: LyricsResult = { raw: null, parsed: { metadata: {}, lines: [] }, source: 'none' };
   if (!track || !track.file_path) return empty;
@@ -79,6 +89,11 @@ export async function loadLyrics(track: Track): Promise<LyricsResult> {
   const custom = await tryCustomLyrics(track.id);
   if (custom) {
     return { raw: custom, parsed: parseLrc(custom), source: 'custom' };
+  }
+
+  const lrclib = await tryLrclib(track);
+  if (lrclib) {
+    return { raw: lrclib, parsed: parseLrc(lrclib), source: 'lrclib' };
   }
 
   return empty;
