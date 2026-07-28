@@ -125,6 +125,7 @@ export default {
     queue_shuffle: "シャッフル",
     queue_move_up: "上に移動",
     queue_move_down: "下に移動",
+    queue_removed: "キューから削除されました",
     toast_close: "通知を閉じる",
     toast_song_removed: "曲がプレイリストから削除されました",
     toast_playlist_deleted: "プレイリストが削除されました",

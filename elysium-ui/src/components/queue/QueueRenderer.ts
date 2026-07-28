@@ -4,6 +4,7 @@
 import type { QueueState } from './services/queueState.js';
 import { queueManager } from './services/QueueManager.js';
 import type { QueueEntry } from './services/QueueManager.js';
+import { t } from '../../utils/translate.js';
 
 type TranslateFn = (key: string) => string;
 
@@ -13,16 +14,10 @@ export function renderQueueContent(
   t: TranslateFn,
 ): void {
   container.innerHTML = '';
-
-  if (state.entries.length === 0) {
-    renderEmptyState(container, t);
-    return;
-  }
-
+  if (state.entries.length === 0) { renderEmptyState(container, t); return; }
   if (state.currentIndex >= 0 && state.currentIndex < state.entries.length) {
     renderCurrentTrack(container, state.entries[state.currentIndex], t);
   }
-
   renderUpcoming(container, state, t);
 }
 
@@ -134,7 +129,14 @@ function createEntryRow(
     removeBtn.className = 'queue-entry-btn queue-entry-remove';
     removeBtn.textContent = '×';
     removeBtn.title = t('queue_remove');
-    removeBtn.addEventListener('click', (e) => { e.stopPropagation(); queueManager.dequeue(absoluteIndex); });
+    removeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const removedTitle = entry.track.title;
+      queueManager.dequeue(absoluteIndex);
+      window.dispatchEvent(new CustomEvent('elysium-toast', {
+        detail: { type: 'info', title: t('queue_removed'), message: removedTitle, duration: 3000 }
+      }));
+    });
 
     btnWrap.append(moveUpBtn, moveDownBtn, removeBtn);
   }

@@ -125,6 +125,7 @@ export default {
     queue_shuffle: "Aleatório",
     queue_move_up: "Mover para cima",
     queue_move_down: "Mover para baixo",
+    queue_removed: "Removida da fila",
     toast_close: "Fechar notificação",
     toast_song_removed: "Música removida da playlist",
     toast_playlist_deleted: "Playlist excluída",

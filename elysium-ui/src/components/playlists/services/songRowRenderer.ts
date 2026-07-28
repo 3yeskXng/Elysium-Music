@@ -84,6 +84,9 @@ export function renderSongRow(
   row.querySelector('.sr-queue-btn')!.addEventListener('click', (e) => {
     e.stopPropagation();
     queueManager.enqueue(song, 'playlist');
+    window.dispatchEvent(new CustomEvent('elysium-toast', {
+      detail: { type: 'info', title: t('queue_add'), message: song.title, duration: 3000 }
+    }));
   });
 
   row.querySelector('.sr-remove-btn')!.addEventListener('click', (e) => {

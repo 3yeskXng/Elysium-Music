@@ -120,6 +120,7 @@ export default {
     queue_shuffle: "Mélanger",
     queue_move_up: "Monter",
     queue_move_down: "Descendre",
+    queue_removed: "Retiré de la file",
     toast_close: "Fermer la notification",
     toast_song_removed: "Chanson retirée de la playlist",
     toast_playlist_deleted: "Playlist supprimée",

@@ -13,6 +13,13 @@ function log(level, msg) {
     if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Search', msg);
 }
 
+function formatDuration(secs) {
+    if (!secs || secs <= 0) return '--:--';
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+}
+
 export function buildTrackRow(track, container) {
     const row = document.createElement('div');
     row.style.cssText = `
@@ -25,7 +32,7 @@ export function buildTrackRow(track, container) {
             <div style="font-weight:600; font-size:0.95rem; color:var(--text-main); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${track.title}</div>
             <div style="font-size:0.8rem; color:var(--text-muted);">${track.artist || t('artist_unknown')}</div>
         </div>
-        <div style="font-size:0.9rem; color:var(--text-muted); font-family:monospace; flex-shrink:0;">${track.duration || '--:--'}</div>
+        <div style="font-size:0.9rem; color:var(--text-muted); font-family:monospace; flex-shrink:0;">${formatDuration(track.duration_secs)}</div>
         <button class="search-download-btn" style="background:rgba(138,92,246,0.1); border:none; color:var(--accent-premium);
             width:24px; height:24px; border-radius:50%; cursor:pointer; display:flex;
             align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s;"
@@ -80,6 +87,9 @@ export function buildTrackRow(track, container) {
     row.querySelector('.search-queue-btn').addEventListener('click', (e) => {
         e.stopPropagation();
         queueManager.enqueue(track, 'search');
+        window.dispatchEvent(new CustomEvent('elysium-toast', {
+            detail: { type: 'info', title: t('queue_add'), message: track.title, duration: 3000 }
+        }));
     });
 
     row.addEventListener('mouseenter', () => row.style.background = 'rgba(138,92,246,0.05)');

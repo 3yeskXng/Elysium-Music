@@ -120,6 +120,7 @@ export default {
     queue_shuffle: "Aleatorio",
     queue_move_up: "Subir",
     queue_move_down: "Bajar",
+    queue_removed: "Eliminada de la cola",
     toast_close: "Cerrar notificación",
     toast_song_removed: "Canción eliminada de la playlist",
     toast_playlist_deleted: "Playlist eliminada",
