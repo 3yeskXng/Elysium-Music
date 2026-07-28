@@ -124,5 +124,6 @@ export default {
     queue_upcoming: "Siradaki",
     queue_shuffle: "Karistir",
     queue_move_up: "Yukari",
-    queue_move_down: "Asagi"
+    queue_move_down: "Asagi",
+    toast_close: "Bildirimi kapat"
 };

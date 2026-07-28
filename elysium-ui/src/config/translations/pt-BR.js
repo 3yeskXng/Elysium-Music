@@ -124,5 +124,6 @@ export default {
     queue_upcoming: "Próximo",
     queue_shuffle: "Aleatório",
     queue_move_up: "Mover para cima",
-    queue_move_down: "Mover para baixo"
+    queue_move_down: "Mover para baixo",
+    toast_close: "Fechar notificação"
 };

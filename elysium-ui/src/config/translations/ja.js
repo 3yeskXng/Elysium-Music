@@ -124,5 +124,6 @@ export default {
     queue_upcoming: "次に再生",
     queue_shuffle: "シャッフル",
     queue_move_up: "上に移動",
-    queue_move_down: "下に移動"
+    queue_move_down: "下に移動",
+    toast_close: "通知を閉じる"
 };

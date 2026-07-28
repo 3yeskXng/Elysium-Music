@@ -119,5 +119,6 @@ export default {
     queue_upcoming: "Siguiente",
     queue_shuffle: "Aleatorio",
     queue_move_up: "Subir",
-    queue_move_down: "Bajar"
+    queue_move_down: "Bajar",
+    toast_close: "Cerrar notificación"
 };

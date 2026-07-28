@@ -119,5 +119,6 @@ export default {
     queue_upcoming: "À suivre",
     queue_shuffle: "Mélanger",
     queue_move_up: "Monter",
-    queue_move_down: "Descendre"
+    queue_move_down: "Descendre",
+    toast_close: "Fermer la notification"
 };

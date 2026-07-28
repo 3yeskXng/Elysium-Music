@@ -16,6 +16,7 @@ use playlists::commands::{
     add_song_to_playlist, remove_song_from_playlist,
 };
 use lyrics::commands::{read_lrc_file, read_embedded_lyrics, read_custom_lyrics, write_custom_lyrics};
+use commands::toast::emit_toast;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -50,7 +51,8 @@ pub fn run() {
             read_lrc_file,
             read_embedded_lyrics,
             read_custom_lyrics,
-            write_custom_lyrics
+            write_custom_lyrics,
+            emit_toast
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

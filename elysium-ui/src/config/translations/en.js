@@ -124,5 +124,6 @@ export default {
     queue_upcoming: "Up Next",
     queue_shuffle: "Shuffle",
     queue_move_up: "Move up",
-    queue_move_down: "Move down"
+    queue_move_down: "Move down",
+    toast_close: "Close notification"
 };

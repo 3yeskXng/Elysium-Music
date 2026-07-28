@@ -124,5 +124,6 @@ export default {
     queue_upcoming: "Als Nächstes",
     queue_shuffle: "Mischen",
     queue_move_up: "Nach oben",
-    queue_move_down: "Nach unten"
+    queue_move_down: "Nach unten",
+    toast_close: "Benachrichtigung schließen"
 };

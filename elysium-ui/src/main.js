@@ -16,6 +16,7 @@ import { playlistState } from './components/playlists/services/playlistState';
 import { renderPlaylistSidebar } from './components/playlists/PlaylistList';
 import { initPlaylistViewListener } from './components/playlists/PlaylistView';
 import { initializeLanguage } from './config/language/languageDetector.js';
+import { initToastManager } from './components/popup/ToastManager.ts';
 import './config/translations.js';
 
 moduleRegistry.onModuleSwitch((activeModule) => {
@@ -43,6 +44,7 @@ function listenForBackendLogs() {
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeLanguage();
+    initToastManager();
 
     moduleRegistry.registerCoreModule(searchModule);
     moduleRegistry.registerCoreModule(playlistOverviewModule);
