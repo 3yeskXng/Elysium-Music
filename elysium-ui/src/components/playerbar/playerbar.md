@@ -10,17 +10,20 @@ The PlayerBar is the persistent bottom bar in Elysium that provides transport co
 
 ```
 src/components/playerbar/
-  PlayerBar.ts          — Shell lifecycle, track binding, lyrics sync
-  PlayerControls.ts     — Play/pause, rewind/forward, progress bar
-  PlayerActions.ts      — Download, add-to-playlist (+), lyrics toggle
-  PlayerVolume.ts       — Volume slider with mute toggle
+  PlayerBar.ts              — Shell lifecycle, track binding, lyrics sync
+  PlayerControls.ts         — Play/pause, rewind/forward, progress bar
+  PlayerActions.ts          — Lyrics toggle, queue toggle
+  PlayerTrackActions.ts     — Download & add-to-playlist for current track
+  PlayerVolume.ts           — Volume slider with mute toggle
+  PlayerTrackActions.md     — Track action docs
   services/
-    playbackService.ts  — Playback state, RAF loop, transport actions
+    playbackService.ts      — Playback state, RAF loop, transport actions
 
 src/styles/player/
-  player-layout.css     — Grid positioning, meta slot, track info
-  player-controls.css   — Transport buttons, progress bar, actions
-  player-volume.css     — Volume slider styles
+  player-layout.css         — Grid positioning, meta slot, track info
+  player-controls.css       — Transport buttons, progress bar, actions
+  player-track-actions.css  — Track action buttons and spinner
+  player-volume.css         — Volume slider styles
 ```
 
 ---
@@ -41,12 +44,17 @@ Creates the transport row (prev, play/pause, next) and the progress bar.
 - **Time display**: Two `<span>` elements showing `currentTime` and `duration` in `m:ss` format.
 - **Subscription**: Calls `playback.subscribe()` to receive 60fps updates from the RAF loop. Updates button icon (`ICON_PLAY` / `ICON_PAUSE`), progress value, fill width, and time labels.
 
-### PlayerActions.ts (62 lines)
-Three utility buttons in the right slot:
+### PlayerActions.ts (27 lines)
+Two utility buttons in the right slot:
 
-- **Download**: Opens a Tauri save dialog, then invokes `download_youtube` backend command.
-- **Add to playlist (+)**: Opens the `AddToPlaylistModal` with the current track.
 - **Lyrics toggle**: Calls `toggleLyrics()` from LyricsPanel to show/hide the lyrics overlay.
+- **Queue toggle**: Calls `toggleQueue()` from PlayerQueue to show/hide the queue panel.
+
+### PlayerTrackActions.ts (80 lines)
+Two track-specific action buttons in the right slot (rendered before volume):
+
+- **Download**: Reads `audioEngine.currentTrack`, opens a Tauri save dialog, then invokes `download_youtube` backend command. Shows a CSS spinner during download.
+- **Add to playlist (+)**: Reads `audioEngine.currentTrack`, then opens the `AddToPlaylistModal` with the current track.
 
 ### PlayerVolume.ts (45 lines)
 Volume control with mute toggle:
@@ -87,7 +95,8 @@ The shell uses CSS Grid (`grid-column: 2; grid-row: 2`) and flexbox internally f
 | File | Lines | Purpose |
 |------|-------|---------|
 | `player-layout.css` | 74 | Grid positioning, meta slot, track info typography |
-| `player-controls.css` | 150 | Transport buttons, progress bar, action buttons |
+| `player-controls.css` | 130 | Transport buttons, progress bar, action buttons |
+| `player-track-actions.css` | 20 | Track action buttons (download, add-to-playlist) |
 | `player-volume.css` | 58 | Volume slider with gradient fill |
 
 All sizing uses `clamp()` for responsive scaling. No hardcoded px values for layout dimensions.
@@ -143,6 +152,14 @@ The PlayerBar is designed to be extensible for a future plugin system:
 - Have the plugin call `document.getElementById('player-plugin-slot').appendChild(...)` during init
 - Style it in a new CSS module under `src/styles/player/`
 
+### Existing slots and their occupants
+
+| Slot | Occupants | Order |
+|------|-----------|-------|
+| `#player-meta-slot` | Title + artist | Left |
+| `#player-controls-slot` | Transport buttons + progress bar | Center |
+| `#player-utilities-slot` | Track actions → Volume → Actions (lyrics, queue) | Right |
+
 ---
 
 ## Cross-Platform Considerations
@@ -158,12 +175,12 @@ The PlayerBar is designed to be extensible for a future plugin system:
 
 | Rule | Status | Notes |
 |------|--------|-------|
-| No file >150 lines | ✅ | Largest file: `player-controls.css` at 150 lines |
+| No file >150 lines | ✅ | Largest file: `player-layout.css` at 74 lines |
 | No hardcodes | ✅ | All colors, sizes via CSS variables; all text via i18n keys |
-| Full i18n (6 languages) | ✅ | All user-facing strings use `t()` or `data-i18n` |
-| Modular architecture | ✅ | 5 TypeScript modules + 3 CSS files, each single-responsibility |
+| Full i18n (8 languages) | ✅ | All user-facing strings use `t()` or `data-i18n` |
+| Modular architecture | ✅ | 6 TypeScript modules + 4 CSS files, each single-responsibility |
 | English comments | ✅ | All comments in English |
-| No inline style deserts | ✅ | Styles in CSS files; inline only in SettingsView (legacy, separate concern) |
+| No inline style deserts | ✅ | Styles in CSS files |
 | TypeScript for new modules | ✅ | All playerbar modules are TypeScript |
 | `// HACK!!!` marking | ✅ | No hacks in playerbar code |
 

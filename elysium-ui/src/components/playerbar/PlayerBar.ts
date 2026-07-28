@@ -6,6 +6,7 @@ import { resolveArtist } from '../../utils/resolveArtist.js';
 import { createPlayerControls } from './PlayerControls.js';
 import { createPlayerActions } from './PlayerActions.js';
 import { createPlayerVolume } from './PlayerVolume.js';
+import { createPlayerTrackActions } from './PlayerTrackActions.js';
 import { loadTrackLyrics, initLyricsPanel } from '../lyrics/services/LyricsPanel.js';
 import { initQueuePanel } from '../queue/PlayerQueue.js';
 import type { Track } from '../../types/Track.js';
@@ -36,6 +37,7 @@ function createShell(): void {
 
   controlsSlot.appendChild(createPlayerControls());
 
+  utilsSlot.appendChild(createPlayerTrackActions());
   utilsSlot.appendChild(createPlayerVolume());
   utilsSlot.appendChild(createPlayerActions());
 

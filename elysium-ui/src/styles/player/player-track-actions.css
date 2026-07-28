@@ -1,0 +1,21 @@
+/* src/styles/player/player-track-actions.css */
+/* Track action buttons — download and add-to-playlist in the player bar */
+
+.player-track-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-right: 4px;
+}
+
+.pta-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-top-color: var(--accent-premium);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
