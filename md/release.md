@@ -42,6 +42,7 @@ Please keep in mind: I am developing this project entirely on my own as a hobby 
 
 ### ⚠️ Disclaimer
 This is "as-is" software. The developer is not liable for any damages of any kind. Please use it purely as a hobby/educational project and not as production-ready software. For more details, please refer to the README.md.
+*Important*: It will automatically download ffmpeg, ffprobe and yt-dlp on the first start so that it is always up to date.
 
 ### Full Changelog
 

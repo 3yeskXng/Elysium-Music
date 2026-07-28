@@ -51,7 +51,7 @@ pub async fn scan_local_library() -> Result<Vec<TrackPayload>, String> {
 
         if let Some(ref ffprobe_path) = ffprobe {
             let meta_output = no_window_command(ffprobe_path)
-                .args(["-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nocorrect=1", &path_str])
+                .args(["-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1", &path_str])
                 .output();
 
             if let Ok(output) = meta_output {

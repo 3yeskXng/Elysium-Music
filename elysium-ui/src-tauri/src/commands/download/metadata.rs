@@ -14,7 +14,7 @@ pub fn probe(path: &str) -> (String, u32) {
         .args([
             "-v", "error",
             "-show_entries", "format=duration",
-            "-of", "default=noprint_wrappers=1:nocorrect=1",
+            "-of", "default=noprint_wrappers=1",
             path,
         ])
         .output();
