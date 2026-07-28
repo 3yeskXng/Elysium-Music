@@ -1,7 +1,12 @@
 Unter tauri.conf.json kann man Version, Name und Minimale/Standard-Fenstergröße ändern.
 
 Git:
+# Hochladen
 git tag -a v0.5.0 -m ""
+git push origin v0.5.0
+# Tag lokal und auf GitHub löschen
+git tag -d v0.5.0
+git push origin :refs/tags/v0.5.0
 
 Plan:
 - Dateien löschen(0.6)
