@@ -125,5 +125,7 @@ export default {
     queue_shuffle: "Karistir",
     queue_move_up: "Yukari",
     queue_move_down: "Asagi",
-    toast_close: "Bildirimi kapat"
+    toast_close: "Bildirimi kapat",
+    toast_song_removed: "Şarkı oynatma listesinden kaldırıldı",
+    toast_playlist_deleted: "Oynatma listesi silindi"
 };

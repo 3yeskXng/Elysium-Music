@@ -37,6 +37,9 @@ function renderPlaylistItem(playlist: Playlist): HTMLElement {
     try {
       await playlistState.remove(playlist.id);
       log('INFO', `Playlist deleted: "${playlist.name}"`);
+      window.dispatchEvent(new CustomEvent('elysium-toast', {
+        detail: { type: 'info', title: t('toast_playlist_deleted'), message: playlist.name, duration: 3000 }
+      }));
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       log('ERROR', `Delete playlist failed: ${msg}`);

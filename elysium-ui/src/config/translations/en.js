@@ -125,5 +125,7 @@ export default {
     queue_shuffle: "Shuffle",
     queue_move_up: "Move up",
     queue_move_down: "Move down",
-    toast_close: "Close notification"
+    toast_close: "Close notification",
+    toast_song_removed: "Song removed from playlist",
+    toast_playlist_deleted: "Playlist deleted"
 };

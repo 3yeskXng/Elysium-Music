@@ -94,6 +94,9 @@ export function renderSongRow(
       try {
         await playlistState.removeSong(playlist.id, song.id);
         log('INFO', `Removed "${song.title}" from "${playlist.name}"`);
+        window.dispatchEvent(new CustomEvent('elysium-toast', {
+          detail: { type: 'info', title: t('toast_song_removed'), message: song.title, duration: 3000 }
+        }));
         if (onViewChange) onViewChange(playlist.id);
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);

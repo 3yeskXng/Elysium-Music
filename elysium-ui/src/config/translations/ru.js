@@ -125,5 +125,7 @@ export default {
     queue_shuffle: "Перемешать",
     queue_move_up: "Вверх",
     queue_move_down: "Вниз",
-    toast_close: "Закрыть уведомление"
+    toast_close: "Закрыть уведомление",
+    toast_song_removed: "Песня удалена из плейлиста",
+    toast_playlist_deleted: "Плейлист удалён"
 };
