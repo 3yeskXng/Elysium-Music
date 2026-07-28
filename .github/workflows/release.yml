@@ -52,7 +52,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Bundle Frontend Assets
-        run: node build-stage.cjs
+        run: npm run build
         working-directory: elysium-ui
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
