@@ -1,15 +1,16 @@
 // src-tauri/src/discord/activity.rs
 // Activity builder — converts track metadata into Discord Rich Presence activity
 
-use discord_rich_presence::activity::{Activity, Assets, Timestamps};
+use discord_rich_presence::activity::{Activity, ActivityType, Assets, Timestamps};
 
 const APP_NAME: &str = "Elysium Music";
 const LARGE_IMAGE_KEY: &str = "elysium_logo";
 
 pub fn build_playing_activity<'a>(track_title: &'a str, track_artist: &'a str, start_time: u64) -> Activity<'a> {
     Activity::new()
-        .state(track_title)
-        .details(track_artist)
+        .activity_type(ActivityType::Listening)
+        .details(track_title)
+        .state(track_artist)
         .assets(
             Assets::new()
                 .large_image(LARGE_IMAGE_KEY)
@@ -23,8 +24,9 @@ pub fn build_playing_activity<'a>(track_title: &'a str, track_artist: &'a str, s
 
 pub fn build_paused_activity<'a>(track_title: &'a str, track_artist: &'a str) -> Activity<'a> {
     Activity::new()
-        .state(track_title)
-        .details(track_artist)
+        .activity_type(ActivityType::Listening)
+        .details(track_title)
+        .state(track_artist)
         .assets(
             Assets::new()
                 .large_image(LARGE_IMAGE_KEY)
@@ -34,8 +36,8 @@ pub fn build_paused_activity<'a>(track_title: &'a str, track_artist: &'a str) ->
 
 pub fn build_idle_activity() -> Activity<'static> {
     Activity::new()
-        .state("Idle")
         .details("Elysium Music")
+        .state("Idle")
         .assets(
             Assets::new()
                 .large_image(LARGE_IMAGE_KEY)

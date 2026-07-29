@@ -145,10 +145,4 @@ export default {
     dcrp_btn_connect: "接続",
     dcrp_btn_disconnect: "切断",
     dcrp_toast_error: "Discord Rich Presence エラー",
-    dcrp_client_id: "クライアントID",
-    dcrp_client_id_placeholder: "DiscordアプリのクライアントIDを貼り付け",
-    dcrp_save_btn: "保存",
-    dcrp_how_to_get: "取得方法は？",
-    dcrp_cid_saved: "クライアントIDを保存しました",
-    dcrp_client_id_empty: "最初にクライアントIDを入力してください"
 };

@@ -145,10 +145,4 @@ export default {
     dcrp_btn_connect: "Bağlan",
     dcrp_btn_disconnect: "Bağlantıyı Kes",
     dcrp_toast_error: "Discord Rich Presence hatası",
-    dcrp_client_id: "İstemci ID",
-    dcrp_client_id_placeholder: "Discord uygulama istemci ID'nizi yapıştırın",
-    dcrp_save_btn: "Kaydet",
-    dcrp_how_to_get: "Nasıl alınır?",
-    dcrp_cid_saved: "İstemci ID kaydedildi",
-    dcrp_client_id_empty: "Lütfen önce bir İstemci ID girin"
 };

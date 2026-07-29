@@ -145,10 +145,4 @@ export default {
     dcrp_btn_connect: "Conectar",
     dcrp_btn_disconnect: "Desconectar",
     dcrp_toast_error: "Erro no Discord Rich Presence",
-    dcrp_client_id: "ID do Cliente",
-    dcrp_client_id_placeholder: "Cole o ID do cliente Discord",
-    dcrp_save_btn: "Salvar",
-    dcrp_how_to_get: "Como conseguir um?",
-    dcrp_cid_saved: "ID do cliente salvo",
-    dcrp_client_id_empty: "Insira um ID do cliente primeiro"
 };

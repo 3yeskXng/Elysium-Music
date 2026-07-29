@@ -45,6 +45,21 @@ export function startBridge(): void {
     bridgeActive = true;
     audioEngine.onTrackChange(onTrackChange);
     audioEngine.onStatusChange(onStatusChange);
+    // Set initial presence immediately — query current track if any
+    const track = (audioEngine as any).currentTrack;
+    if (track) {
+        currentTitle = track.title || 'Unknown';
+        currentArtist = track.artist || 'Unknown Artist';
+        const paused = (audioEngine as any).audio?.paused;
+        if (paused) {
+            dcrpService.updatePresence(currentTitle, currentArtist, false, 0);
+        } else {
+            playStartTime = Date.now();
+            dcrpService.updatePresence(currentTitle, currentArtist, true, playStartTime);
+        }
+    } else {
+        dcrpService.setIdle();
+    }
     log('INFO', 'DCRP bridge started');
 }
 
