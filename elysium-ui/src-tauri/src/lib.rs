@@ -29,6 +29,10 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
+            let env_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(".env");
+            if env_path.exists() {
+                let _ = dotenvy::from_path(&env_path);
+            }
             app.manage(DiscordState(Mutex::new(DiscordClient::new())));
             let handle = app.handle().clone();
             tauri::async_runtime::spawn(deps::init(handle));

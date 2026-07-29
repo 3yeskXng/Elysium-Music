@@ -75,12 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (dcrpService.isEnabled()) {
-        dcrpService.loadConfig().then(cfg => {
-            if (cfg.client_id) {
-                dcrpService.connect(cfg.client_id).then(ok => {
-                    if (ok) startBridge();
-                });
-            }
+        dcrpService.connect().then(ok => {
+            if (ok) startBridge();
         });
     }
 

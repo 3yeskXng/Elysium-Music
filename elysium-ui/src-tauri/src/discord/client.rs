@@ -9,16 +9,26 @@ pub struct DiscordClient {
     connected: bool,
 }
 
+fn load_client_id() -> String {
+    std::env::var("DISCORD_CLIENT_ID").unwrap_or_else(|_| {
+        "YOUR_DISCORD_CLIENT_ID_HERE".to_string()
+    })
+}
+
 impl DiscordClient {
     pub fn new() -> Self {
         Self { inner: None, connected: false }
     }
 
-    pub fn connect(&mut self, client_id: &str) -> Result<(), String> {
+    pub fn connect(&mut self) -> Result<(), String> {
         if self.connected {
             return Ok(());
         }
-        let mut client = DiscordIpcClient::new(client_id)
+        let client_id = load_client_id();
+        if client_id == "YOUR_DISCORD_CLIENT_ID_HERE" {
+            return Err("DISCORD_CLIENT_ID not set in src-tauri/.env".to_string());
+        }
+        let mut client = DiscordIpcClient::new(&client_id)
             .map_err(|e| format!("Failed to create Discord IPC client: {}", e))?;
         client.connect()
             .map_err(|e| format!("Failed to connect to Discord: {}", e))?;

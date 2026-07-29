@@ -23,6 +23,9 @@ Thumbs.db
 elysium-ui/src-tauri/target/
 elysium-ui/src-tauri/gen/
 
+# Discord client ID (API key) — user-specific, never commit
+
+
 # Cache & playlists
 .cache/
 /playlists/

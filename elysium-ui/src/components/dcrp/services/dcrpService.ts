@@ -1,9 +1,8 @@
 // src/components/dcrp/services/dcrpService.ts
-// Core Discord RPC service — IPC bridge, connection state, config persistence
+// Core Discord RPC service — IPC bridge, connection state
 
 import { invokeBackend } from '../../../api.js';
 
-const CID_KEY = 'elysium_dcrp_client_id';
 const ENABLED_KEY = 'elysium_dcrp_enabled';
 
 function log(level: string, msg: string): void {
@@ -12,21 +11,9 @@ function log(level: string, msg: string): void {
     }
 }
 
-export function loadConfig(): { client_id: string; enabled: boolean } {
-    return {
-        client_id: localStorage.getItem(CID_KEY) || '',
-        enabled: localStorage.getItem(ENABLED_KEY) === 'true',
-    };
-}
-
-export function saveConfig(clientId: string): void {
-    localStorage.setItem(CID_KEY, clientId);
-    log('INFO', 'Client ID saved');
-}
-
-export async function connect(clientId: string): Promise<boolean> {
+export async function connect(): Promise<boolean> {
     try {
-        await invokeBackend('discord_connect', { clientId });
+        await invokeBackend('discord_connect');
         setEnabled(true);
         log('SUCCESS', 'Connected to Discord Rich Presence');
         return true;

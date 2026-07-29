@@ -8,9 +8,9 @@ use crate::discord::client::DiscordClient;
 pub struct DiscordState(pub Mutex<DiscordClient>);
 
 #[tauri::command]
-pub fn discord_connect(state: State<'_, DiscordState>, client_id: String) -> Result<String, String> {
+pub fn discord_connect(state: State<'_, DiscordState>) -> Result<String, String> {
     let mut client = state.0.lock().map_err(|e| format!("Lock error: {}", e))?;
-    client.connect(&client_id)?;
+    client.connect()?;
     Ok("connected".to_string())
 }
 
