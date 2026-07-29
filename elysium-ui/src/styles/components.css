@@ -31,3 +31,52 @@
     font-weight: 600;
     letter-spacing: -0.1px;
 }
+
+.dcrp-card {
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border-subtle);
+    padding: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dcrp-card-title {
+    font-weight: 600;
+    color: var(--text-main);
+    font-size: 0.95rem;
+}
+
+.dcrp-card-status {
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+.dcrp-card-status.connected {
+    color: var(--accent-premium);
+}
+
+.dcrp-card-status.disconnected {
+    color: var(--text-muted);
+}
+
+.dcrp-toggle-btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    color: white;
+}
+
+.dcrp-toggle-btn.enabled {
+    background: rgba(255, 0, 0, 0.15);
+    border: 1px solid #ff4a4a;
+    color: #ff4a4a;
+}
+
+.dcrp-toggle-btn.disabled {
+    background: var(--accent-premium);
+}

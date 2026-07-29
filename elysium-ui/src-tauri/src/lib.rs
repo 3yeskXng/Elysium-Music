@@ -4,7 +4,10 @@ pub mod commands;
 pub mod deps;
 pub mod playlists;
 pub mod lyrics;
+pub mod discord;
 
+use std::sync::Mutex;
+use tauri::Manager;
 use commands::scanner::scan_local_library;
 use commands::download::download_youtube;
 use commands::file_ops::{get_track_bytes, save_track};
@@ -17,6 +20,8 @@ use playlists::commands::{
 };
 use lyrics::commands::{read_lrc_file, read_embedded_lyrics, read_custom_lyrics, write_custom_lyrics};
 use commands::toast::emit_toast;
+use discord::client::DiscordClient;
+use discord::commands::{DiscordState, discord_connect, discord_disconnect, discord_update_presence, discord_set_idle, discord_get_status};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -24,6 +29,7 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
+            app.manage(DiscordState(Mutex::new(DiscordClient::new())));
             let handle = app.handle().clone();
             tauri::async_runtime::spawn(deps::init(handle));
             Ok(())
@@ -52,7 +58,12 @@ pub fn run() {
             read_embedded_lyrics,
             read_custom_lyrics,
             write_custom_lyrics,
-            emit_toast
+            emit_toast,
+            discord_connect,
+            discord_disconnect,
+            discord_update_presence,
+            discord_set_idle,
+            discord_get_status
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

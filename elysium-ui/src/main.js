@@ -18,6 +18,8 @@ import { initPlaylistViewListener } from './components/playlists/PlaylistView';
 import { initializeLanguage } from './config/language/languageDetector.js';
 import { initToastManager } from './components/popup/ToastManager.ts';
 import { initFirstStartPopup } from './components/popup/FirstStartPopup.ts';
+import * as dcrpService from './components/dcrp/services/dcrpService.ts';
+import { startBridge } from './components/dcrp/services/dcrpBridge.ts';
 import './config/translations.js';
 
 moduleRegistry.onModuleSwitch((activeModule) => {
@@ -71,6 +73,16 @@ document.addEventListener('DOMContentLoaded', () => {
     checkForUpdate().then(info => {
         if (info) console.log(`[Update] New version available: ${info.version}`);
     });
+
+    if (dcrpService.isEnabled()) {
+        dcrpService.loadConfig().then(cfg => {
+            if (cfg.client_id) {
+                dcrpService.connect(cfg.client_id).then(ok => {
+                    if (ok) startBridge();
+                });
+            }
+        });
+    }
 
     window.addEventListener('elysium-playlist-created', () => {
         renderPlaylistSidebar(document.getElementById('sidebar-playlist-slots'));

@@ -132,5 +132,18 @@ export default {
     toast_playlist_deleted: "Playlist eliminada",
     toast_playlist_created: "Playlist creada",
     toast_song_added: "Canción añadida a la playlist",
-    toast_language_changed: "Idioma cambiado"
+    toast_language_changed: "Idioma cambiado",
+    dcrp_title: "Discord Rich Presence",
+    dcrp_sub: "Muestra tu canción actual en Discord",
+    dcrp_status_connected: "Conectado",
+    dcrp_status_disconnected: "Desconectado",
+    dcrp_btn_connect: "Conectar",
+    dcrp_btn_disconnect: "Desconectar",
+    dcrp_toast_error: "Error de Discord Rich Presence",
+    dcrp_client_id: "ID de Cliente",
+    dcrp_client_id_placeholder: "Pega tu ID de cliente de Discord",
+    dcrp_save_btn: "Guardar",
+    dcrp_how_to_get: "¿Cómo obtener una?",
+    dcrp_cid_saved: "ID de cliente guardada",
+    dcrp_client_id_empty: "Primero ingresa una ID de cliente"
 };

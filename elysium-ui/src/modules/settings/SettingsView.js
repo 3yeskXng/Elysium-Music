@@ -7,6 +7,7 @@ import { getLanguageOptions } from '../../config/languageRegistry.js';
 import { pluginManager } from '../../core/pluginManager.js';
 import { APP_FOOTER_TEXT } from '../../config/appInfo.js';
 import { handleLanguageChange, handlePluginToggle } from './services/settingsService.js';
+import { renderDcrpCard } from '../../components/dcrp/DcrpView.ts';
 
 export const settingsModule = {
     id: 'settings',
@@ -43,6 +44,9 @@ export const settingsModule = {
                 `).join('')}
             </div>
             <div id="update-banner" style="display:none; margin-top:20px; padding:14px 18px; background:rgba(138,92,246,0.1); border:1px solid rgba(138,92,246,0.3); border-radius:8px;"></div>
+            <h3 style="color:var(--text-main); font-size:1.2rem; margin-bottom:8px; margin-top:24px;" data-i18n="dcrp_title">${t('dcrp_title')}</h3>
+            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:16px;" data-i18n="dcrp_sub">${t('dcrp_sub')}</p>
+            <div id="dcrp-container"></div>
             <div style="margin-top:40px; padding-top:16px; border-top:1px solid var(--border-subtle); text-align:center; font-size:0.8rem; color:var(--text-muted); user-select:none;">
                 ${APP_FOOTER_TEXT}
             </div>
@@ -52,6 +56,9 @@ export const settingsModule = {
         div.querySelectorAll('.plugin-toggle-btn').forEach(btn => {
             btn.addEventListener('click', (e) => handlePluginToggle(e.target.getAttribute('data-plugin-id')));
         });
+
+        const dcrpContainer = div.querySelector('#dcrp-container');
+        if (dcrpContainer) renderDcrpCard(dcrpContainer);
 
         return div;
     }

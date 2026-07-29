@@ -137,5 +137,18 @@ export default {
     toast_playlist_deleted: "プレイリストが削除されました",
     toast_playlist_created: "プレイリストが作成されました",
     toast_song_added: "曲がプレイリストに追加されました",
-    toast_language_changed: "言語が変更されました"
+    toast_language_changed: "言語が変更されました",
+    dcrp_title: "Discord Rich Presence",
+    dcrp_sub: "現在再生中の曲をDiscordに表示",
+    dcrp_status_connected: "接続中",
+    dcrp_status_disconnected: "未接続",
+    dcrp_btn_connect: "接続",
+    dcrp_btn_disconnect: "切断",
+    dcrp_toast_error: "Discord Rich Presence エラー",
+    dcrp_client_id: "クライアントID",
+    dcrp_client_id_placeholder: "DiscordアプリのクライアントIDを貼り付け",
+    dcrp_save_btn: "保存",
+    dcrp_how_to_get: "取得方法は？",
+    dcrp_cid_saved: "クライアントIDを保存しました",
+    dcrp_client_id_empty: "最初にクライアントIDを入力してください"
 };
