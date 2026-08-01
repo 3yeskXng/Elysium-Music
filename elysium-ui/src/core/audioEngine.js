@@ -12,8 +12,8 @@ class AudioEngine {
     constructor() {
         this.audio = new Audio();
         this.currentTrack = null;
-        this.onTrackChangeCallback = null;
-        this.onStatusChangeCallback = null;
+        this.trackChangeListeners = new Set();
+        this.statusChangeListeners = new Set();
 
         this.audio.addEventListener('timeupdate', () => {
             if (this.onStatusChangeCallback) this.onStatusChangeCallback('timeupdate');
@@ -39,17 +39,37 @@ class AudioEngine {
         }
     }
 
+    emitTrackChange(track, status) {
+        for (const listener of this.trackChangeListeners) {
+            try {
+                listener(track, status);
+            } catch (err) {
+                log('ERROR', `Track change listener failed: ${err.message || err}`);
+            }
+        }
+    }
+
+    emitStatusChange(status) {
+        for (const listener of this.statusChangeListeners) {
+            try {
+                listener(status);
+            } catch (err) {
+                log('ERROR', `Status change listener failed: ${err.message || err}`);
+            }
+        }
+    }
+
     async playTrack(track) {
         try {
             this.currentTrack = track;
-            if (this.onTrackChangeCallback) this.onTrackChangeCallback(track, 'loading');
+            this.emitTrackChange(track, 'loading');
 
             const cachedUrl = await getCachedAudio(track);
             if (cachedUrl && cachedUrl.startsWith('blob:')) {
                 log('INFO', `Playing from session cache: "${track.title}"`);
                 this.audio.src = cachedUrl;
                 await this.audio.play();
-                if (this.onTrackChangeCallback) this.onTrackChangeCallback(track, 'playing');
+                this.emitTrackChange(track, 'playing');
                 return;
             }
 
@@ -67,10 +87,10 @@ class AudioEngine {
             log('SUCCESS', `Playback started: "${track.title}" — Duration: ${this.audio.duration ? Math.floor(this.audio.duration) + 's' : 'calculating...'}`);
 
             storeToCache(track, track.file_path);
-            if (this.onTrackChangeCallback) this.onTrackChangeCallback(track, 'playing');
+            this.emitTrackChange(track, 'playing');
         } catch (fault) {
             log('ERROR', `Playback failed for "${track?.title}": ${fault.message || fault}`);
-            if (this.onTrackChangeCallback) this.onTrackChangeCallback(track, 'error');
+            this.emitTrackChange(track, 'error');
         }
     }
 
@@ -108,8 +128,25 @@ class AudioEngine {
         }
     }
 
-    onTrackChange(cb) { this.onTrackChangeCallback = cb; }
-    onStatusChange(cb) { this.onStatusChangeCallback = cb; }
+    addTrackChangeListener(cb) {
+        this.trackChangeListeners.add(cb);
+        return () => this.trackChangeListeners.delete(cb);
+    }
+
+    addStatusChangeListener(cb) {
+        this.statusChangeListeners.add(cb);
+        return () => this.statusChangeListeners.delete(cb);
+    }
+
+    onTrackChange(cb) {
+        this.trackChangeListeners.clear();
+        if (cb) this.trackChangeListeners.add(cb);
+    }
+
+    onStatusChange(cb) {
+        this.statusChangeListeners.clear();
+        if (cb) this.statusChangeListeners.add(cb);
+    }
 }
 
 export const audioEngine = new AudioEngine();

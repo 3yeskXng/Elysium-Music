@@ -8,6 +8,8 @@ let playStartTime = 0;
 let currentTitle = '';
 let currentArtist = '';
 let bridgeActive = false;
+let unsubscribeTrackChange: (() => void) | null = null;
+let unsubscribeStatusChange: (() => void) | null = null;
 
 function log(level: string, msg: string): void {
     if ((window as any).triggerElysiumLog) {
@@ -43,8 +45,8 @@ function onStatusChange(status: string): void {
 export function startBridge(): void {
     if (bridgeActive) return;
     bridgeActive = true;
-    audioEngine.onTrackChange(onTrackChange);
-    audioEngine.onStatusChange(onStatusChange);
+    unsubscribeTrackChange = audioEngine.addTrackChangeListener(onTrackChange);
+    unsubscribeStatusChange = audioEngine.addStatusChangeListener(onStatusChange);
     // Set initial presence immediately — query current track if any
     const track = (audioEngine as any).currentTrack;
     if (track) {
@@ -65,8 +67,14 @@ export function startBridge(): void {
 
 export function stopBridge(): void {
     bridgeActive = false;
-    audioEngine.onTrackChange(null as any);
-    audioEngine.onStatusChange(null as any);
+    if (unsubscribeTrackChange) {
+        unsubscribeTrackChange();
+        unsubscribeTrackChange = null;
+    }
+    if (unsubscribeStatusChange) {
+        unsubscribeStatusChange();
+        unsubscribeStatusChange = null;
+    }
     dcrpService.setIdle();
     log('INFO', 'DCRP bridge stopped');
 }

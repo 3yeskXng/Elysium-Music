@@ -11,6 +11,21 @@ import { loadTrackLyrics, initLyricsPanel } from '../lyrics/services/LyricsPanel
 import { initQueuePanel } from '../queue/PlayerQueue.js';
 import type { Track } from '../../types/Track.js';
 
+function renderTrack(track: Track | null): void {
+  const titleEl = document.getElementById('player-track-title');
+  const artistEl = document.getElementById('player-track-artist');
+  if (!titleEl || !artistEl) return;
+
+  if (!track) {
+    titleEl.textContent = '';
+    artistEl.textContent = '';
+    return;
+  }
+
+  titleEl.textContent = track.title || '';
+  artistEl.textContent = resolveArtist(track.artist);
+}
+
 function createShell(): void {
   const metaSlot = document.getElementById('player-meta-slot');
   const controlsSlot = document.getElementById('player-controls-slot');
@@ -46,12 +61,9 @@ function createShell(): void {
 }
 
 function bindTrackUpdates(): void {
-  audioEngine.onTrackChange((track: Track) => {
-    if (!track) return;
-    const titleEl = document.getElementById('player-track-title');
-    const artistEl = document.getElementById('player-track-artist');
-    if (titleEl) titleEl.textContent = track.title || '';
-    if (artistEl) artistEl.textContent = resolveArtist(track.artist);
+  audioEngine.addTrackChangeListener((track: Track, status?: string) => {
+    renderTrack(track);
+    if (!track || status === 'loading') return;
     loadTrackLyrics(track);
   });
 }
@@ -62,6 +74,10 @@ export function initPlayerBar(): void {
   if (initialized) return;
   initialized = true;
   createShell();
+  renderTrack(audioEngine.currentTrack);
   bindTrackUpdates();
+  if (audioEngine.currentTrack) {
+    loadTrackLyrics(audioEngine.currentTrack);
+  }
   window.triggerElysiumLog?.('INFO', 'PlayerBar', 'Player bar initialized (TypeScript)');
 }

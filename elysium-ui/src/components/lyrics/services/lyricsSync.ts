@@ -9,6 +9,7 @@ type SyncCallback = (activeIndex: number) => void;
 const SCROLL_DEBOUNCE_MS = 300;
 
 let unsubscribe: (() => void) | null = null;
+let unsubscribeStatusChange: (() => void) | null = null;
 let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
 let onActiveChange: SyncCallback | null = null;
 
@@ -22,7 +23,7 @@ export function startSync(callback: SyncCallback): void {
     }
   });
 
-  audioEngine.onStatusChange((status: string) => {
+  unsubscribeStatusChange = audioEngine.addStatusChangeListener((status: string) => {
     if (status === 'timeupdate') {
       lyricsState.updateTime(audioEngine.audio.currentTime);
     }
@@ -31,6 +32,7 @@ export function startSync(callback: SyncCallback): void {
 
 export function stopSync(): void {
   if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+  if (unsubscribeStatusChange) { unsubscribeStatusChange(); unsubscribeStatusChange = null; }
   onActiveChange = null;
 }
 
