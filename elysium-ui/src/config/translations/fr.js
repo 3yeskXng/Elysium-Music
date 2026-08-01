@@ -133,6 +133,8 @@ export default {
     toast_playlist_created: "Playlist créée",
     toast_song_added: "Chanson ajoutée à la playlist",
     toast_language_changed: "Langue modifiée",
+    dcrp_toast_enabled: "Discord Rich Presence activé",
+    dcrp_toast_disabled: "Discord Rich Presence désactivé",
     dcrp_title: "Discord Rich Presence",
     dcrp_sub: "Affiche ton morceau en cours sur Discord",
     dcrp_status_connected: "Connecté",

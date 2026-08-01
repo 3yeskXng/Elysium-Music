@@ -2,6 +2,7 @@
 // Core Discord RPC service — IPC bridge, connection state
 
 import { invokeBackend } from '../../../api.js';
+import { showDcrpStateToast } from './dcrpToast.js';
 
 const ENABLED_KEY = 'elysium_dcrp_enabled';
 
@@ -15,6 +16,7 @@ export async function connect(): Promise<boolean> {
     try {
         await invokeBackend('discord_connect');
         setEnabled(true);
+        showDcrpStateToast('enabled');
         log('SUCCESS', 'Connected to Discord Rich Presence');
         return true;
     } catch (err: any) {
@@ -27,6 +29,7 @@ export async function disconnect(): Promise<boolean> {
     try {
         await invokeBackend('discord_disconnect');
         setEnabled(false);
+        showDcrpStateToast('disabled');
         log('INFO', 'Disconnected from Discord Rich Presence');
         return true;
     } catch (err: any) {

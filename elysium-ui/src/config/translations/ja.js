@@ -138,6 +138,8 @@ export default {
     toast_playlist_created: "プレイリストが作成されました",
     toast_song_added: "曲がプレイリストに追加されました",
     toast_language_changed: "言語が変更されました",
+    dcrp_toast_enabled: "Discord Rich Presenceが有効になりました",
+    dcrp_toast_disabled: "Discord Rich Presenceが無効になりました",
     dcrp_title: "Discord Rich Presence",
     dcrp_sub: "現在再生中の曲をDiscordに表示",
     dcrp_status_connected: "接続中",

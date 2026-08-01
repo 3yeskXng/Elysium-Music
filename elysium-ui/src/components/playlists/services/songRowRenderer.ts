@@ -1,6 +1,7 @@
 // src/components/playlists/services/songRowRenderer.ts
 // Builds a single playlist song row with play, download, add-to-playlist, queue, and remove actions
 // 1:1 structural copy of search/trackRowBuilder.js — closure capture, zero global state
+// this file makes too much in one single file. its a bad file.
 
 import type { Track } from '../../../types/Track.js';
 import type { Playlist } from '../../../types/Playlist.js';

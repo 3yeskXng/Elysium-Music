@@ -138,6 +138,8 @@ export default {
     toast_playlist_created: "Oynatma listesi oluşturuldu",
     toast_song_added: "Şarkı oynatma listesine eklendi",
     toast_language_changed: "Dil değiştirildi",
+    dcrp_toast_enabled: "Discord Rich Presence etkinleştirildi",
+    dcrp_toast_disabled: "Discord Rich Presence devre dışı bırakıldı",
     dcrp_title: "Discord Rich Presence",
     dcrp_sub: "Mevcut parçanı Discord'da göster",
     dcrp_status_connected: "Bağlı",
