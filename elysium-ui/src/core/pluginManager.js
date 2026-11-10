@@ -5,6 +5,7 @@ class ElysiumPluginManager {
     constructor() {
         this.plugins = new Map();
         this.plugins.set('youtube_core', { id: 'youtube_core', name: 'YouTube Audio Streamer', version: '2.1.0', active: true });
+        this.plugins.set('new_fast_listen', { id: 'new_fast_listen', name: 'New Fast Listen', version: '1.0.0', active: false });
         this.plugins.set('spotify_bridge', { id: 'spotify_bridge', name: 'Spotify Web API Bridge', version: '1.0.4', active: false });
     }
 

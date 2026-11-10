@@ -6,3 +6,4 @@ pub mod track_meta;
 pub mod metadata;
 pub mod cache;
 pub mod toast;
+pub mod newfast;

@@ -94,6 +94,22 @@ class AudioEngine {
         }
     }
 
+    async playRemoteTrack(track, streamUrl) {
+        try {
+            this.currentTrack = track;
+            this.emitTrackChange(track, 'loading');
+
+            this.audio.src = streamUrl;
+            await this.audio.play();
+            log('SUCCESS', `Remote playback started: "${track.title}"`);
+            this.emitTrackChange(track, 'playing');
+        } catch (fault) {
+            log('ERROR', `Remote playback failed for "${track?.title}": ${fault.message || fault}`);
+            this.emitTrackChange(track, 'error');
+            throw fault;
+        }
+    }
+
     togglePause() {
         if (!this.audio.src) return 'idle';
         if (this.audio.paused) {

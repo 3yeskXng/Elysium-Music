@@ -9,8 +9,22 @@ import ja from './ja.js';
 import ru from './ru.js';
 import tr from './tr.js';
 import ptBR from './pt-BR.js';
+import { newFastTranslations } from './newfast/index.js';
 
-export const translations = { de, en, es, fr, ja, ru, tr, 'pt-BR': ptBR };
+function mergeLanguage(base, extra) {
+    return { ...base, ...(extra || {}) };
+}
+
+export const translations = {
+    de: mergeLanguage(de, newFastTranslations.de),
+    en: mergeLanguage(en, newFastTranslations.en),
+    es: mergeLanguage(es, newFastTranslations.es),
+    fr: mergeLanguage(fr, newFastTranslations.fr),
+    ja: mergeLanguage(ja, newFastTranslations.ja),
+    ru: mergeLanguage(ru, newFastTranslations.ru),
+    tr: mergeLanguage(tr, newFastTranslations.tr),
+    'pt-BR': mergeLanguage(ptBR, newFastTranslations['pt-BR'])
+};
 
 window.elysiumTranslate = function (lang) {
     localStorage.setItem('elysium_language', lang);

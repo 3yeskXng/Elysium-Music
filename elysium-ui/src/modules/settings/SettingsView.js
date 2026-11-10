@@ -8,6 +8,7 @@ import { pluginManager } from '../../core/pluginManager.js';
 import { APP_FOOTER_TEXT } from '../../config/appInfo.js';
 import { handleLanguageChange, handlePluginToggle } from './services/settingsService.js';
 import { renderDcrpCard } from '../../components/dcrp/DcrpView.ts';
+import { renderNewFastSettingsCard } from '../newfast/ui/NewFastSettingsCard.ts';
 
 export const settingsModule = {
     id: 'settings',
@@ -44,6 +45,7 @@ export const settingsModule = {
                 `).join('')}
             </div>
             <div id="update-banner" style="display:none; margin-top:20px; padding:14px 18px; background:rgba(138,92,246,0.1); border:1px solid rgba(138,92,246,0.3); border-radius:8px;"></div>
+            <div id="newfast-settings-slot"></div>
             <h3 style="color:var(--text-main); font-size:1.2rem; margin-bottom:8px; margin-top:24px;" data-i18n="dcrp_title">${t('dcrp_title')}</h3>
             <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:16px;" data-i18n="dcrp_sub">${t('dcrp_sub')}</p>
             <div id="dcrp-container"></div>
@@ -59,6 +61,9 @@ export const settingsModule = {
 
         const dcrpContainer = div.querySelector('#dcrp-container');
         if (dcrpContainer) renderDcrpCard(dcrpContainer);
+
+        const newFastSlot = div.querySelector('#newfast-settings-slot');
+        if (newFastSlot) newFastSlot.appendChild(renderNewFastSettingsCard());
 
         return div;
     }

@@ -10,6 +10,7 @@ import { t } from '../../../utils/translate.js';
 import { metadataRegistry } from '../../../core/metadata/metadataRegistry.js';
 import { buildTrackRow } from './trackRowBuilder.js';
 import { setStatus } from './searchService.js';
+import { tryPlayWithNewFastListen } from '../../newfast/services/NewFastPlaybackService.ts';
 
 function log(level, msg) {
     if (window.triggerElysiumLog) window.triggerElysiumLog(level, 'Stream', msg);
@@ -46,6 +47,11 @@ export async function handleStreamSearch(query, statusBox, resultsContainer) {
 }
 
 export async function playStreamTrack(track, container) {
+    const startedFast = await tryPlayWithNewFastListen(track, container);
+    if (startedFast) {
+        return;
+    }
+
     showLoader(container, t('dl_downloading'));
     try {
         const result = await invokeBackend('download_youtube', { query: track.title });

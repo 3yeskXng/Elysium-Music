@@ -1,5 +1,6 @@
 // elysium-ui/src/core/services/updateService.js
 // Auto-updater — checks GitHub releases for newer versions on app start
+// ATTENTION HACK!!! Paste github repo link
 
 import { APP_VERSION, GITHUB_REPO } from '../../config/appInfo.js';
 
